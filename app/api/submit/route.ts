@@ -1,16 +1,21 @@
-// pages/api/submit.ts
-import type { NextApiRequest, NextApiResponse } from "next";
-import { getDbConnection } from "../../lib/db";
+import { NextRequest, NextResponse } from "next/server";
+import { getDbConnection } from "../../../lib/db";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
+type SubmitBody = {
+  first_name: string;
+  last_name: string;
+  email: string;
+  tickers?: string[] | string;
+  feedback?: string;
+};
 
-  const { first_name, last_name, email, tickers, feedback } = req.body;
+export async function POST(req: NextRequest) {
+  const body = (await req.json()) as SubmitBody;
+  const { first_name, last_name, email, tickers, feedback } = body;
 
+  // Validate required fields
   if (!first_name || !last_name || !email) {
-    return res.status(400).json({ error: "Missing required fields" });
+    return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
   const conn = await getDbConnection();
@@ -51,7 +56,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Insert tickers
     if (tickers) {
-      const tickerList = tickers.split(",");
+      const tickerList = Array.isArray(tickers) ? tickers : tickers.split(",");
       for (const ticker of tickerList) {
         await request.input("email", email).input("ticker", ticker).query(`
           INSERT INTO ticker_selection_clients (email, ticker)
@@ -69,10 +74,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     await transaction.commit();
-    return res.status(200).json({ message: "Form submitted successfully!" });
+    return NextResponse.json({ message: "Form submitted successfully!" });
   } catch (err) {
     await transaction.rollback();
     console.error("Error processing form:", err);
-    return res.status(500).json({ error: "An error occurred while processing your form." });
+    return NextResponse.json({ error: "An error occurred while processing your form." }, { status: 500 });
   }
 }
