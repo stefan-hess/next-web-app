@@ -88,6 +88,7 @@
     "@testing-library/jest-dom": "^6.1.4",
     "@testing-library/react": "^14.3.1",
     "@total-typescript/ts-reset": "^0.5.1",
+    "@types/mssql": "^9.1.7",
     "@types/node": "^20.17.43",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
