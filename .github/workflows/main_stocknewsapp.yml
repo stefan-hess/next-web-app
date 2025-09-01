@@ -32,12 +32,11 @@ jobs:
         run: unset NODE_OPTIONS
 
       # Enable Corepack for package manager management
-      - name: Enable Corepack
-        run: corepack enable
-
-      # Use pnpm 10
-      - name: Use pnpm
-        run: corepack prepare pnpm@10.0.0 --activate
+      - name: Enable and verify pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.0.0 --activate
+          pnpm -v
 
       # Install dependencies
       - name: Install dependencies
