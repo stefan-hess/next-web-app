@@ -1,5 +1,5 @@
 // lib/db.ts
-import sql from "mssql";
+import sql from "mssql"
 
 const config: sql.config = {
   user: "shess",
@@ -10,19 +10,19 @@ const config: sql.config = {
     encrypt: true,
     trustServerCertificate: false,
   },
-};
+}
 
-let pool: sql.ConnectionPool | null = null;
+let pool: sql.ConnectionPool | null = null
 
 export async function getDbConnection() {
   if (pool) {
-    return pool;
+    return pool
   }
   try {
-    pool = await sql.connect(config);
-    return pool;
+    pool = await sql.connect(config)
+    return pool
   } catch (err) {
-    console.error("Database connection failed:", err);
-    throw err;
+    console.error("Database connection failed:", err)
+    throw err
   }
 }
