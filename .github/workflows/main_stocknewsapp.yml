@@ -29,8 +29,14 @@ jobs:
           python -m venv venv
           source venv/bin/activate
       
+      - name: Enable Corepack
+        run: corepack enable 
+      
+      - name: use pnpm
+        run: corepack prepare pnpm@10.0.0 --activate
+
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
         
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
