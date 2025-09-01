@@ -25,6 +25,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '20'
+          cache: 'pnpm'
 
       # Unset NODE_OPTIONS to avoid invalid --ignoreDeprecations error
       - name: Unset NODE_OPTIONS
@@ -40,7 +41,7 @@ jobs:
 
       # Install dependencies
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       # Build Next.js app
       - name: Build Next.js
