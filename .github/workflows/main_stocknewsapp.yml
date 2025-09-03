@@ -26,10 +26,6 @@ jobs:
         with:
           node-version: '20'
 
-      # Unset NODE_OPTIONS to avoid invalid --ignoreDeprecations error
-      - name: Unset NODE_OPTIONS
-        run: unset NODE_OPTIONS
-
       # Enable Corepack for package manager management
       - name: Enable and verify pnpm
         run: |
@@ -41,9 +37,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Build Next.js app
+      # Build Next.js app (unset NODE_OPTIONS in same shell)
       - name: Build Next.js
-        run: pnpm run build
+        run: |
+          unset NODE_OPTIONS
+          pnpm run build
 
         # Archive build output + dependencies
       - name: Archive production build
