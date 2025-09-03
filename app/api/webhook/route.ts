@@ -1,92 +1,87 @@
-import Stripe from "stripe";
-import { NextResponse } from "next/server";
-import { getDbConnection } from "../../lib/db";
+import { NextResponse } from "next/server"
+import Stripe from "stripe"
+import { getDbConnection } from "../../lib/db"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-08-27.basil",
-});
+})
 
 export async function POST(req: Request) {
-  const sig = req.headers.get("stripe-signature")!;
-  const body = await req.text();
+  const sig = req.headers.get("stripe-signature")!
+  const body = await req.text()
 
-  let event: Stripe.Event;
+  let event: Stripe.Event
 
   try {
     event = stripe.webhooks.constructEvent(
       body,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET!
-    );
+    )
   } catch (err) {
-    console.error("Webhook signature verification failed:", err);
+    console.error("Webhook signature verification failed:", err)
     return NextResponse.json(
       { error: "Webhook signature verification failed" },
       { status: 400 }
-    );
+    )
   }
 
-  try {
-    if (event.type === "checkout.session.completed") {
-      const session = event.data.object as Stripe.Checkout.Session;
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object as Stripe.Checkout.Session
+    console.log("Checkout session completed:", session)
 
-      // Grab subscription info
-      const subscriptionId = session.subscription as string;
-      const customerId = session.customer as string;
-      const email = session.customer_email!;
-      const plan = session.metadata?.plan || "default_plan";
-      const status = "active";
+    try {
+      const conn = await getDbConnection()
+      const request = conn.request()
 
-      // Store in DB
-      const conn = await getDbConnection();
-      const request = conn.request();
+      const clientEmail = session.customer_email || null
+      const stripeCustomerId = session.customer
+      const stripeSubscriptionId = session.subscription
+      const plan = session.metadata?.plan || null
+      const startDate = new Date(session.created * 1000)
+      const endDate = null
 
-      // Check if subscription exists
-      const existing = await request
-        .input("email", email)
-        .query(
-          "SELECT * FROM subscriptions WHERE email = @email AND stripe_subscription_id = @subscriptionId"
-        );
-
-      if (existing.recordset.length > 0) {
-        // Update existing subscription
-        await request
-          .input("email", email)
-          .input("subscriptionId", subscriptionId)
-          .input("customerId", customerId)
-          .input("plan", plan)
-          .input("status", status)
-          .query(`
-            UPDATE subscriptions
-            SET stripe_customer_id = @customerId,
-                plan = @plan,
-                status = @status,
-                updated_at = GETDATE()
-            WHERE email = @email AND stripe_subscription_id = @subscriptionId
-          `);
-      } else {
-        // Insert new subscription
-        await request
-          .input("email", email)
-          .input("subscriptionId", subscriptionId)
-          .input("customerId", customerId)
-          .input("plan", plan)
-          .input("status", status)
-          .query(`
-            INSERT INTO subscriptions (email, stripe_customer_id, stripe_subscription_id, plan, status)
-            VALUES (@email, @customerId, @subscriptionId, @plan, @status)
-          `);
+      if (!clientEmail) {
+        console.error("No customer email found in session")
+        return NextResponse.json(
+          { error: "No customer email found in session" },
+          { status: 400 }
+        )
       }
 
-      console.log(`Subscription processed for ${email}: ${plan}`);
-    }
+      // Insert or update client in test_clients_stripe
+      await request
+        .input("email", clientEmail)
+        .input("stripe_customer_id", stripeCustomerId)
+        .input("stripe_subscription_id", stripeSubscriptionId)
+        .input("plan", plan)
+        .input("subscription_start_date", startDate)
+        .input("subscription_end_date", endDate)
+        .query(`
+          MERGE INTO test_clients_stripe AS target
+          USING (SELECT @email AS email) AS source
+          ON target.email = source.email
+          WHEN MATCHED THEN
+            UPDATE SET
+              stripe_customer_id = @stripe_customer_id,
+              stripe_subscription_id = @stripe_subscription_id,
+              plan = @plan,
+              subscription_start_date = @subscription_start_date,
+              subscription_end_date = @subscription_end_date
+          WHEN NOT MATCHED THEN
+            INSERT (email, stripe_customer_id, stripe_subscription_id, plan, subscription_start_date, subscription_end_date)
+            VALUES (@email, @stripe_customer_id, @stripe_subscription_id, @plan, @subscription_start_date, @subscription_end_date);
+        `)
 
-    return NextResponse.json({ received: true });
-  } catch (err) {
-    console.error("Error processing subscription:", err);
-    return NextResponse.json(
-      { error: "Failed to process subscription" },
-      { status: 500 }
-    );
+      console.log(`Client ${clientEmail} inserted/updated successfully.`)
+    } catch (err) {
+      console.error("Database update failed:", err)
+      return NextResponse.json(
+        { error: "Failed to update subscription in DB" },
+        { status: 500 }
+      )
+    }
   }
+
+  return NextResponse.json({ received: true })
 }

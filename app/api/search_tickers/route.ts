@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getDbConnection } from "../../lib/db"
 
+// Use the Ticker type from the form page for type safety
+// If you want to share types, consider moving this to a shared types file
+
+type Ticker = { ticker: string; name: string }
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const query = searchParams.get("query") || ""
@@ -20,7 +25,8 @@ export async function GET(req: NextRequest) {
         AND status = 'Active'
       ORDER BY symbol
     `)
-    const tickers = result.recordset.map((row: any) => ({ ticker: row.symbol, name: row.name }))
+    // Use explicit type for row and result.recordset
+    const tickers: Ticker[] = (result.recordset as { symbol: string; name: string }[]).map((row) => ({ ticker: row.symbol, name: row.name }))
     return NextResponse.json(tickers)
   } catch (err) {
     console.error("Error searching tickers:", err)
