@@ -1,5 +1,5 @@
 // test-db-connection.ts
-import { getDbConnection } from "./app/lib/db.ts";
+import { getDbConnection } from "./app/lib/db";
 
 async function testConnection() {
   try {
