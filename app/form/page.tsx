@@ -10,15 +10,15 @@ export default function FormSection() {
   const [search, setSearch] = useState("")
   const [searchResults, setSearchResults] = useState<Ticker[]>([])
   const [selectedTickers, setSelectedTickers] = useState<Ticker[]>([])
-  const [feedback, setFeedback] = useState("")
   const [message, setMessage] = useState<string | null>(null)
+  const [showMaxTickersPopup, setShowMaxTickersPopup] = useState(false)
   const maxTickers = 5
 
   const handleSearch = async (query: string) => {
     setSearch(query)
     if (query.length > 0) {
       try {
-        const response = await fetch(`/search_tickers?query=${encodeURIComponent(query)}`)
+        const response = await fetch(`/api/search_tickers?query=${encodeURIComponent(query)}`)
         if (response.ok) {
           const data = await response.json()
           setSearchResults(data as Ticker[])
@@ -36,6 +36,8 @@ export default function FormSection() {
   const handleSelectTicker = (ticker: Ticker) => {
     if (selectedTickers.length < maxTickers && !selectedTickers.find((t) => t.ticker === ticker.ticker)) {
       setSelectedTickers([...selectedTickers, ticker])
+    } else if (selectedTickers.length >= maxTickers) {
+      setShowMaxTickersPopup(true)
     }
   }
 
@@ -55,7 +57,6 @@ export default function FormSection() {
           last_name: lastName,
           email,
           tickers: selectedTickers.map((t) => t.ticker).join(","),
-          feedback,
         }),
       })
       if (res.ok) {
@@ -64,7 +65,6 @@ export default function FormSection() {
         setLastName("")
         setEmail("")
         setSelectedTickers([])
-        setFeedback("")
       } else {
         setMessage("An error occurred while processing your form.")
       }
@@ -83,7 +83,6 @@ export default function FormSection() {
           the NYSE and NASDAQ. Expansion to other stock exchanges and a premium version are coming soon. We’d love your
           feedback below!
         </p>
-        {message && <div className="mb-4 text-center font-semibold text-green-600">{message}</div>}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="flex gap-4">
             <div className="flex-1">
@@ -159,25 +158,64 @@ export default function FormSection() {
                 </span>
               ))}
             </div>
+            {showMaxTickersPopup && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                <div className="rounded-2xl bg-white/90 p-8 shadow-2xl max-w-sm w-full transform transition-all">
+                  <p className="mb-6 text-center text-xl font-semibold text-black">
+                    With the free plan, you can select a maximum of 5 tickers.
+                  </p>
+                  <button
+                    onClick={() => setShowMaxTickersPopup(false)}
+                    className="mx-auto block w-full rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-6 py-3
+                      text-white font-bold shadow-lg transition-all duration-300
+                      hover:scale-105 hover:shadow-2xl active:scale-95"
+                  >
+                    OK
+                  </button>
+                </div>
+              </div>
+            )}
             <input type="hidden" name="tickers" value={selectedTickers.map((t) => t.ticker).join(",")} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Your Feedback</label>
-            <textarea
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              rows={4}
-              placeholder="Enter your feedback here..."
-              value={feedback}
-              onChange={(e) => setFeedback(e.target.value)}
-            />
           </div>
           <button
             type="submit"
-            className="w-full rounded-md bg-indigo-600 px-6 py-3 font-semibold text-white transition hover:bg-indigo-700"
+            className="w-full rounded-xl bg-gradient-to-r from-blue-600 via-blue-200 to-blue-400 px-6 py-3 font-semibold text-black shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl active:scale-95"
           >
             Submit
           </button>
+          <div className="mt-6 flex justify-center gap-4">
+            <a
+              href="/feedback"
+              className="inline-block rounded-md bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-6 py-3 font-semibold text-white shadow-lg transition hover:scale-105 hover:shadow-2xl active:scale-95"
+            >
+              Leave Feedback
+            </a>
+            <a
+              href="/unsubscribe"
+              className="inline-block rounded-md bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-6 py-3 font-semibold text-white shadow-lg transition hover:scale-105 hover:shadow-2xl active:scale-95"
+            >
+              Click here to unsubscribe
+            </a>
+          </div>
         </form>
+        {/* Popover for form submission success */}
+        {message === "Form submitted successfully!" && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div className="rounded-2xl bg-white/90 p-8 shadow-2xl max-w-sm w-full transform transition-all">
+              <p className="mb-6 text-center text-xl font-semibold text-green-700">
+                Form submitted successfully!
+              </p>
+              <button
+                onClick={() => setMessage(null)}
+                className="mx-auto block w-full rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-6 py-3
+                  text-white font-bold shadow-lg transition-all duration-300
+                  hover:scale-105 hover:shadow-2xl active:scale-95"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </main>
   )

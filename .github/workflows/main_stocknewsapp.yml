@@ -85,8 +85,9 @@ jobs:
         with:
           app-name: 'StockNewsApp'
           slot-name: 'Production'
+        env:
+          SCM_DO_BUILD_DURING_DEPLOYMENT: false
 
-          
 
 
 
