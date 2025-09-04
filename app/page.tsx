@@ -27,12 +27,18 @@ export default function Home() {
           to your email. Select up to 5 companies from NYSE and NASDAQ. Expansion to other exchanges and premium
           features coming soon.
         </p>
-        <div className="flex justify-center">
+        <div className="flex justify-center mt-8 gap-4">
           <a
             href="/form"
-            className="inline-block rounded-md bg-indigo-600 px-8 py-3 text-lg font-semibold text-white transition hover:bg-indigo-700"
+            className="inline-block rounded-md bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-8 py-3 text-lg font-semibold text-white shadow-lg transition hover:scale-105 hover:shadow-2xl active:scale-95"
           >
             Get Started
+          </a>
+          <a
+            href="/checkout"
+            className="inline-block rounded-md bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-8 py-3 text-lg font-semibold text-white shadow-lg transition hover:scale-105 hover:shadow-2xl active:scale-95"
+          >
+            Go Premium
           </a>
         </div>
       </div>

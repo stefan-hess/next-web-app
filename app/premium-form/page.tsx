@@ -1,0 +1,248 @@
+"use client"
+import React, { useState } from "react"
+
+// Copy of the standard form, but with maxTickers set to 20 for premium users
+
+
+type PlanType = "monger" | "buffett" | null
+type Ticker = { ticker: string; name: string }
+
+
+export default function PremiumFormSection() {
+  const [firstName, setFirstName] = useState("")
+  const [lastName, setLastName] = useState("")
+  const [email, setEmail] = useState("")
+  const [search, setSearch] = useState("")
+  const [searchResults, setSearchResults] = useState<Ticker[]>([])
+  const [selectedTickers, setSelectedTickers] = useState<Ticker[]>([])
+  const [message, setMessage] = useState<string | null>(null)
+  const [showMaxTickersPopup, setShowMaxTickersPopup] = useState(false)
+  const [plan, setPlan] = useState<PlanType>(null)
+  const [planError, setPlanError] = useState<string | null>(null)
+  const maxTickers = plan === "buffett" ? 50 : 20
+
+  // Fetch plan on email blur
+  const handleEmailBlur = async () => {
+    setPlan(null)
+    setPlanError(null)
+    if (!email) return
+    try {
+      const res = await fetch("/api/get-stripe-plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      })
+      const data = (await res.json()) as { plan?: string }
+      if (data.plan === "monger" || data.plan === "buffett") {
+        setPlan(data.plan)
+      } else {
+        setPlan(null)
+        setPlanError("No premium plan found for this email.")
+      }
+    } catch {
+      setPlan(null)
+      setPlanError("Error checking plan. Please try again.")
+    }
+  }
+
+  const handleSearch = async (query: string) => {
+    setSearch(query)
+    if (query.length > 0) {
+      try {
+        const response = await fetch(`/api/search_tickers?query=${encodeURIComponent(query)}`)
+        if (response.ok) {
+          const data = await response.json()
+          setSearchResults(data as Ticker[])
+        } else {
+          setSearchResults([])
+        }
+      } catch {
+        setSearchResults([])
+      }
+    } else {
+      setSearchResults([])
+    }
+  }
+
+  const handleSelectTicker = (ticker: Ticker) => {
+    if (selectedTickers.length < maxTickers && !selectedTickers.find((t) => t.ticker === ticker.ticker)) {
+      setSelectedTickers([...selectedTickers, ticker])
+    } else if (selectedTickers.length >= maxTickers) {
+      setShowMaxTickersPopup(true)
+    }
+  }
+
+  const handleRemoveTicker = (ticker: Ticker) => {
+    setSelectedTickers(selectedTickers.filter((t) => t.ticker !== ticker.ticker))
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setMessage(null)
+    try {
+      const res = await fetch("/api/submit-premium", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          first_name: firstName,
+          last_name: lastName,
+          email,
+          tickers: selectedTickers.map((t) => t.ticker).join(","),
+        }),
+      })
+      if (res.ok) {
+        setMessage("Your selection has been updated successfully!")
+        setFirstName("")
+        setLastName("")
+        setEmail("")
+        setSelectedTickers([])
+      } else {
+        const data = (await res.json()) as { error?: string }
+        if (res.status === 403 && data.error?.includes("premium plan")) {
+          setMessage("Sorry, we didn't find a premium plan for this email address. Please subscribe to have access!")
+        } else {
+          setMessage(data.error || "An error occurred while processing your form.")
+        }
+      }
+    } catch {
+      setMessage("An error occurred while processing your form.")
+    }
+  }
+
+  return (
+    <main className="flex min-h-screen flex-col items-center bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="mt-16 w-full max-w-2xl rounded-xl bg-white p-8 shadow-xl">
+        <h1 className="mb-4 text-center text-4xl font-bold text-indigo-800">StockTickerNews Premium</h1>
+        <p className="mb-8 text-center text-gray-700">
+          Select up to 20 stocks with the Monger plan and 50 with the Buffett plan, if you already have a premium subscription!
+        </p>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">First Name</label>
+              <input
+                type="text"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Last Name</label>
+              <input
+                type="text"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Email</label>
+              <input
+                type="email"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onBlur={handleEmailBlur}
+                required
+              />
+              {/* Plan check message below email input */}
+              {plan === null && !planError && email && (
+                <div className="text-gray-500 text-sm mt-1">Enter your email to check your premium plan and unlock ticker selection.</div>
+              )}
+              {planError && <div className="text-red-500 text-sm mt-1">{planError}</div>}
+              {plan === "buffett" && <div className="text-green-600 text-sm mt-1">Buffett plan detected: you can select up to 50 companies.</div>}
+              {plan === "monger" && <div className="text-green-600 text-sm mt-1">Monger plan detected: you can select up to 20 companies.</div>}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Search Tickers</label>
+              <input
+                type="text"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                placeholder="Type to search company name or ticker symbol..."
+                value={search}
+                onChange={(e) => handleSearch(e.target.value)}
+              />
+              {searchResults.length > 0 && (
+                <ul className="mt-2 max-h-40 overflow-y-auto rounded-md border bg-white shadow">
+                  {searchResults.map((item) => (
+                    <li
+                      key={item.ticker}
+                      className="cursor-pointer px-4 py-2 hover:bg-indigo-50"
+                      onClick={() => handleSelectTicker(item)}
+                    >
+                      {item.ticker} - {item.name}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <input type="hidden" name="tickers" value={selectedTickers.map((t) => t.ticker).join(",")} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Selected Tickers</label>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {selectedTickers.map((ticker) => (
+                  <span
+                    key={ticker.ticker}
+                    className="inline-flex items-center rounded-full bg-indigo-100 px-3 py-1 text-sm font-medium text-indigo-800"
+                  >
+                    {ticker.ticker}
+                    <button
+                      type="button"
+                      className="ml-2 text-indigo-500 hover:text-red-500"
+                      onClick={() => handleRemoveTicker(ticker)}
+                    >
+                      &times;
+                    </button>
+                  </span>
+                ))}
+              </div>
+              {showMaxTickersPopup && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                  <div className="rounded-2xl bg-white/90 p-8 shadow-2xl max-w-sm w-full transform transition-all">
+                    <p className="mb-6 text-center text-xl font-semibold text-black">
+                      {plan === "buffett"
+                        ? "With the Buffett plan, you can select a maximum of 50 tickers."
+                        : "With the Monger plan, you can select a maximum of 20 tickers."}
+                    </p>
+                    <button
+                      onClick={() => setShowMaxTickersPopup(false)}
+                      className="mx-auto block w-full rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-6 py-3
+                        text-white font-bold shadow-lg transition-all duration-300
+                        hover:scale-105 hover:shadow-2xl active:scale-95"
+                    >
+                      OK
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+          <button
+            type="submit"
+            className="w-full rounded-xl bg-gradient-to-r from-blue-600 via-blue-200 to-blue-400 px-6 py-3 font-semibold text-black shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl active:scale-95"
+          >
+            Submit
+          </button>
+          <div className="mt-6 flex justify-center gap-4">
+            <a
+              href="/feedback"
+              className="inline-block rounded-md bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-6 py-3 font-semibold text-white shadow-lg transition hover:scale-105 hover:shadow-2xl active:scale-95"
+            >
+              Leave Feedback
+            </a>
+            <a
+              href="/unsubscribe"
+              className="inline-block rounded-md bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-6 py-3 font-semibold text-white shadow-lg transition hover:scale-105 hover:shadow-2xl active:scale-95"
+            >
+              Unsubscribe
+            </a>
+          </div>
+          {message && <div className="alert alert-info mt-4">{message}</div>}
+        </form>
+      </div>
+    </main>
+  )
+}

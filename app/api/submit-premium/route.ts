@@ -1,0 +1,30 @@
+import { NextRequest, NextResponse } from "next/server"
+import { getDbConnection } from "../../lib/db"
+
+export async function POST(req: NextRequest) {
+  const { first_name, last_name, email, tickers } = (await req.json()) as { first_name: string; last_name: string; email: string; tickers: string }
+  try {
+    const conn = await getDbConnection()
+    const request = conn.request()
+    // Check the user's plan
+    const result = await request.input("email", email).query(`
+      SELECT stripe_plan FROM test_clients_stripe WHERE email = @email
+    `)
+    const plan = result.recordset[0]?.stripe_plan
+    if (plan !== "monger" && plan !== "buffett") {
+      return NextResponse.json({ error: "You must have an active premium plan to submit this form." }, { status: 403 })
+    }
+    // Enforce ticker count limit based on plan
+    const tickersArr = tickers.split(",").filter(Boolean)
+    const maxTickers = plan === "buffett" ? 50 : 20
+    if (tickersArr.length > maxTickers) {
+      return NextResponse.json({ error: `Your plan allows up to ${maxTickers} tickers. You selected ${tickersArr.length}.` }, { status: 400 })
+    }
+    // ...existing logic to save the form data, e.g., insert/update tickers...
+    // For now, just return success
+    return NextResponse.json({ success: true })
+  } catch (err) {
+    console.error("Premium form submission failed:", err)
+    return NextResponse.json({ error: (err as Error).message }, { status: 500 })
+  }
+}
