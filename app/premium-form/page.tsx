@@ -4,7 +4,7 @@ import React, { useState } from "react"
 // Copy of the standard form, but with maxTickers set to 20 for premium users
 
 
-type PlanType = "monger" | "buffett" | null
+type PlanType = "munger" | "buffett" | null
 type Ticker = { ticker: string; name: string }
 
 
@@ -19,6 +19,7 @@ export default function PremiumFormSection() {
   const [showMaxTickersPopup, setShowMaxTickersPopup] = useState(false)
   const [plan, setPlan] = useState<PlanType>(null)
   const [planError, setPlanError] = useState<string | null>(null)
+  const [agreedToTerms, setAgreedToTerms] = useState(false)
   const maxTickers = plan === "buffett" ? 50 : 20
 
   // Fetch plan on email blur
@@ -33,7 +34,7 @@ export default function PremiumFormSection() {
         body: JSON.stringify({ email }),
       })
       const data = (await res.json()) as { plan?: string }
-      if (data.plan === "monger" || data.plan === "buffett") {
+  if (data.plan === "munger" || data.plan === "buffett") {
         setPlan(data.plan)
       } else {
         setPlan(null)
@@ -79,6 +80,10 @@ export default function PremiumFormSection() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setMessage(null)
+    if (!agreedToTerms) {
+      setMessage("You must agree to the Terms & Conditions to submit.")
+      return
+    }
     try {
       const res = await fetch("/api/submit-premium", {
         method: "POST",
@@ -96,6 +101,7 @@ export default function PremiumFormSection() {
         setLastName("")
         setEmail("")
         setSelectedTickers([])
+  setAgreedToTerms(false)
       } else {
         const data = (await res.json()) as { error?: string }
         if (res.status === 403 && data.error?.includes("premium plan")) {
@@ -114,7 +120,7 @@ export default function PremiumFormSection() {
       <div className="mt-16 w-full max-w-2xl rounded-xl bg-white p-8 shadow-xl">
         <h1 className="mb-4 text-center text-4xl font-bold text-indigo-800">StockTickerNews Premium</h1>
         <p className="mb-8 text-center text-gray-700">
-          Select up to 20 stocks with the Monger plan and 50 with the Buffett plan, if you already have a premium subscription!
+          Select up to 20 stocks with the Munger plan and 50 with the Buffett plan, if you already have a premium subscription!
         </p>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 gap-6">
@@ -154,7 +160,7 @@ export default function PremiumFormSection() {
               )}
               {planError && <div className="text-red-500 text-sm mt-1">{planError}</div>}
               {plan === "buffett" && <div className="text-green-600 text-sm mt-1">Buffett plan detected: you can select up to 50 companies.</div>}
-              {plan === "monger" && <div className="text-green-600 text-sm mt-1">Monger plan detected: you can select up to 20 companies.</div>}
+              {plan === "munger" && <div className="text-green-600 text-sm mt-1">Munger plan detected: you can select up to 20 companies.</div>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Search Tickers</label>
@@ -205,7 +211,7 @@ export default function PremiumFormSection() {
                     <p className="mb-6 text-center text-xl font-semibold text-black">
                       {plan === "buffett"
                         ? "With the Buffett plan, you can select a maximum of 50 tickers."
-                        : "With the Monger plan, you can select a maximum of 20 tickers."}
+                        : "With the Munger plan, you can select a maximum of 20 tickers."}
                     </p>
                     <button
                       onClick={() => setShowMaxTickersPopup(false)}
@@ -220,9 +226,23 @@ export default function PremiumFormSection() {
               )}
             </div>
           </div>
+          <div className="mt-4 flex items-center">
+            <input
+              type="checkbox"
+              id="terms"
+              checked={agreedToTerms}
+              onChange={(e) => setAgreedToTerms(e.target.checked)}
+              className="mr-2 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+              required
+            />
+            <label htmlFor="terms" className="text-sm text-gray-700">
+              I agree to the <a href="/terms" target="_blank" className="text-indigo-600 underline">Terms &amp; Conditions</a>
+            </label>
+          </div>
           <button
             type="submit"
-            className="w-full rounded-xl bg-gradient-to-r from-blue-600 via-blue-200 to-blue-400 px-6 py-3 font-semibold text-black shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl active:scale-95"
+            className="w-full rounded-xl bg-gradient-to-r from-blue-600 via-blue-200 to-blue-400 px-6 py-3 font-semibold text-black shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+            disabled={!agreedToTerms}
           >
             Submit
           </button>

@@ -12,6 +12,7 @@ export default function FormSection() {
   const [selectedTickers, setSelectedTickers] = useState<Ticker[]>([])
   const [message, setMessage] = useState<string | null>(null)
   const [showMaxTickersPopup, setShowMaxTickersPopup] = useState(false)
+  const [agreedToTerms, setAgreedToTerms] = useState(false)
   const maxTickers = 5
 
   const handleSearch = async (query: string) => {
@@ -48,6 +49,10 @@ export default function FormSection() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setMessage(null)
+    if (!agreedToTerms) {
+      setMessage("You must agree to the Terms & Conditions to submit.")
+      return
+    }
     try {
       const res = await fetch("/api/submit", {
         method: "POST",
@@ -65,6 +70,7 @@ export default function FormSection() {
         setLastName("")
         setEmail("")
         setSelectedTickers([])
+        setAgreedToTerms(false)
       } else {
         setMessage("An error occurred while processing your form.")
       }
@@ -160,26 +166,49 @@ export default function FormSection() {
             </div>
             {showMaxTickersPopup && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                <div className="rounded-2xl bg-white/90 p-8 shadow-2xl max-w-sm w-full transform transition-all">
+                <div className="relative rounded-2xl bg-white/90 p-8 shadow-2xl max-w-sm w-full transform transition-all">
+                  {/* Close X button */}
+                  <button
+                    onClick={() => setShowMaxTickersPopup(false)}
+                    className="absolute top-2 right-2 text-gray-400 hover:text-red-500 text-2xl font-bold focus:outline-none"
+                    aria-label="Close"
+                  >
+                    &times;
+                  </button>
                   <p className="mb-6 text-center text-xl font-semibold text-black">
                     With the free plan, you can select a maximum of 5 tickers.
                   </p>
                   <button
-                    onClick={() => setShowMaxTickersPopup(false)}
+                    onClick={() => window.location.href = '/checkout'}
                     className="mx-auto block w-full rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-6 py-3
                       text-white font-bold shadow-lg transition-all duration-300
                       hover:scale-105 hover:shadow-2xl active:scale-95"
                   >
-                    OK
+                    Go Premium
                   </button>
                 </div>
               </div>
             )}
             <input type="hidden" name="tickers" value={selectedTickers.map((t) => t.ticker).join(",")} />
+            <div className="mt-4 flex items-center">
+              <input
+                type="checkbox"
+                id="terms"
+                checked={agreedToTerms}
+                onChange={(e) => setAgreedToTerms(e.target.checked)}
+                className="mr-2 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                required
+              />
+              <label htmlFor="terms" className="text-sm text-gray-700">
+                I agree to the <a href="/terms" target="_blank" className="text-indigo-600 underline">Terms &amp; Conditions</a>
+              </label>
+            </div>
           </div>
           <button
             type="submit"
             className="w-full rounded-xl bg-gradient-to-r from-blue-600 via-blue-200 to-blue-400 px-6 py-3 font-semibold text-black shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl active:scale-95"
+            disabled={!agreedToTerms}
+            style={{ opacity: agreedToTerms ? 1 : 0.6, cursor: agreedToTerms ? "pointer" : "not-allowed" }}
           >
             Submit
           </button>

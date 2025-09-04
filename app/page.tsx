@@ -41,6 +41,9 @@ export default function Home() {
             Go Premium
           </a>
         </div>
+          <div className="mt-6 rounded-md border border-yellow-400 bg-yellow-50 p-4 text-sm text-yellow-800">
+            <strong>Warning:</strong> News summaries are generated with the help of AI and therefore may contain mistakes or inaccuracies. Do not base investment decisions solely on this newsletter. Use it as an aid for further research on the stocks. The content is not investment advice and we are not liable for any investment decisions made based on the newsletter. With subscribing to any stock-ticker-news plan you agree with this disclaimer.
+          </div>
       </div>
     </main>
   )

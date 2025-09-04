@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getDbConnection } from "../../lib/db"
+import { GLOBAL_VARS } from "globalVars"
 
 export async function POST(req: NextRequest) {
   const { first_name, last_name, email, tickers } = (await req.json()) as { first_name: string; last_name: string; email: string; tickers: string }
@@ -8,10 +9,10 @@ export async function POST(req: NextRequest) {
     const request = conn.request()
     // Check the user's plan
     const result = await request.input("email", email).query(`
-      SELECT stripe_plan FROM test_clients_stripe WHERE email = @email
+      SELECT stripe_plan FROM ${GLOBAL_VARS.TABLE_STRIPE_CLIENTS} WHERE email = @email
     `)
     const plan = result.recordset[0]?.stripe_plan
-    if (plan !== "monger" && plan !== "buffett") {
+  if (plan !== "munger" && plan !== "buffett") {
       return NextResponse.json({ error: "You must have an active premium plan to submit this form." }, { status: 403 })
     }
     // Enforce ticker count limit based on plan

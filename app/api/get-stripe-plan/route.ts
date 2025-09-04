@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getDbConnection } from "../../lib/db"
+import { GLOBAL_VARS } from "globalVars"
 
 export async function POST(req: NextRequest) {
   const { email } = (await req.json()) as { email: string }
@@ -8,7 +9,7 @@ export async function POST(req: NextRequest) {
     const conn = await getDbConnection()
     const request = conn.request()
     const result = await request.input("email", email).query(`
-      SELECT stripe_plan FROM test_clients_stripe WHERE email = @email
+      SELECT stripe_plan FROM ${GLOBAL_VARS.TABLE_STRIPE_CLIENTS} WHERE email = @email
     `)
     const plan = result.recordset[0]?.stripe_plan || null
     return NextResponse.json({ plan })
