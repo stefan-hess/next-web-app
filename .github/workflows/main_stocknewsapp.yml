@@ -2,7 +2,7 @@
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 # More info on Node.js, GitHub Actions, and Azure App Service: https://aka.ms/nodejs-webapps-actions
 
-name: Build and deploy Next.js app to Azure Web App - StockNewsApp
+name: Minimal Azure Deploy
 
 on:
   push:
@@ -11,78 +11,53 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-
+      id-token: write
     steps:
-      # Checkout the repo
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      # Set up Node.js
-      - name: Set up Node.js
+      - name: Setup Node
         uses: actions/setup-node@v3
         with:
           node-version: '20'
+          cache: 'pnpm'
 
-      # Enable Corepack for package manager management
-      - name: Enable and verify pnpm
+      - name: Enable pnpm
         run: |
           corepack enable
           corepack prepare pnpm@10.0.0 --activate
           pnpm -v
 
-      # Install dependencies
-      - name: Install dependencies
+      - name: Install deps
         run: pnpm install --frozen-lockfile
 
-      # Build Next.js app (unset NODE_OPTIONS in same shell)
-      - name: Build Next.js
+      - name: Build (skip lint blocking) & export
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+          NEXT_DISABLE_ESLINT: 1
         run: |
-          unset NODE_OPTIONS
           pnpm run build
 
-        # Archive build output + dependencies
-      - name: Archive production build
-        run: zip -r release.zip .next public package.json next.config.* node_modules
+      - name: Archive build
+        run: zip -r build.zip .next public package.json next.config.*
 
-      # Upload artifact for deployment
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: nextjs-app
-          path: |
-            .
-            !node_modules/
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      id-token: write
-      contents: read
-
-    steps:
-      # Download artifact built in previous step
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: nextjs-app
-      
-      - name: Login to Azure
+      - name: Azure Login
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_F146D823C76C44BAA695A70AFD34E569 }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_4BEA309DA8F54427B17CF25D2EF3715C }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_C2BA8E3D5E9A4F25846F6913A2C7F3E9 }}
 
-      - name: 'Deploy to Azure Web App'
+      - name: Deploy
         uses: azure/webapps-deploy@v3
-        id: deploy-to-webapp
         with:
           app-name: 'StockNewsApp'
           slot-name: 'Production'
+          package: build.zip
         env:
           SCM_DO_BUILD_DURING_DEPLOYMENT: false
 

@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getDbConnection } from "../../lib/db"
 import { GLOBAL_VARS } from "globalVars"
+import { getDbConnection } from "../../lib/db"
 
 export async function POST(req: NextRequest) {
-  const { first_name, last_name, email, tickers } = (await req.json()) as { first_name: string; last_name: string; email: string; tickers: string }
+  // Prefix unused vars to satisfy eslint if not needed yet
+  const { first_name: _first_name, last_name: _last_name, email, tickers } = (await req.json()) as { first_name: string; last_name: string; email: string; tickers: string }
   try {
     const conn = await getDbConnection()
     const request = conn.request()

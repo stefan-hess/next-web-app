@@ -1,8 +1,8 @@
 // No special config needed for app router
 import { NextResponse } from "next/server"
 import Stripe from "stripe"
-import { getDbConnection } from "../../lib/db"
 import { GLOBAL_VARS } from "globalVars"
+import { getDbConnection } from "../../lib/db"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-08-27.basil",
@@ -42,8 +42,17 @@ export async function POST(req: Request) {
       const clientEmail = session.customer_email || session.metadata?.email || null
       const firstName = session.metadata?.first_name || null
       const lastName = session.metadata?.last_name || null
-      const stripeCustomerId = typeof session.customer === 'string' ? session.customer : (session.customer as any)?.id || null
-      const stripeSubscriptionId = typeof session.subscription === 'string' ? session.subscription : (session.subscription as any)?.id || null
+      // Safe extraction of possible string or object-with-id values without using 'any'
+      const extractId = (val: unknown): string | null => {
+        if (typeof val === 'string') return val
+        if (val && typeof val === 'object' && 'id' in val) {
+          const idVal = (val as { id?: unknown }).id
+            return typeof idVal === 'string' ? idVal : null
+        }
+        return null
+      }
+      const stripeCustomerId = extractId(session.customer)
+      const stripeSubscriptionId = extractId(session.subscription)
       const stripePlan = session.metadata?.plan || null
       const createdAt = new Date()
       const updatedAt = new Date()

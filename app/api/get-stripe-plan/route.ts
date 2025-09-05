@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getDbConnection } from "../../lib/db"
 import { GLOBAL_VARS } from "globalVars"
+import { getDbConnection } from "../../lib/db"
 
 export async function POST(req: NextRequest) {
   const { email } = (await req.json()) as { email: string }
