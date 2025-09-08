@@ -6,8 +6,8 @@ import { loadStripe } from "@stripe/stripe-js"
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 const PRICES = [
-  { id: "price_1S56yQREANM77N65cZM1G0pY", name: "Munger", amount: 4.99, description: "Follow 10 Stocks" },
-  { id: "price_1S2ae1REANM77N650wVydHZG", name: "Buffett", amount: 8.99, description: "Follow 20 Stocks" },
+  { id: "price_1S58CGI8pTUJRz6FyikGu4R7", name: "Munger", amount: 4.99, description: "Follow 10 Stocks" },
+  { id: "price_1S58CtI8pTUJRz6FSh35gDnU", name: "Buffett", amount: 8.99, description: "Follow 20 Stocks" },
   { id: "price_enterprise", name: "Enterprise", amount: "Contact for quote", description: "For funds, small research shops, teams" },
 ];
 
@@ -64,6 +64,14 @@ export default function CheckoutPage() {
   return (
     <main className="flex min-h-screen flex-col items-center bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="mt-16 w-full max-w-2xl rounded-xl bg-white p-8 shadow-xl">
+        <div className="flex justify-end mb-2">
+          <a
+            href="/premium-form"
+            className="text-xs px-3 py-1 rounded bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition font-medium shadow-sm border border-indigo-200"
+          >
+            Already have premium?
+          </a>
+        </div>
         <h1 className="mb-4 text-center text-4xl font-bold text-indigo-800">Premium Plans</h1>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
           {PRICES.map((plan) => (
