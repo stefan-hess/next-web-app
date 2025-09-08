@@ -13,7 +13,7 @@ export default function FormSection() {
   const [message, setMessage] = useState<string | null>(null)
   const [showMaxTickersPopup, setShowMaxTickersPopup] = useState(false)
   const [agreedToTerms, setAgreedToTerms] = useState(false)
-  const maxTickers = 5
+  const maxTickers = 2
 
   const handleSearch = async (query: string) => {
     setSearch(query)
@@ -85,9 +85,8 @@ export default function FormSection() {
         <h1 className="mb-4 text-center text-4xl font-bold text-indigo-800">StockTickerNews</h1>
         <p className="mb-8 text-center text-gray-700">
           Hey there. This is a monthly stock ticker newsletter that automatically sends a summary of recent events for
-          companies on your watch list to your email. Save time researching news! For now, you can select 5 companies on
-          the NYSE and NASDAQ. Expansion to other stock exchanges and a premium version are coming soon. We’d love your
-          feedback below!
+          companies on your watch list to your email. Save time researching news! For now, you can select 2 companies on
+          the NYSE and NASDAQ. We’d love your feedback below!
         </p>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="flex gap-4">
@@ -176,7 +175,7 @@ export default function FormSection() {
                     &times;
                   </button>
                   <p className="mb-6 text-center text-xl font-semibold text-black">
-                    With the free plan, you can select a maximum of 5 tickers.
+                    With the free plan, you can select a maximum of 2 tickers.
                   </p>
                   <button
                     onClick={() => window.location.href = '/checkout'}

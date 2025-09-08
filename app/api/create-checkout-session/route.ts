@@ -18,6 +18,11 @@ export async function POST(req: Request) {
       plan?: string;
     };
 
+    // Calculate trial_end (first day of next month, 00:00 UTC)
+    const now = new Date();
+    const trialEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0, 0));
+    const trialEndUnix = Math.floor(trialEnd.getTime() / 1000);
+
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       payment_method_types: ["card"],
@@ -30,6 +35,9 @@ export async function POST(req: Request) {
         first_name: firstName || "",
         last_name: lastName || "",
         plan: plan || "",
+      },
+      subscription_data: {
+        trial_end: trialEndUnix,
       },
     });
 
