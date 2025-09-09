@@ -10,7 +10,7 @@
     "lint:fix": "next lint --fix",
     "prettier": "prettier --check \"**/*.{js,jsx,ts,tsx}\"",
     "prettier:fix": "prettier --write \"**/*.{js,jsx,ts,tsx}\"",
-    "analyze": "cross-env ANALYZE=true pnpm run build",
+    "analyze": "cross-env ANALYZE=true npm run build",
     "storybook": "cross-env FORCE_COLOR=1 storybook dev -p 6006",
     "test-storybook": "cross-env FORCE_COLOR=1 test-storybook",
     "build-storybook": "cross-env FORCE_COLOR=1 storybook build",
@@ -115,7 +115,7 @@
     "patch-package": "^8.0.0",
     "postcss": "^8.5.6",
     "postcss-import": "^16.1.0",
-    "postinstall-postinstall": "^2.1.0",
+    
     "prettier": "3.0.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "semantic-release": "^22.0.12",
