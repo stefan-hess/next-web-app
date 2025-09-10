@@ -68,6 +68,7 @@
     "autoprefixer": "^10.4.21",
     "cross-env": "^7.0.3",
     "eslint": "^9.26.0",
+    "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-storybook": "^0.11.6",
     "gzip-size": "6.0.0",
@@ -91,5 +92,5 @@
   "engines": {
     "node": ">=20.0.0"
   },
-    "packageManager": "npm@10.8.2"
+  "packageManager": "npm@10.8.2"
 }
