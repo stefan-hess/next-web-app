@@ -120,7 +120,7 @@ export default function PremiumFormSection() {
       <div className="mt-16 w-full max-w-2xl rounded-xl bg-white p-8 shadow-xl">
         <h1 className="mb-4 text-center text-4xl font-bold text-indigo-800">StockTickerNews Premium</h1>
         <p className="mb-8 text-center text-gray-700">
-          Select up to 20 stocks with the Munger plan and 50 with the Buffett plan, if you already have a premium subscription!
+          Select up to 10 stocks with the Munger plan and 20 with the Buffett plan, if you already have a premium subscription! Simply resubmit a new selection to update your current one.
         </p>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 gap-6">

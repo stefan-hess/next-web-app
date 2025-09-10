@@ -29,7 +29,11 @@ export async function GET(req: NextRequest) {
     const tickers: Ticker[] = (result.recordset as { symbol: string; name: string }[]).map((row) => ({ ticker: row.symbol, name: row.name }))
     return NextResponse.json(tickers)
   } catch (err) {
-    console.error("Error searching tickers:", err)
-    return NextResponse.json([], { status: 500 })
+    if (err instanceof Error) {
+      console.error("Error searching tickers:", err.message, err.stack)
+    } else {
+      console.error("Error searching tickers:", err)
+    }
+    return NextResponse.json({ error: "An error occurred while searching tickers.", details: err instanceof Error ? err.message : String(err) }, { status: 500 })
   }
 }

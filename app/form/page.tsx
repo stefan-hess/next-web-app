@@ -84,9 +84,7 @@ export default function FormSection() {
       <div className="mt-16 w-full max-w-2xl rounded-xl bg-white p-8 shadow-xl">
         <h1 className="mb-4 text-center text-4xl font-bold text-indigo-800">StockTickerNews</h1>
         <p className="mb-8 text-center text-gray-700">
-          Hey there. This is a monthly stock ticker newsletter that automatically sends a summary of recent events for
-          companies on your watch list to your email. Save time researching news! For now, you can select 2 companies on
-          the NYSE and NASDAQ. We’d love your feedback below!
+          For the free tier, you can select up to 2 companies. Simply input your info and get your individual newsletter beginning of each month! Upgrade to premium for more stocks in your newsletter.
         </p>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="flex gap-4">

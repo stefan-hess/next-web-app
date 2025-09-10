@@ -91,7 +91,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: "Form submitted successfully!" })
   } catch (err) {
     await transaction.rollback()
-    console.error("Error processing form:", err)
-    return NextResponse.json({ error: "An error occurred while processing your form." }, { status: 500 })
+    if (err instanceof Error) {
+      console.error("Error processing form:", err.message, err.stack)
+    } else {
+      console.error("Error processing form:", err)
+    }
+    return NextResponse.json({ error: "An error occurred while processing your form.", details: err instanceof Error ? err.message : String(err) }, { status: 500 })
   }
 }
