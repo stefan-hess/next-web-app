@@ -101,7 +101,7 @@ export default function PremiumFormSection() {
         setLastName("")
         setEmail("")
         setSelectedTickers([])
-  setAgreedToTerms(false)
+        setAgreedToTerms(false)
       } else {
         const data = (await res.json()) as { error?: string }
         if (res.status === 403 && data.error?.includes("premium plan")) {
@@ -159,8 +159,8 @@ export default function PremiumFormSection() {
                 <div className="text-gray-500 text-sm mt-1">Enter your email to check your premium plan and unlock ticker selection.</div>
               )}
               {planError && <div className="text-red-500 text-sm mt-1">{planError}</div>}
-              {plan === "Buffett" && <div className="text-green-600 text-sm mt-1">Buffett plan detected: you can select up to 50 companies.</div>}
-              {plan === "Munger" && <div className="text-green-600 text-sm mt-1">Munger plan detected: you can select up to 20 companies.</div>}
+              {plan === "Buffett" && <div className="text-green-600 text-sm mt-1">Buffett plan detected: you can select up to 20 companies.</div>}
+              {plan === "Munger" && <div className="text-green-600 text-sm mt-1">Munger plan detected: you can select up to 10 companies.</div>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Search Tickers</label>
@@ -260,7 +260,28 @@ export default function PremiumFormSection() {
               Unsubscribe
             </a>
           </div>
-          {message && <div className="alert alert-info mt-4">{message}</div>}
+          {/* Success popover */}
+          {message === "Your selection has been updated successfully!" && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+              <div className="rounded-2xl bg-white/90 p-8 shadow-2xl max-w-sm w-full transform transition-all text-center">
+                <p className="mb-6 text-center text-xl font-semibold text-green-700">
+                  Your selection has been updated successfully!
+                </p>
+                <button
+                  onClick={() => setMessage(null)}
+                  className="mx-auto block w-full rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-6 py-3
+                    text-white font-bold shadow-lg transition-all duration-300
+                    hover:scale-105 hover:shadow-2xl active:scale-95"
+                >
+                  OK
+                </button>
+              </div>
+            </div>
+          )}
+          {/* Other messages */}
+          {message && message !== "Your selection has been updated successfully!" && (
+            <div className="alert alert-info mt-4">{message}</div>
+          )}
         </form>
       </div>
     </main>

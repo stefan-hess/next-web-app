@@ -22,8 +22,18 @@ export async function POST(req: NextRequest) {
     if (tickersArr.length > maxTickers) {
       return NextResponse.json({ error: `Your plan allows up to ${maxTickers} tickers. You selected ${tickersArr.length}.` }, { status: 400 })
     }
-    // ...existing logic to save the form data, e.g., insert/update tickers...
-    // For now, just return success
+    // Remove all existing tickers for this email
+    await conn.request()
+      .input("email", email)
+      .query(`DELETE FROM ${GLOBAL_VARS.TABLE_TICKER_SELECTION_CLIENTS} WHERE email = @email`)
+
+    // Insert new tickers
+    for (const ticker of tickersArr) {
+      await conn.request()
+        .input("email", email)
+        .input("ticker", ticker.trim())
+        .query(`INSERT INTO ${GLOBAL_VARS.TABLE_TICKER_SELECTION_CLIENTS} (email, ticker) VALUES (@email, @ticker)`)
+    }
     return NextResponse.json({ success: true })
   } catch (err) {
     console.error("Premium form submission failed:", err)
