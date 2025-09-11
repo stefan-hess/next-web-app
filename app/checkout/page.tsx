@@ -39,6 +39,7 @@ export default function CheckoutPage() {
     setIsLoading(true);
     try {
       const stripe = await stripePromise;
+      const planName = PRICES.find(p => p.id === selectedPlan)?.name || "";
       const res = await fetch("/api/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -47,6 +48,7 @@ export default function CheckoutPage() {
           email,
           firstName,
           lastName,
+          plan: planName,
         }),
       });
       const data = (await res.json()) as { id?: string; error?: string };
