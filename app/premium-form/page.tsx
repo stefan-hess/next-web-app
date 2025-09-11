@@ -4,7 +4,7 @@ import React, { useState } from "react"
 // Copy of the standard form, but with maxTickers set to 20 for premium users
 
 
-type PlanType = "munger" | "buffett" | null
+type PlanType = "Munger" | "Buffett" | null
 type Ticker = { ticker: string; name: string }
 
 
@@ -20,7 +20,7 @@ export default function PremiumFormSection() {
   const [plan, setPlan] = useState<PlanType>(null)
   const [planError, setPlanError] = useState<string | null>(null)
   const [agreedToTerms, setAgreedToTerms] = useState(false)
-  const maxTickers = plan === "buffett" ? 50 : 20
+  const maxTickers = plan === "Buffett" ? 50 : 20
 
   // Fetch plan on email blur
   const handleEmailBlur = async () => {
@@ -34,7 +34,7 @@ export default function PremiumFormSection() {
         body: JSON.stringify({ email }),
       })
       const data = (await res.json()) as { plan?: string }
-  if (data.plan === "munger" || data.plan === "buffett") {
+  if (data.plan === "Munger" || data.plan === "Buffett") {
         setPlan(data.plan)
       } else {
         setPlan(null)
@@ -159,8 +159,8 @@ export default function PremiumFormSection() {
                 <div className="text-gray-500 text-sm mt-1">Enter your email to check your premium plan and unlock ticker selection.</div>
               )}
               {planError && <div className="text-red-500 text-sm mt-1">{planError}</div>}
-              {plan === "buffett" && <div className="text-green-600 text-sm mt-1">Buffett plan detected: you can select up to 50 companies.</div>}
-              {plan === "munger" && <div className="text-green-600 text-sm mt-1">Munger plan detected: you can select up to 20 companies.</div>}
+              {plan === "Buffett" && <div className="text-green-600 text-sm mt-1">Buffett plan detected: you can select up to 50 companies.</div>}
+              {plan === "Munger" && <div className="text-green-600 text-sm mt-1">Munger plan detected: you can select up to 20 companies.</div>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Search Tickers</label>
@@ -209,7 +209,7 @@ export default function PremiumFormSection() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
                   <div className="rounded-2xl bg-white/90 p-8 shadow-2xl max-w-sm w-full transform transition-all">
                     <p className="mb-6 text-center text-xl font-semibold text-black">
-                      {plan === "buffett"
+                      {plan === "Buffett"
                         ? "With the Buffett plan, you can select a maximum of 50 tickers."
                         : "With the Munger plan, you can select a maximum of 20 tickers."}
                     </p>
