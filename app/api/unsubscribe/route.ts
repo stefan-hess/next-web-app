@@ -17,7 +17,11 @@ export async function POST(req: NextRequest) {
       `)
     return NextResponse.json({ message: "Unsubscribed successfully." })
   } catch (err) {
-    console.error("Unsubscribe error:", err)
-    return NextResponse.json({ error: "An error occurred while unsubscribing." }, { status: 500 })
+    if (err instanceof Error) {
+      console.error("Unsubscribe error:", err.message, err.stack)
+    } else {
+      console.error("Unsubscribe error:", err)
+    }
+    return NextResponse.json({ error: "An error occurred while unsubscribing.", details: err instanceof Error ? err.message : String(err) }, { status: 500 })
   }
 }

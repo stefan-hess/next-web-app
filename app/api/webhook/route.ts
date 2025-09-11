@@ -4,9 +4,18 @@ import Stripe from "stripe"
 import { GLOBAL_VARS } from "globalVars"
 import { getDbConnection } from "../../lib/db"
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-08-27.basil",
-})
+let stripe: Stripe | null = null
+function getStripe(): Stripe {
+  const key = process.env.STRIPE_SECRET_KEY
+  if (!key) {
+    console.error("Missing STRIPE_SECRET_KEY environment variable for webhook")
+    throw new Error("Stripe not configured")
+  }
+  if (!stripe) {
+    stripe = new Stripe(key)
+  }
+  return stripe
+}
 
 export async function POST(req: Request) {
   const sig = req.headers.get("stripe-signature")!
@@ -15,13 +24,17 @@ export async function POST(req: Request) {
   let event: Stripe.Event;
 
   try {
-    event = stripe.webhooks.constructEvent(
+    event = getStripe().webhooks.constructEvent(
       body,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET!
     );
   } catch (err) {
-    console.error("Webhook signature verification failed:", err);
+    if (err instanceof Error) {
+      console.error("Webhook signature verification failed:", err.message, err.stack)
+    } else {
+      console.error("Webhook signature verification failed:", err)
+    }
     return NextResponse.json(
       { error: "Webhook signature verification failed" },
       { status: 400 }
@@ -97,7 +110,11 @@ export async function POST(req: Request) {
 
       console.log(`Client ${clientEmail} inserted/updated successfully.`)
     } catch (err) {
-      console.error("Database update failed:", err)
+      if (err instanceof Error) {
+        console.error("Database update failed:", err.message, err.stack)
+      } else {
+        console.error("Database update failed:", err)
+      }
       return NextResponse.json(
         { error: "Failed to update subscription in DB" },
         { status: 500 }

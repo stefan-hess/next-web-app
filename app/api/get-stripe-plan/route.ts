@@ -14,6 +14,11 @@ export async function POST(req: NextRequest) {
     const plan = result.recordset[0]?.stripe_plan || null
     return NextResponse.json({ plan })
   } catch (err) {
-    return NextResponse.json({ error: (err as Error).message }, { status: 500 })
+    if (err instanceof Error) {
+      console.error("Get Stripe plan failed:", err.message, err.stack)
+    } else {
+      console.error("Get Stripe plan failed:", err)
+    }
+    return NextResponse.json({ error: "Failed to get plan", details: err instanceof Error ? err.message : String(err) }, { status: 500 })
   }
 }

@@ -2,7 +2,19 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2025-08-27.basil" });
+let stripe: Stripe | null = null;
+function getStripe(): Stripe {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) {
+    console.error("Missing STRIPE_SECRET_KEY environment variable");
+    throw new Error("Stripe is not configured");
+  }
+  if (!stripe) {
+    // Use default account API version to avoid invalid version issues
+    stripe = new Stripe(key);
+  }
+  return stripe;
+}
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL?.startsWith("http")
   ? process.env.NEXT_PUBLIC_BASE_URL
@@ -23,7 +35,7 @@ export async function POST(req: Request) {
     const trialEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0, 0));
     const trialEndUnix = Math.floor(trialEnd.getTime() / 1000);
 
-    const session = await stripe.checkout.sessions.create({
+  const session = await getStripe().checkout.sessions.create({
       mode: "subscription",
       payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
@@ -43,7 +55,11 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ id: session.id });
   } catch (err) {
-    console.error("Checkout session creation failed:", err);
-    return NextResponse.json({ error: (err as Error).message }, { status: 500 });
+    if (err instanceof Error) {
+      console.error("Checkout session creation failed:", err.message, err.stack);
+    } else {
+      console.error("Checkout session creation failed:", err);
+    }
+    return NextResponse.json({ error: err instanceof Error ? err.message : String(err) }, { status: 500 });
   }
 }

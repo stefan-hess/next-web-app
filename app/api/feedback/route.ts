@@ -17,7 +17,11 @@ export async function POST(req: NextRequest) {
       `)
     return NextResponse.json({ message: "Feedback submitted successfully." })
   } catch (err) {
-    console.error("Feedback submission error:", err)
-    return NextResponse.json({ error: "An error occurred while submitting feedback." }, { status: 500 })
+    if (err instanceof Error) {
+      console.error("Feedback submission error:", err.message, err.stack)
+    } else {
+      console.error("Feedback submission error:", err)
+    }
+    return NextResponse.json({ error: "An error occurred while submitting feedback.", details: err instanceof Error ? err.message : String(err) }, { status: 500 })
   }
 }
