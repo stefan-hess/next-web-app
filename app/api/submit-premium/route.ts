@@ -13,12 +13,12 @@ export async function POST(req: NextRequest) {
       SELECT stripe_plan FROM ${GLOBAL_VARS.TABLE_STRIPE_CLIENTS} WHERE email = @email
     `)
     const plan = result.recordset[0]?.stripe_plan
-  if (plan !== "munger" && plan !== "buffett") {
+  if (plan !== "Munger" && plan !== "Buffett") {
       return NextResponse.json({ error: "You must have an active premium plan to submit this form." }, { status: 403 })
     }
     // Enforce ticker count limit based on plan
     const tickersArr = tickers.split(",").filter(Boolean)
-    const maxTickers = plan === "buffett" ? 50 : 20
+    const maxTickers = plan === "Buffett" ? 20 : 10
     if (tickersArr.length > maxTickers) {
       return NextResponse.json({ error: `Your plan allows up to ${maxTickers} tickers. You selected ${tickersArr.length}.` }, { status: 400 })
     }
