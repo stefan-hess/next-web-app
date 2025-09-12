@@ -13,11 +13,13 @@ export default function FormSection() {
   const [message, setMessage] = useState<string | null>(null)
   const [showMaxTickersPopup, setShowMaxTickersPopup] = useState(false)
   const [agreedToTerms, setAgreedToTerms] = useState(false)
+  const [searching, setSearching] = useState(false)
   const maxTickers = 2
 
   const handleSearch = async (query: string) => {
     setSearch(query)
     if (query.length > 0) {
+      setSearching(true)
       try {
         const response = await fetch(`/api/search_tickers?query=${encodeURIComponent(query)}`)
         if (response.ok) {
@@ -29,8 +31,10 @@ export default function FormSection() {
       } catch {
         setSearchResults([])
       }
+      setSearching(false)
     } else {
       setSearchResults([])
+      setSearching(false)
     }
   }
 
@@ -128,7 +132,15 @@ export default function FormSection() {
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
             />
-            {searchResults.length > 0 && (
+            {searching && (
+              <div className="flex items-center gap-2 mt-2">
+                <span className="relative flex h-6 w-6">
+                  <span className="animate-spin inline-block w-full h-full border-4 border-indigo-300 border-t-indigo-600 rounded-full"></span>
+                </span>
+                <span className="text-indigo-600 font-medium">Searching...</span>
+              </div>
+            )}
+            {searchResults.length > 0 && !searching && (
               <ul className="mt-2 max-h-40 overflow-y-auto rounded-md border bg-white shadow">
                 {searchResults.map((item) => (
                   <li
