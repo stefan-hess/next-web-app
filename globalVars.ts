@@ -19,8 +19,9 @@ export const GLOBAL_VARS = {
 
   // Plan names
   PLAN_FREE: "free",
-  PLAN_MONGER: "monger",
-  PLAN_BUFFETT: "buffett",
+  PLAN_MUNGER: "Munger",
+  PLAN_BUFFETT: "Buffett",
 
   // Other global constants can be added here
+  STRIPE_API_VERSION: "2025-08-27.basil"
 }
