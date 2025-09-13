@@ -46,8 +46,7 @@ export default function Home() {
       <div className="mt-16 w-full max-w-2xl rounded-xl bg-white p-8 shadow-xl">
         <h1 className="mb-4 text-center text-4xl font-bold text-indigo-800">StockTickerNews</h1>
         <p className="mb-8 text-center text-gray-700">
-          Welcome to StockTickerNews! Are you a fundamental investor? Get monthly summaries of recent events for companies on your watch list delivered
-          to your email and keep up with underlying business developments with ease. Try for free and select 2 companies from NYSE and NASDAQ. Check out our new premium plans below for additional stocks to select!
+          Welcome to StockTickerNews. Tired of digging through endless headlines? If you are a fundamental investor, get monthly summaries of key business events for the companies on your watchlist — straight to your inbox. Try for free and select 2 companies from NYSE and NASDAQ. Need more? Explore our premium plans below for additional stocks to select!
         </p>
         <div className="flex justify-center mt-8 gap-4">
           <a
@@ -64,7 +63,7 @@ export default function Home() {
           </a>
         </div>
         <div className="mt-6 rounded-md border border-yellow-400 bg-yellow-50 p-4 text-sm text-yellow-800">
-          <strong>Warning:</strong> News summaries are generated with the help of AI and therefore may contain mistakes or inaccuracies, including when there is a lack of available news. Do not base investment decisions solely on this newsletter. Use it as an aid for further research on the stocks. The content is not investment advice and we are not liable for any investment decisions made based on the newsletter. With subscribing to any stock-ticker-news plan you agree with this disclaimer. See our <a href="/terms" className="text-indigo-600 underline">Terms &amp; Conditions</a>.
+          <strong>Warning:</strong> News summaries are generated with the help of AI and therefore may contain mistakes or inaccuracies. Do not base investment decisions solely on this newsletter. Use it as an aid for further research on the stocks. The content is not investment advice and we are not liable for any investment decisions made based on the newsletter. With subscribing to any stock-ticker-news plan you agree with this disclaimer. See our <a href="/terms" className="text-indigo-600 underline">Terms &amp; Conditions</a>.
         </div>
       </div>
       {/* Demo News Carousel */}
