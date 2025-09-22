@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     const request = conn.request()
     // Check the user's plan
     const result = await request.input("email", email).query(`
-      SELECT stripe_plan FROM ${GLOBAL_VARS.TABLE_STRIPE_CLIENTS} WHERE email = @email
+  SELECT stripe_plan FROM ${GLOBAL_VARS.TABLE_NEWS_SUBSCRIBED_CLIENTS} WHERE email = @email
     `)
     const plan = result.recordset[0]?.stripe_plan
   if (plan !== "Munger" && plan !== "Buffett") {

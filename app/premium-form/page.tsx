@@ -9,8 +9,6 @@ type Ticker = { ticker: string; name: string }
 
 
 export default function PremiumFormSection() {
-  const [firstName, setFirstName] = useState("")
-  const [lastName, setLastName] = useState("")
   const [email, setEmail] = useState("")
   const [search, setSearch] = useState("")
   const [searchResults, setSearchResults] = useState<Ticker[]>([])
@@ -21,7 +19,7 @@ export default function PremiumFormSection() {
   const [plan, setPlan] = useState<PlanType>(null)
   const [planError, setPlanError] = useState<string | null>(null)
   const [agreedToTerms, setAgreedToTerms] = useState(false)
-  const maxTickers = plan === "Buffett" ? 50 : 20
+  const maxTickers = plan === "Buffett" ? 20 : 10
 
   // Fetch plan on email blur
   const handleEmailBlur = async () => {
@@ -93,19 +91,15 @@ export default function PremiumFormSection() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          first_name: firstName,
-          last_name: lastName,
           email,
           tickers: selectedTickers.map((t) => t.ticker).join(","),
         }),
       })
       if (res.ok) {
-        setMessage("Your selection has been updated successfully!")
-        setFirstName("")
-        setLastName("")
-        setEmail("")
-        setSelectedTickers([])
-        setAgreedToTerms(false)
+  setMessage("Your selection has been updated successfully!")
+  setEmail("")
+  setSelectedTickers([])
+  setAgreedToTerms(false)
       } else {
         const data = (await res.json()) as { error?: string }
         if (res.status === 403 && data.error?.includes("premium plan")) {
@@ -128,26 +122,6 @@ export default function PremiumFormSection() {
         </p>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">First Name</label>
-              <input
-                type="text"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Last Name</label>
-              <input
-                type="text"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                required
-              />
-            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Email</label>
               <input

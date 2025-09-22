@@ -5,7 +5,6 @@ export const GLOBAL_VARS = {
   // Database table names
   TABLE_NEWS_SUBSCRIBED_CLIENTS: "news_subscribed_clients",
   TABLE_TICKER_SELECTION_CLIENTS: "ticker_selection_clients",
-  TABLE_STRIPE_CLIENTS: "news_subscribed_clients",
   TABLE_FEEDBACK: "feedback",
 
   // Column names

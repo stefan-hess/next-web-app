@@ -91,7 +91,7 @@ export async function POST(req: Request) {
         .input("updated_at", updatedAt)
         .input("subscription_cancelled", subscriptionCancelled)
         .query(`
-          MERGE INTO ${GLOBAL_VARS.TABLE_STRIPE_CLIENTS} AS target
+          MERGE INTO ${GLOBAL_VARS.TABLE_NEWS_SUBSCRIBED_CLIENTS} AS target
           USING (SELECT @email AS email) AS source
           ON target.email = source.email
           WHEN MATCHED THEN

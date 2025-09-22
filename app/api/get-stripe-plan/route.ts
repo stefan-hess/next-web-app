@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     const conn = await getDbConnection()
     const request = conn.request()
     const result = await request.input("email", email).query(`
-      SELECT stripe_plan, subscription_cancelled FROM ${GLOBAL_VARS.TABLE_STRIPE_CLIENTS} WHERE email = @email
+  SELECT stripe_plan, subscription_cancelled FROM ${GLOBAL_VARS.TABLE_NEWS_SUBSCRIBED_CLIENTS} WHERE email = @email
     `)
     const row = result.recordset[0]
     if (!row || row.subscription_cancelled === true) {
