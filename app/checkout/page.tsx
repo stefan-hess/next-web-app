@@ -12,7 +12,7 @@ const PRICES = [
     amount: 4.99,
     description: "Follow 10 Stocks",
     features: [
-      "Business developments",
+      "Business developments of the month",
       "Latest SEC filings for quarterly and annual financial data",
       "Latest SEC filings for insider transactions",
       "News update sent directly to your email inbox",
@@ -24,7 +24,7 @@ const PRICES = [
     amount: 8.99,
     description: "Follow 20 Stocks",
     features: [
-      "Business developments",
+      "Business developments of the month",
       "Latest SEC filings for quarterly and annual financial data",
       "Latest SEC filings for insider transactions",
       "News update sent directly to your email inbox",
