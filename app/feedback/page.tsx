@@ -36,7 +36,7 @@ export default function FeedbackPage() {
       <div className="mt-16 w-full max-w-md rounded-xl bg-white p-8 shadow-xl">
         <h1 className="mb-4 text-center text-3xl font-bold text-indigo-800">Feedback</h1>
         <p className="mb-8 text-center text-gray-700">
-          We value your feedback! Please let us know your thoughts below, what features you might like or what improvement points you see in our website or product. Cheers!
+          We value your feedback! Please let us know your thoughts below, what features you might like or what improvement points you see in our website or product.
         </p>
         {message && <div className="mb-4 text-center font-semibold text-green-600">{message}</div>}
         <form onSubmit={handleSubmit} className="space-y-6">

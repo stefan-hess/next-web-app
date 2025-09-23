@@ -6,8 +6,30 @@ import { loadStripe } from "@stripe/stripe-js"
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 const PRICES = [
-  { id: "price_1S58CGI8pTUJRz6FyikGu4R7", name: "Munger", amount: 4.99, description: "Follow 10 Stocks" },
-  { id: "price_1S58CtI8pTUJRz6FSh35gDnU", name: "Buffett", amount: 8.99, description: "Follow 20 Stocks" },
+  {
+    id: "price_1S58CGI8pTUJRz6FyikGu4R7",
+    name: "Munger",
+    amount: 4.99,
+    description: "Follow 10 Stocks",
+    features: [
+      "Business developments",
+      "Latest SEC filings for quarterly and annual financial data",
+      "Latest SEC filings for insider transactions",
+      "News update sent directly to your email inbox",
+    ],
+  },
+  {
+    id: "price_1S58CtI8pTUJRz6FSh35gDnU",
+    name: "Buffett",
+    amount: 8.99,
+    description: "Follow 20 Stocks",
+    features: [
+      "Business developments",
+      "Latest SEC filings for quarterly and annual financial data",
+      "Latest SEC filings for insider transactions",
+      "News update sent directly to your email inbox",
+    ],
+  },
   { id: "price_enterprise", name: "Enterprise", amount: "Contact for quote", description: "For funds, small research shops, teams" },
 ];
 
@@ -81,9 +103,16 @@ export default function CheckoutPage() {
               <div>
                 <h2 className="text-2xl font-semibold mb-2">{plan.name}</h2>
                 <p className={plan.id === "price_enterprise" ? "text-gray-600 mb-4 text-xs" : "text-gray-600 mb-4"}>{plan.description}</p>
-                <p className="text-3xl font-bold mb-2">{plan.id === "price_enterprise" ? "Individual" : `$${plan.amount}/mo`}</p>
+                {plan.features && plan.features.length > 0 && (
+                  <ul className="mb-4 list-disc list-inside text-[10px] text-gray-700">
+                    {plan.features.map((f, i) => (
+                      <li key={i}>{f}</li>
+                    ))}
+                  </ul>
+                )}
+                <p className="text-xl font-bold mb-2">{plan.id === "price_enterprise" ? "Individual pricing and features" : `$${plan.amount}/mo`}</p>
                 {plan.id !== "price_enterprise" && (
-                  <p className="mb-6 text-xs text-gray-500">You will be charged for the first time the following month.</p>
+                  <p className="mb-6 text-[10px] text-gray-500">Charged for the first time the following month.</p>
                 )}
               </div>
               {plan.id === "price_enterprise" ? (
