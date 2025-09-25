@@ -39,8 +39,8 @@ export async function POST(req: Request) {
       mode: "subscription",
       payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
-  success_url: `${BASE_URL}/payment-success`,
-      cancel_url: `${BASE_URL}/checkout`,
+  success_url: `www.stock-ticker-news.com/payment-success`,
+      cancel_url: `www.stock-ticker-news.com`,
       customer_email: email,
       metadata: {
         email: email || "",

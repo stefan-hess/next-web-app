@@ -1,8 +1,8 @@
 export default function TermsPage() {
   return (
-    <main className="flex min-h-screen flex-col items-center bg-gradient-to-br from-blue-50 to-indigo-100">
+    <main className="flex min-h-screen flex-col items-center bg-[#fdf6ee]">
       <div className="mt-16 w-full max-w-2xl rounded-xl bg-white p-8 shadow-xl">
-        <h1 className="mb-4 text-center text-3xl font-bold text-indigo-800">Terms &amp; Conditions</h1>
+        <h1 className="mb-4 text-center text-3xl font-bold text-black">Terms &amp; Conditions</h1>
         <div className="text-gray-800 text-sm">
           <p className="mb-2 text-right text-xs text-gray-500">Last updated: September 4 2025</p>
           <p className="mb-4">Welcome to StockTickerNews (“we,” “our,” “us”). These Terms and Conditions (“Terms”) govern your use of our stock ticker newsletter service (the “Service”). By subscribing to or using the Service, you agree to be bound by these Terms. If you do not agree, please do not use the Service.</p>
@@ -76,13 +76,11 @@ export default function TermsPage() {
             </li>
             <li>
               <strong>Governing Law</strong><br />
-              These Terms shall be governed by and construed in accordance with the laws of [Insert Jurisdiction], without regard to its conflict of laws principles.
+              These Terms shall be governed by and construed in accordance with the laws of Switzerland, without regard to its conflict of laws principles.
             </li>
             <li>
               <strong>Contact Us</strong><br />
-              If you have questions about these Terms, please contact us at:<br />
-              StockTickerNews<br />
-              [Your Contact Email]
+              If you have questions about these Terms, please contact us at: info@stocktickernews.com
             </li>
           </ol>
         </div>

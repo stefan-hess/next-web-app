@@ -122,5 +122,57 @@ export async function POST(req: Request) {
     }
   }
 
+// Handle subscription lifecycle events to keep DB in sync
+try {
+  if (
+    event.type === "customer.subscription.deleted" ||
+    event.type === "customer.subscription.updated"
+  ) {
+    const subscription = event.data.object as Stripe.Subscription;
+    const stripeSubscriptionId = subscription.id;
+    const status = subscription.status; // e.g., 'canceled', 'active', 'incomplete'
+
+    // Decide if the subscription is considered cancelled
+    const isCancelled =
+      status === "canceled" || status === "incomplete_expired" ? 1 : 0;
+
+    try {
+      const conn = await getDbConnection();
+      const req = conn.request();
+
+      await req
+        .input("stripe_subscription_id", stripeSubscriptionId)
+        .input("subscription_cancelled", isCancelled)
+        .query(`
+          UPDATE ${GLOBAL_VARS.TABLE_NEWS_SUBSCRIBED_CLIENTS}
+          SET subscription_cancelled = @subscription_cancelled,
+              updated_at = GETDATE()
+          WHERE stripe_subscription_id = @stripe_subscription_id
+        `);
+
+      console.log(
+        `Updated subscription state for ${stripeSubscriptionId}: cancelled=${isCancelled}`
+      );
+    } catch (dbErr) {
+      console.error(
+        "Failed to update subscription state in DB from webhook:",
+        dbErr
+      );
+
+      // **Return a 500 so Stripe retries the webhook**
+      return NextResponse.json(
+        { error: "Database update failed" },
+        { status: 500 }
+      );
+    }
+  }
+} catch (e) {
+  console.error("Error processing subscription webhook:", e);
+  return NextResponse.json(
+    { error: "Unhandled error processing webhook" },
+    { status: 500 }
+  );
+}
+
   return NextResponse.json({ received: true })
 }

@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
+import Header_Variation from "components/sections/Header_Variation"
 
 export default function UnsubscribePage() {
   const [email, setEmail] = useState("")
@@ -27,11 +28,13 @@ export default function UnsubscribePage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="mt-16 w-full max-w-md rounded-xl bg-white p-8 shadow-xl">
+    <>
+    <Header_Variation />
+  <main className="flex min-h-screen flex-col items-center bg-[#fdf6ee]">
+  <div className="mt-16 w-full max-w-md rounded-xl bg-[#fdf6ee] p-8 shadow-xl">
         <h1 className="mb-4 text-center text-3xl font-bold text-indigo-800">Unsubscribe</h1>
         <p className="mb-8 text-center text-gray-700">
-          Enter your email address below to unsubscribe from the StockTickerNews newsletter.
+          Sorry to see you go! Enter your email address below to unsubscribe from the StockTickerNews product. You will no longer be charged.
         </p>
         {message && <div className="mb-4 text-center font-semibold text-red-600">{message}</div>}
         <form onSubmit={handleUnsubscribe} className="space-y-6">
@@ -54,5 +57,6 @@ export default function UnsubscribePage() {
         </form>
       </div>
     </main>
+    </>
   )
 }

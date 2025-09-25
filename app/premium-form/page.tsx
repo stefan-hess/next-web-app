@@ -1,5 +1,6 @@
 "use client"
 import React, { useState } from "react"
+import HeaderVariation from "components/sections/Header_Variation" 
 
 // Copy of the standard form, but with maxTickers set to 20 for premium users
 
@@ -114,11 +115,13 @@ export default function PremiumFormSection() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="mt-16 w-full max-w-2xl rounded-xl bg-white p-8 shadow-xl">
+    <>
+      <HeaderVariation />
+      <main className="flex min-h-screen flex-col items-center bg-[#fdf6ee]">
+  <div className="mt-16 w-full max-w-2xl rounded-xl bg-[#fdf6ee] p-8 shadow-xl text-black">
         <h1 className="mb-4 text-center text-4xl font-bold text-indigo-800">StockTickerNews Premium</h1>
         <p className="mb-8 text-center text-gray-700">
-          Update your current selection, if you already have a premium subscription! Simply resubmit the full list of tickers to update your current one.
+          Update your current selection, if you already have a premium subscription! Simply resubmit the full list of tickers you want to update your current one.
         </p>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 gap-6">
@@ -126,7 +129,7 @@ export default function PremiumFormSection() {
               <label className="block text-sm font-medium text-gray-700">Email</label>
               <input
                 type="email"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-md border border-black bg-[#fdf6ee] shadow-sm focus:border-black focus:ring-black"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 onBlur={handleEmailBlur}
@@ -134,17 +137,17 @@ export default function PremiumFormSection() {
               />
               {/* Plan check message below email input */}
               {plan === null && !planError && email && (
-                <div className="text-gray-500 text-sm mt-1">Enter your email to check your premium plan and unlock ticker selection.</div>
+                <div className="text-gray-500 text-sm mt-1">Checking your premium plan and unlock ticker selection...</div>
               )}
               {planError && <div className="text-red-500 text-sm mt-1">{planError}</div>}
-              {plan === "Buffett" && <div className="text-green-600 text-sm mt-1">Buffett plan detected: you can select up to 20 companies.</div>}
-              {plan === "Munger" && <div className="text-green-600 text-sm mt-1">Munger plan detected: you can select up to 10 companies.</div>}
+              {plan === "Buffett" && <div className="text-black text-sm mt-1">Buffett plan detected: select up to 20 companies.</div>}
+              {plan === "Munger" && <div className="text-black text-sm mt-1">Munger plan detected: select up to 10 companies.</div>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Search Tickers</label>
               <input
                 type="text"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-md border border-black bg-[#fdf6ee] shadow-sm focus:border-black focus:ring-black px-3 py-2 text-sm"
                 placeholder="Type to search company name or ticker symbol..."
                 value={search}
                 onChange={(e) => handleSearch(e.target.value)}
@@ -152,9 +155,9 @@ export default function PremiumFormSection() {
               {searching && (
                 <div className="flex items-center gap-2 mt-2">
                   <span className="relative flex h-6 w-6">
-                    <span className="animate-spin inline-block w-full h-full border-4 border-indigo-300 border-t-indigo-600 rounded-full"></span>
+                    <span className="animate-spin inline-block w-full h-full border-4 border-black border-t-black rounded-full"></span>
                   </span>
-                  <span className="text-indigo-600 font-medium">Searching...</span>
+                  <span className="text-black font-medium">Searching...</span>
                 </div>
               )}
               {searchResults.length > 0 && !searching && (
@@ -190,26 +193,6 @@ export default function PremiumFormSection() {
                     </button>
                   </span>
                 ))}
-              </div>
-              {showMaxTickersPopup && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                  <div className="rounded-2xl bg-white/90 p-8 shadow-2xl max-w-sm w-full transform transition-all">
-                    <p className="mb-6 text-center text-xl font-semibold text-black">
-                      {plan === "Buffett"
-                        ? "With the Buffett plan, you can select a maximum of 50 tickers."
-                        : "With the Munger plan, you can select a maximum of 20 tickers."}
-                    </p>
-                    <button
-                      onClick={() => setShowMaxTickersPopup(false)}
-                      className="mx-auto block w-full rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-6 py-3
-                        text-white font-bold shadow-lg transition-all duration-300
-                        hover:scale-105 hover:shadow-2xl active:scale-95"
-                    >
-                      OK
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
           <div className="mt-4 flex items-center">
@@ -227,7 +210,7 @@ export default function PremiumFormSection() {
           </div>
           <button
             type="submit"
-            className="w-full rounded-xl bg-gradient-to-r from-blue-600 via-blue-200 to-blue-400 px-6 py-3 font-semibold text-black shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full rounded-xl border border-black bg-[#fdf6ee] px-6 py-3 font-semibold text-black shadow transition-all duration-200 hover:shadow-lg hover:scale-105 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
             disabled={!agreedToTerms}
           >
             Submit
@@ -235,13 +218,13 @@ export default function PremiumFormSection() {
           <div className="mt-6 flex justify-center gap-4">
             <a
               href="/feedback"
-              className="inline-block rounded-md bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-6 py-3 font-semibold text-white shadow-lg transition hover:scale-105 hover:shadow-2xl active:scale-95"
+              className="inline-block rounded-md border border-black bg-[#fdf6ee] px-6 py-3 font-semibold text-black shadow-lg transition hover:bg-blue-100 hover:text-blue-700 hover:scale-105 hover:shadow-2xl active:scale-95"
             >
               Leave Feedback
             </a>
             <a
               href="/unsubscribe"
-              className="inline-block rounded-md bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-6 py-3 font-semibold text-white shadow-lg transition hover:scale-105 hover:shadow-2xl active:scale-95"
+              className="inline-block rounded-md border border-black bg-[#fdf6ee] px-6 py-3 font-semibold text-black shadow-lg transition hover:bg-blue-100 hover:text-blue-700 hover:scale-105 hover:shadow-2xl active:scale-95"
             >
               Unsubscribe
             </a>
@@ -268,8 +251,10 @@ export default function PremiumFormSection() {
           {message && message !== "Your selection has been updated successfully!" && (
             <div className="alert alert-info mt-4">{message}</div>
           )}
-        </form>
+  </div>
+  </form>
       </div>
-    </main>
+      </main>
+    </>
   )
 }

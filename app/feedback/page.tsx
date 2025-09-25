@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
+import Header_Variation from "components/sections/Header_Variation"
 
 export default function FeedbackPage() {
   const [email, setEmail] = useState("")
@@ -32,11 +33,13 @@ export default function FeedbackPage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="mt-16 w-full max-w-md rounded-xl bg-white p-8 shadow-xl">
+    <>    
+    <Header_Variation />
+  <main className="flex min-h-screen flex-col items-center bg-[#fdf6ee]">
+      <div className="mt-16 w-full max-w-md rounded-xl bg-[#fdf6ee] p-8 shadow-xl">
         <h1 className="mb-4 text-center text-3xl font-bold text-indigo-800">Feedback</h1>
         <p className="mb-8 text-center text-gray-700">
-          We value your feedback! Please let us know your thoughts below, what features you might like or what improvement points you see in our website or product.
+          We value your feedback! Please let us know your thoughts below, what features you might like or what improvement points you see in our product.
         </p>
         {message && <div className="mb-4 text-center font-semibold text-green-600">{message}</div>}
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -44,7 +47,7 @@ export default function FeedbackPage() {
             <label className="block text-sm font-medium text-gray-700">Email</label>
             <input
               type="email"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              className="mt-1 block w-full rounded-md border-black bg-[#fdf6ee] shadow-sm focus:border-black focus:ring-black"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -53,7 +56,7 @@ export default function FeedbackPage() {
           <div>
             <label className="block text-sm font-medium text-gray-700">Your Feedback</label>
             <textarea
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              className="mt-1 block w-full rounded-md border-black bg-[#fdf6ee] shadow-sm focus:border-black focus:ring-black"
               rows={4}
               placeholder="Enter your feedback here..."
               value={feedback}
@@ -70,5 +73,6 @@ export default function FeedbackPage() {
         </form>
       </div>
     </main>
+    </>
   )
 }
