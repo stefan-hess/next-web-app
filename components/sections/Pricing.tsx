@@ -178,8 +178,7 @@ const PricingSection = () => {
             🎉 Limited Offer: <span className="font-bold">50% OFF</span> on all plans!
           </div>
           <h2 className="text-3xl lg:text-5xl font-bold text-foreground">
-            Choose Your 
-            <span className="bg-gradient-primary bg-clip-text text-blue-600"> Investment Plan</span>
+            Choose Your Investment Plan
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Start with our free trial and upgrade to unlock more stocks and advanced features. 
