@@ -1,8 +1,8 @@
 
 import { NextRequest, NextResponse } from "next/server"
-import { getDbConnection } from "../../lib/db"
 import Stripe from "stripe"
 import { GLOBAL_VARS } from "globalVars"
+import { getDbConnection } from "../../lib/db"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: GLOBAL_VARS.STRIPE_API_VERSION as "2025-08-27.basil" })
 

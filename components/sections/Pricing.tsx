@@ -1,8 +1,8 @@
 "use client"
+import { Check } from "lucide-react";
 import React from "react";
 import { Button } from "components/ui/Button/Button_new";
 import { Card, CardContent, CardHeader } from "components/ui/card";
-import { Check, Star } from "lucide-react";
 
 const plans = [
   {
@@ -160,9 +160,13 @@ const PricingSection = () => {
         return;
       }
       await stripe.redirectToCheckout({ sessionId: data.id });
-    } catch (err: any) {
-      setFormError(err.message || "An error occurred. Please try again.");
-      setIsLoading(false);
+    } catch (err: unknown) {
+  if (err instanceof Error) {
+    setFormError(err.message || "An error occurred. Please try again.");
+    } else {
+    setFormError("An error occurred. Please try again.");
+    }
+    setIsLoading(false);
     }
   };
 

@@ -1,5 +1,6 @@
-import { Button } from "components/ui/Button/Button_new";
 import { ArrowRight, BarChart3 } from "lucide-react";
+import Image from "next/image";
+import { Button } from "components/ui/Button/Button_new";
 
 const HeroSection = () => {
   return (
@@ -69,11 +70,13 @@ const HeroSection = () => {
               <div className="w-full h-full rounded-full bg-gradient-to-bl from-red-400 via-blue-300 to-blue-400 opacity-60 blur-3xl animate-[blob2_22s_ease-in-out_infinite]" />
             </div>
             <div className="relative z-10 h-[420px] w-screen lg:w-[50vw] overflow-hidden rounded-none">
-              <img
-                src="/assets/Hero_image.jpg"
-                alt="Financial dashboard showing stock charts and market data"
-                className="absolute left-0 top-0 h-full w-full object-cover shadow-card"
-                style={{ objectPosition: "left center" }}
+              <Image
+              src="/assets/Hero_image.jpg"
+              alt="Financial dashboard showing stock charts and market data"
+              fill
+              className="absolute left-0 top-0 h-full w-full object-cover shadow-card"
+              style={{ objectPosition: "left center" }}
+              priority
               />
             </div>
             <div className="absolute -inset-4 bg-gradient-primary opacity-20 blur-3xl rounded-full pointer-events-none"></div>

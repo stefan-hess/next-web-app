@@ -1,7 +1,7 @@
 "use client";
-import { useEffect, useRef, useState, RefObject } from "react";
-import { Button } from "components/ui/Button/Button_new";
-import { TrendingUp, Menu, ChartColumn } from "lucide-react";
+import { ChartColumn } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 
 const NAV_ITEMS = [
   { id: "features", label: "Features" },
@@ -13,7 +13,7 @@ const NAV_ITEMS = [
 const Header = () => {
 
   const [activeSection, setActiveSection] = useState<string>("features");
-  const [hovered, setHovered] = useState<string | null>(null);
+  const [hovered, _setHovered] = useState<string | null>(null);
   const navRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
   const blobRef = useRef<HTMLDivElement | null>(null);
 
@@ -58,12 +58,10 @@ const Header = () => {
     <header className="border-b border-border bg-[#fdf6ee] sticky top-0 z-50 overflow-hidden">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-          <a href="/" className="flex items-center space-x-2 group focus:outline-none">
-            <ChartColumn className="h-8 w-8 text-financial-primary group-hover:scale-110 transition-transform" />
-            <span className="text-xl font-bold text-foreground group-hover:text-financial-primary transition-colors">StockTickerNews</span>
-          </a>
-          {/* No nav or buttons for non-landing pages */}
-          {/* No action buttons for non-landing pages */}
+          <Link href="/" className="flex items-center space-x-2 group focus:outline-none">
+          <ChartColumn className="h-8 w-8 text-financial-primary group-hover:scale-110 transition-transform" />
+          <span className="text-xl font-bold text-foreground group-hover:text-financial-primary transition-colors">StockTickerNews</span>
+          </Link>
         </div>
       </div>
       <style>{`

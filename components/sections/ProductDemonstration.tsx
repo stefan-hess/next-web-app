@@ -1,3 +1,4 @@
+import Image from "next/image";
 import React from "react";
 
 const demoProducts = [
@@ -51,10 +52,13 @@ const ProductDemonstration = () => {
 											 <div className="pointer-events-none absolute bottom-0 left-0 w-full h-10" style={{background: 'linear-gradient(to bottom, rgba(253,246,238,0) 0%, rgba(253,246,238,0.9) 80%, #fdf6ee 100%)'}} />
 										 </div>
 												<div className="mb-4">
-														<img
+														<Image
 																 src={product.image}
 																 alt={product.title}
+																 width={400}
+																 height={200}
 																 className="w-full h-100 object-contain rounded-lg shadow border border-black/10 bg-white/60"
+																 style={{ objectFit: 'contain' }}
 														/>
 												</div>
 												{/* Insider tables below image, as siblings */}

@@ -1,5 +1,5 @@
+import { BarChart3, Building2, Clock, Shield, TrendingUp, UserCheck } from "lucide-react";
 import { Card, CardContent } from "components/ui/card";
-import { TrendingUp, Building2, UserCheck, BarChart3, Clock, Shield } from "lucide-react";
 
 const features = [
   {

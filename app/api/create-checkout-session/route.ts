@@ -16,7 +16,7 @@ function getStripe(): Stripe {
   return stripe;
 }
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL?.startsWith("http")
+const _BASE_URL = process.env.NEXT_PUBLIC_BASE_URL?.startsWith("http")
   ? process.env.NEXT_PUBLIC_BASE_URL
   : "http://localhost:3000";
 

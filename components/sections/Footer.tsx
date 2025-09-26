@@ -1,4 +1,4 @@
-import { TrendingUp, ChartColumn } from "lucide-react";
+import { ChartColumn } from "lucide-react";
 
 const Footer = () => {
   return (

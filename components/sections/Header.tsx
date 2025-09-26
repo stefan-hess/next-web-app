@@ -1,7 +1,7 @@
 "use client";
-import { useEffect, useRef, useState, RefObject } from "react";
+import { ChartColumn, Menu } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "components/ui/Button/Button_new";
-import { TrendingUp, Menu, ChartColumn} from "lucide-react";
 
 const NAV_ITEMS = [
   { id: "features", label: "Features" },

@@ -1,6 +1,7 @@
 "use client"
-import React, { useState } from "react"
+
 import { loadStripe } from "@stripe/stripe-js"
+import React, { useState } from "react"
 
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
@@ -79,8 +80,8 @@ export default function CheckoutPage() {
       } else {
         setFormError(data.error || "Failed to start checkout.");
       }
-    } catch (err) {
-      setFormError("Failed to start checkout.");
+    } catch {
+    setFormError("Failed to start checkout.");
     }
     setIsLoading(false);
   };

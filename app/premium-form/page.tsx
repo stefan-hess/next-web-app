@@ -16,7 +16,7 @@ export default function PremiumFormSection() {
   const [searching, setSearching] = useState(false)
   const [selectedTickers, setSelectedTickers] = useState<Ticker[]>([])
   const [message, setMessage] = useState<string | null>(null)
-  const [showMaxTickersPopup, setShowMaxTickersPopup] = useState(false)
+  const [_showMaxTickersPopup, setShowMaxTickersPopup] = useState(false)
   const [plan, setPlan] = useState<PlanType>(null)
   const [planError, setPlanError] = useState<string | null>(null)
   const [agreedToTerms, setAgreedToTerms] = useState(false)

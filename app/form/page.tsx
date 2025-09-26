@@ -12,7 +12,7 @@ export default function FormSection() {
   const [searchResults, setSearchResults] = useState<Ticker[]>([])
   const [selectedTickers, setSelectedTickers] = useState<Ticker[]>([])
   const [message, setMessage] = useState<string | null>(null)
-  const [showMaxTickersPopup, setShowMaxTickersPopup] = useState(false)
+  const [_showMaxTickersPopup, setShowMaxTickersPopup] = useState(false)
   const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [searching, setSearching] = useState(false)
   const maxTickers = 2

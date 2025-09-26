@@ -1,19 +1,19 @@
 import { Metadata } from "next";
-import Header from "components/sections/Header";
-import Hero from "components/sections/HeroSection";
-import FeaturesSection from "components/sections/FeaturesSection";
-import Pricing from "components/sections/Pricing";
-import ProductDemo from "components/sections/ProductDemonstration";
-import Footer from "components/sections/Footer";
 import AboutUs from "components/sections/AboutUs";
 import ContactUs from "components/sections/ContactUs";
+import FeaturesSection from "components/sections/FeaturesSection";
+import Footer from "components/sections/Footer";
+import Header from "components/sections/Header";
+import Hero from "components/sections/HeroSection";
+import Pricing from "components/sections/Pricing";
+import ProductDemo from "components/sections/ProductDemonstration";
 
 export const metadata: Metadata = {
   title: "Stock-Ticker-News",
 };
 
 export default function Home() {
-  const demoNews = [
+  const _demoNews = [
     {
       ticker: "AAPL",
       headline: "In the past month, Apple Inc. has been making headlines with key developments in the AI space and strategic moves. Gene Munster, managing partner at Deepwater Asset Management, highlighted the potential for Apple to boost its AI growth with the introduction of its AI-powered search tool, World Knowledge Answers, integrated into Siri by 2026. This development could impact business dynamics like revenue streams and partnerships with Google. Despite recent advancements, Apple's stock performance has not been the strongest among the top stocks this year, based on insights from Benzinga Pro. Analysts like Munster and Dan Ives have shared their views on Apple's AI strategy and potential acquisitions, signaling both opportunities and challenges for the tech giant.On the earnings front, some market analysts like Jim Cramer have shown continued interest in Apple despite its recent performance, emphasizing the company's resilience and potential for growth. Recent legal wins and operational improvements have boosted confidence in Apple's outlook, with a positive ruling on its partnership with Google bolstering its position in the market. As Apple gears up for the iPhone 17 launch, industry experts like Daniel Newman have raised concerns about the company's innovation strategy, calling for more disruptive advancements rather than predictable upgrades.Looking ahead, Apple faces high expectations surrounding its upcoming product launches and strategic decisions, particularly in the AI and consumer tech sectors. Despite criticisms and challenges, Apple's stock trends indicate positivity across various time frames, reflecting ongoing investor interest and market momentum. With competition in the AI space intensifying, Apple aims to maintain its position as a leading player in the tech industry while navigating evolving market demands and investor expectations.",
