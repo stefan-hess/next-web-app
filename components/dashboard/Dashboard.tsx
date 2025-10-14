@@ -22,6 +22,8 @@ export const Dashboard = () => {
   const [activeTicker, setActiveTicker] = useState("");
   const [marketCap, setMarketCap] = useState<string>("");
   const [marketCapCurrency, setMarketCapCurrency] = useState<string>("");
+  const [commentariesSidebarOpen, setCommentariesSidebarOpen] = useState(false);
+
   // Helper for scaling market cap
   function autoScale(values: string[], currency: string) {
     const nums = values.map(v => {
@@ -140,6 +142,11 @@ export const Dashboard = () => {
     (t) => t.symbol === activeTicker
   );
 
+  // Handler to open commentaries sidebar
+  const handleOpenCommentariesSidebar = () => {
+    setCommentariesSidebarOpen(true);
+  };
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex flex-col w-full bg-dashboard-bg">
@@ -147,6 +154,7 @@ export const Dashboard = () => {
           ticker={currentTicker}
           marketCap={marketCap}
           marketCapCurrency={marketCapCurrency}
+          onOpenCommentariesSidebar={handleOpenCommentariesSidebar}
         />
         <div className="flex flex-1">
           <DashboardSidebar
@@ -158,16 +166,16 @@ export const Dashboard = () => {
             email={userEmail}
           />
           <main className="flex-1 p-6">
-            {selectedTickers.length === 0 ? (
-              <GetStarted onAddTicker={addTicker} />
+            {currentTicker ? (
+              <MainDashboard
+                ticker={currentTicker}
+                marketCap={marketCap}
+                marketCapCurrency={marketCapCurrency}
+                commentariesSidebarOpen={commentariesSidebarOpen}
+                setCommentariesSidebarOpen={setCommentariesSidebarOpen}
+              />
             ) : (
-              currentTicker && (
-                <MainDashboard 
-                  ticker={currentTicker} 
-                  marketCap={marketCap} 
-                  marketCapCurrency={marketCapCurrency} 
-                />
-              )
+              <GetStarted onAddTicker={addTicker} />
             )}
           </main>
         </div>

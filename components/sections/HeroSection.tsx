@@ -21,11 +21,11 @@ const HeroSection = () => {
               <h1 className="text-4xl lg:text-6xl font-bold text-foreground leading-tight">
                 Stay updated with
                 <span className="relative inline-block">
-                  <span className="bg-gradient-primary bg-clip-text text-blue-600">
+                  <span className="bg-gradient-primary bg-clip-text text-blue-800">
                     {" "}
                     Fundamental
                   </span>
-                  <span className="block h-1 w-3/4 bg-blue-600 rounded-full mt-1 mx-auto"></span>
+                  <span className="block h-1 w-3/4 bg-blue-800 rounded-full mt-1 mx-auto"></span>
                 </span>{" "}
                 Stock Insights
               </h1>

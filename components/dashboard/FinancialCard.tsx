@@ -64,11 +64,16 @@ export const FinancialCard: React.FC<FinancialCardProps> = ({ category, isExpand
   // Collect all keys from all periods
   const allKeys: string[] = Array.from(
     new Set(category.data.flatMap((period: Record<string, string>) => Object.keys(period)))
-  ).filter(key => key !== "reportedCurrency" && key !== "fiscalDateEnding");
+  ).filter(key => key !== "reportedCurrency" && key !== "fiscalDateEnding" && key !== "date");
 
-  // Get period labels (dates), slice to 5 if minimized, 10 if expanded
+  // Get period labels (dates), slice to 5 if minimized, 10 if expanded, and reverse for oldest left
   const maxPeriods = isExpanded ? 10 : 3;
-  const periodLabels: string[] = category.data.map((period: Record<string, string>) => period.fiscalDateEnding || "").slice(0, maxPeriods);
+  // Use 'date' for shares outstanding, 'fiscalDateEnding' for others
+  const periodLabels: string[] = (category.id === "shares-outstanding"
+    ? category.data.map((period: Record<string, string>) => period.date || "")
+    : category.data.map((period: Record<string, string>) => period.fiscalDateEnding || ""))
+    .slice(0, maxPeriods)
+    .reverse();
 
   // For each metric, compute scale and label (use only displayed periods)
   const metricScales: Record<string, { scale: number; label: string }> = {};
@@ -135,19 +140,19 @@ export const FinancialCard: React.FC<FinancialCardProps> = ({ category, isExpand
                     <td className="py-2 border-b border-border/50 text-muted-foreground font-medium">
                       {formatLabel(key)}
                     </td>
-                    {category.data.slice(0, maxPeriods).map((period, idx) => {
-                            const raw = period[key] || "";
-                            const scale = metricScales[key]?.scale ?? 1;
-                            let num = Number(raw.replace(/,/g, ""));
-                            let display = raw;
-                            if (!isNaN(num) && scale !== 1 && raw !== "") {
-                              display = (num / scale).toLocaleString(undefined, { maximumFractionDigits: 2 });
-                            }
-                            return (
-                              <td key={idx} className="py-2 border-b border-border/50 text-right font-semibold text-foreground">
-                                {display}
-                              </td>
-                            );
+                    {[...category.data.slice(0, maxPeriods)].reverse().map((period, idx) => {
+                      const raw = period[key] || "";
+                      const scale = metricScales[key]?.scale ?? 1;
+                      let num = Number(raw.replace(/,/g, ""));
+                      let display = raw;
+                      if (!isNaN(num) && scale !== 1 && raw !== "") {
+                        display = (num / scale).toLocaleString(undefined, { maximumFractionDigits: 2 });
+                      }
+                      return (
+                        <td key={idx} className="py-2 border-b border-border/50 text-right font-semibold text-foreground">
+                          {display}
+                        </td>
+                      );
                     })}
                   </tr>
                 ))}
@@ -156,27 +161,59 @@ export const FinancialCard: React.FC<FinancialCardProps> = ({ category, isExpand
           ) : (
             // Chart view: show first metric as timeseries
             (() => {
-              const metricKey = allKeys[0] ?? '';
-              if (!metricKey) return <div className="text-muted-foreground text-sm">No data for chart</div>;
-              const chartData = category.data.slice(0, maxPeriods).map((period: Record<string, string>) => {
-                const scale = metricScales[metricKey]?.scale ?? 1;
-                let num = Number((period[metricKey] || "0").replace(/,/g, ""));
-                if (!isNaN(num) && scale !== 1) num = num / scale;
-                return {
-                  date: period.fiscalDateEnding || '',
-                  value: isNaN(num) ? null : num,
-                };
+              if (allKeys.length === 0) return <div className="text-muted-foreground text-sm">No data for chart</div>;
+              // Show only 3 periods and reduce chart height if minimized
+              const chartPeriods = isExpanded ? maxPeriods : 3;
+              const chartHeight = isExpanded ? 220 : 120;
+              const chartData = category.data.slice(0, chartPeriods).map((period: Record<string, string>) => {
+                const obj: Record<string, any> =
+                  category.id === "shares-outstanding"
+                    ? { date: period.date || '' }
+                    : { date: period.fiscalDateEnding || '' };
+                allKeys.forEach((key) => {
+                  const scale = metricScales[key]?.scale ?? 1;
+                  let num = Number((period[key] || "0").replace(/,/g, ""));
+                  if (!isNaN(num) && scale !== 1) num = num / scale;
+                  obj[key] = isNaN(num) ? null : num;
+                });
+                return obj;
               });
+              // Reverse so oldest is on the left
+              const reversedChartData = [...chartData].reverse();
+              // Color palette for lines
+              const colors = ["#2563eb", "#059669", "#eab308", "#db2777", "#f97316", "#10b981", "#6366f1", "#f43f5e", "#a21caf", "#64748b"];
               return (
-                <ResponsiveContainer width="100%" height={220}>
-                  <LineChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 10 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-                    <YAxis tick={{ fontSize: 12 }} />
-                    <Tooltip formatter={(value: number) => value?.toLocaleString(undefined, { maximumFractionDigits: 2 })} />
-                    <Line type="monotone" dataKey="value" stroke="#2563eb" strokeWidth={2} dot={{ r: 3 }} />
-                  </LineChart>
-                </ResponsiveContainer>
+                <div>
+                  <ResponsiveContainer width="100%" height={chartHeight}>
+                    <LineChart data={reversedChartData} margin={{ top: 10, right: 20, left: 0, bottom: 10 }}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                      <YAxis tick={{ fontSize: 12 }} />
+                      <Tooltip formatter={(value: number, name: string) => [`${value?.toLocaleString(undefined, { maximumFractionDigits: 2 })}`, formatLabel(name)]} />
+                      {allKeys.map((key, idx) => (
+                        <Line
+                          key={key}
+                          type="monotone"
+                          dataKey={key}
+                          stroke={colors[idx % colors.length]}
+                          strokeWidth={2}
+                          dot={{ r: 3 }}
+                          name={formatLabel(key)}
+                          connectNulls
+                        />
+                      ))}
+                    </LineChart>
+                  </ResponsiveContainer>
+                  {/* Legend below chart */}
+                  <div className="flex flex-wrap gap-4 mt-3 justify-center">
+                    {allKeys.map((key, idx) => (
+                      <div key={key} className="flex items-center gap-2">
+                        <span style={{ background: colors[idx % colors.length], width: 16, height: 4, display: 'inline-block', borderRadius: 2 }}></span>
+                        <span className="text-xs text-muted-foreground">{formatLabel(key)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               );
             })()
           )}

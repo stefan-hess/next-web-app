@@ -43,9 +43,9 @@ export const GetStarted = ({ onAddTicker }: GetStartedProps) => {
           <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-primary flex items-center justify-center mb-6">
             <TrendingUp className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-4xl font-bold text-foreground">Welcome to Stock Ticker Fundamentals</h1>
+          <h1 className="text-4xl font-bold text-foreground">Welcome to Stock Ticker News</h1>
           <p className="text-xl text-muted-foreground max-w-lg mx-auto">
-            Analyze financial data, track performance, and make informed investment decisions with comprehensive fundamental analysis.
+            Analyze official financial data, track performance, and make informed investment decisions with comprehensive fundamental analysis.
           </p>
         </div>
 
@@ -145,8 +145,8 @@ export const GetStarted = ({ onAddTicker }: GetStartedProps) => {
               <div className="w-10 h-10 rounded-lg bg-success-light flex items-center justify-center">
                 <TrendingUp className="w-5 h-5 text-success" />
               </div>
-              <h3 className="font-semibold">Real-time Data</h3>
-              <p className="text-sm text-muted-foreground">Access up-to-date financial information and market data.</p>
+              <h3 className="font-semibold">Trusted Data</h3>
+              <p className="text-sm text-muted-foreground">Access latest official financial information and market data, powered by Alpha Vantage.</p>
             </div>
             <div className="space-y-2">
               <div className="w-10 h-10 rounded-lg bg-warning-light flex items-center justify-center">
@@ -160,7 +160,7 @@ export const GetStarted = ({ onAddTicker }: GetStartedProps) => {
                 <TrendingUp className="w-5 h-5 text-primary" />
               </div>
               <h3 className="font-semibold">Smart Insights</h3>
-              <p className="text-sm text-muted-foreground">Get intelligent analysis and investment recommendations.</p>
+              <p className="text-sm text-muted-foreground">Get intelligent analysis of performance metrics.</p>
             </div>
           </div>
         </div>

@@ -167,39 +167,17 @@ def fetch_balance_sheet_data(tickers):
             response.raise_for_status()
             data = response.json()
 
-            # Extract last quarters
+            # Extract last quarters and years (full extract, not filtered)
             quarterly = data.get("quarterlyReports", [])[:fetched_quarters]
-            quarterly_summary = [
-                {
-                    "fiscalDateEnding": q.get("fiscalDateEnding"),
-                    "reportedCurrency": q.get("reportedCurrency"),
-                    "totalAssets": q.get("totalAssets"),
-                    "totalLiabilities": q.get("totalLiabilities"),
-                    "totalShareholderEquity": q.get("totalShareholderEquity")
-                }
-                for q in quarterly
-            ]
-
-            # Extract last years
             annual = data.get("annualReports", [])[:fetched_years]
-            annual_summary = [
-                {
-                    "fiscalDateEnding": a.get("fiscalDateEnding"),
-                    "reportedCurrency": a.get("reportedCurrency"),
-                    "totalAssets": a.get("totalAssets"),
-                    "totalLiabilities": a.get("totalLiabilities"),
-                    "totalShareholderEquity": a.get("totalShareholderEquity")
-                }
-                for a in annual
-            ]
 
             balance_sheet_data[ticker] = {
-                "quarterly": quarterly_summary,
-                "annual": annual_summary
+                "quarterly": quarterly,
+                "annual": annual
             }
             # Log first few values for each ticker
-            logging.info(f"Balance sheet for {ticker} (annual, first 2): {annual_summary[:2]}")
-            logging.info(f"Balance sheet for {ticker} (quarterly, first 2): {quarterly_summary[:2]}")
+            logging.info(f"Balance sheet for {ticker} (annual, first 2): {annual[:2]}")
+            logging.info(f"Balance sheet for {ticker} (quarterly, first 2): {quarterly[:2]}")
         except Exception as e:
             logging.error(f"Error fetching balance sheet for {ticker}: {e}")
             balance_sheet_data[ticker] = None
@@ -223,38 +201,17 @@ def fetch_income_statement_data(tickers):
             response.raise_for_status()
             data = response.json()
 
-            # Extract last 4 quarters
+            # Extract last quarters and years (full extract, not filtered)
             quarterly = data.get("quarterlyReports", [])[:fetched_quarters]
-            quarterly_summary = [
-                {
-                    "fiscalDateEnding": q.get("fiscalDateEnding"),
-                    "reportedCurrency": q.get("reportedCurrency"),
-                    "totalRevenue": q.get("totalRevenue"),
-                    "costOfRevenue": q.get("costOfRevenue"),
-                    "ebitda": q.get("ebitda"),
-                    "netIncome": q.get("netIncome")
-                }
-                for q in quarterly
-            ]
-
-            # Extract last 5 years
             annual = data.get("annualReports", [])[:fetched_years]
-            annual_summary = [
-                {
-                    "fiscalDateEnding": a.get("fiscalDateEnding"),
-                    "reportedCurrency": a.get("reportedCurrency"),
-                    "totalRevenue": a.get("totalRevenue"),
-                    "costOfRevenue": a.get("costOfRevenue"),
-                    "ebitda": a.get("ebitda"),
-                    "netIncome": a.get("netIncome")
-                }
-                for a in annual
-            ]
 
             income_statement_data[ticker] = {
-                "quarterly": quarterly_summary,
-                "annual": annual_summary
+                "quarterly": quarterly,
+                "annual": annual
             }
+            # Log first few values for each ticker
+            logging.info(f"Income statement for {ticker} (annual, first 2): {annual[:2]}")
+            logging.info(f"Income statement for {ticker} (quarterly, first 2): {quarterly[:2]}")
         except Exception as e:
             logging.error(f"Error fetching income statement for {ticker}: {e}")
             income_statement_data[ticker] = None
@@ -280,36 +237,17 @@ def fetch_cashflow_data(tickers):
             response.raise_for_status()
             data = response.json()
 
-            # Extract last quarters
+            # Extract last quarters and years (full extract, not filtered)
             quarterly = data.get("quarterlyReports", [])[:fetched_quarters]
-            quarterly_summary = [
-                {
-                    "fiscalDateEnding": q.get("fiscalDateEnding"),
-                    "reportedCurrency": q.get("reportedCurrency"),
-                    "operatingCashflow": q.get("operatingCashflow"),
-                    "cashflowFromInvestment": q.get("cashflowFromInvestment"),
-                    "cashflowFromFinancing": q.get("cashflowFromFinancing")
-                }
-                for q in quarterly
-            ]
-
-            # Extract last years
             annual = data.get("annualReports", [])[:fetched_years]
-            annual_summary = [
-                {
-                    "fiscalDateEnding": a.get("fiscalDateEnding"),
-                    "reportedCurrency": a.get("reportedCurrency"),
-                    "operatingCashflow": a.get("operatingCashflow"),
-                    "cashflowFromInvestment": a.get("cashflowFromInvestment"),
-                    "cashflowFromFinancing": a.get("cashflowFromFinancing")
-                }
-                for a in annual
-            ]
 
             cashflow_data[ticker] = {
-                "quarterly": quarterly_summary,
-                "annual": annual_summary
+                "quarterly": quarterly,
+                "annual": annual
             }
+            # Log first few values for each ticker
+            logging.info(f"Cashflow for {ticker} (annual, first 2): {annual[:2]}")
+            logging.info(f"Cashflow for {ticker} (quarterly, first 2): {quarterly[:2]}")
         except Exception as e:
             logging.error(f"Error fetching cashflow for {ticker}: {e}")
             cashflow_data[ticker] = None
@@ -437,6 +375,105 @@ def prepare_fundamentals_data_for_plotting(balance_sheet, income_statement, cash
         }
     return plot_data
 
+def amend_fundamentals_with_kpis(df):
+
+    # df is a list of dicts (annual or quarterly reports)
+    kpi_reports = []
+    for report in df:
+        # Profitability KPIs
+        try:
+            report["gross_margin"] = float(report.get("grossProfit", "nan")) / float(report.get("totalRevenue", "nan"))
+        except:
+            report["gross_margin"] = None
+        try:
+            report["operating_margin"] = float(report.get("operatingIncome", "nan")) / float(report.get("totalRevenue", "nan"))
+        except:
+            report["operating_margin"] = None
+        try:
+            report["net_profit_margin"] = float(report.get("netIncome", "nan")) / float(report.get("totalRevenue", "nan"))
+        except:
+            report["net_profit_margin"] = None
+        try:
+            report["ebitda_margin"] = float(report.get("ebitda", "nan")) / float(report.get("totalRevenue", "nan"))
+        except:
+            report["ebitda_margin"] = None
+        try:
+            report["roa"] = float(report.get("netIncome", "nan")) / float(report.get("totalAssets", "nan"))
+        except:
+            report["roa"] = None
+        try:
+            report["roe"] = float(report.get("netIncome", "nan")) / float(report.get("totalShareholderEquity", "nan"))
+        except:
+            report["roe"] = None
+        try:
+            total_debt = float(report.get("shortTermDebt", "nan")) + float(report.get("longTermDebt", "nan"))
+            denominator = total_debt + float(report.get("totalShareholderEquity", "nan")) - float(report.get("cashAndCashEquivalentsAtCarryingValue", "nan"))
+            report["roic"] = float(report.get("ebit", "nan")) / denominator
+        except:
+            report["roic"] = None
+
+        # Liquidity & Efficiency KPIs
+        try:
+            report["current_ratio"] = float(report.get("totalCurrentAssets", "nan")) / float(report.get("totalCurrentLiabilities", "nan"))
+        except:
+            report["current_ratio"] = None
+        try:
+            quick_assets = float(report.get("cashAndCashEquivalentsAtCarryingValue", "nan")) + float(report.get("shortTermInvestments", "nan")) + float(report.get("currentNetReceivables", "nan"))
+            report["quick_ratio"] = quick_assets / float(report.get("totalCurrentLiabilities", "nan"))
+        except:
+            report["quick_ratio"] = None
+        try:
+            report["cash_ratio"] = float(report.get("cashAndCashEquivalentsAtCarryingValue", "nan")) / float(report.get("totalCurrentLiabilities", "nan"))
+        except:
+            report["cash_ratio"] = None
+        try:
+            report["working_capital"] = float(report.get("totalCurrentAssets", "nan")) - float(report.get("totalCurrentLiabilities", "nan"))
+        except:
+            report["working_capital"] = None
+        try:
+            report["inventory_turnover"] = float(report.get("costOfRevenue", "nan")) / float(report.get("inventory", "nan"))
+        except:
+            report["inventory_turnover"] = None
+        try:
+            report["receivables_turnover"] = float(report.get("totalRevenue", "nan")) / float(report.get("currentNetReceivables", "nan"))
+        except:
+            report["receivables_turnover"] = None
+        try:
+            report["asset_turnover"] = float(report.get("totalRevenue", "nan")) / float(report.get("totalAssets", "nan"))
+        except:
+            report["asset_turnover"] = None
+
+        # Risk KPIs
+        try:
+            report["debt_to_equity_ratio"] = float(report.get("totalLiabilities", "nan")) / float(report.get("totalShareholderEquity", "nan"))
+        except:
+            report["debt_to_equity_ratio"] = None
+        try:
+            report["debt_ratio"] = float(report.get("totalLiabilities", "nan")) / float(report.get("totalAssets", "nan"))
+        except:
+            report["debt_ratio"] = None
+        try:
+            report["interest_coverage_ratio"] = float(report.get("ebit", "nan")) / float(report.get("interestExpense", "nan"))
+        except:
+            report["interest_coverage_ratio"] = None
+        try:
+            report["equity_multiplier"] = float(report.get("totalAssets", "nan")) / float(report.get("totalShareholderEquity", "nan"))
+        except:
+            report["equity_multiplier"] = None
+
+        # Cashflow KPIs
+        try:
+            report["operating_cash_flow_margin"] = float(report.get("operatingCashflow", "nan")) / float(report.get("totalRevenue", "nan"))
+        except:
+            report["operating_cash_flow_margin"] = None
+        try:
+            report["free_cash_flow"] = float(report.get("operatingCashflow", "nan")) - float(report.get("capitalExpenditures", "nan"))
+        except:
+            report["free_cash_flow"] = None
+
+        kpi_reports.append(report)
+    return kpi_reports
+
 if __name__ == "__main__":
     import sys, json
     ticker = sys.argv[1]
@@ -445,5 +482,11 @@ if __name__ == "__main__":
     income_statement = fetch_income_statement_data([ticker])
     cashflow = fetch_cashflow_data([ticker])
     # Prepare the output
-    result = prepare_fundamentals_data_for_plotting(balance_sheet, income_statement, cashflow)
+    df = prepare_fundamentals_data_for_plotting(balance_sheet, income_statement, cashflow)
+    result = {
+        ticker: {
+            "annual": amend_fundamentals_with_kpis(df[ticker]["annual"]),
+            "quarterly": amend_fundamentals_with_kpis(df[ticker]["quarterly"])
+        }
+    }
     print(json.dumps(result))

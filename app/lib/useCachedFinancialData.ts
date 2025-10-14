@@ -25,7 +25,7 @@ export function useCachedFinancialData(ticker: string) {
       return;
     }
     // Fetch from API
-    fetch(`/api/fundamentals_data?ticker=${encodeURIComponent(ticker)}`)
+    fetch(`/api/data/fundamentals_data?ticker=${encodeURIComponent(ticker)}`)
       .then(res => {
         if (!res.ok) throw new Error("API error");
         return res.json();
