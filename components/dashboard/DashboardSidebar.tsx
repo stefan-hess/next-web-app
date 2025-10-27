@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Search, Plus, X } from "lucide-react";
 import {
   Sidebar,
@@ -41,6 +42,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   onAddTicker,
   email,
 }) => {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [allowedTickers, setAllowedTickers] = useState<string[]>([]);
@@ -106,32 +108,35 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   }, [searchQuery]);
 
   const handleAddTicker = (ticker: Ticker) => {
-    // Prevent duplicate insert
-    if (email) {
-      supabase
-        .from("ticker_selection_clients")
-        .select("ticker")
-        .eq("email", email)
-        .eq("ticker", ticker.symbol)
-        .then(({ data, error }) => {
-          if (error) {
-            console.error("Error checking for existing ticker:", error);
-            return;
-          }
-          if (data && data.length > 0) {
-            console.warn("Ticker already exists for user, not inserting.");
-            return;
-          }
-          supabase
-            .from("ticker_selection_clients")
-            .insert([{ ticker: ticker.symbol, name: ticker.name, email }])
-            .then(({ error }) => {
-              if (error) {
-                console.error("Error inserting ticker into DB:", error);
-              }
-            });
-        });
+    // Redirect to login if user is not authenticated
+    if (!email) {
+      router.push("/login");
+      return;
     }
+    // Prevent duplicate insert
+    supabase
+      .from("ticker_selection_clients")
+      .select("ticker")
+      .eq("email", email)
+      .eq("ticker", ticker.symbol)
+      .then(({ data, error }) => {
+        if (error) {
+          console.error("Error checking for existing ticker:", error);
+          return;
+        }
+        if (data && data.length > 0) {
+          console.warn("Ticker already exists for user, not inserting.")
+          return;
+        }
+        supabase
+          .from("ticker_selection_clients")
+          .insert([{ ticker: ticker.symbol, name: ticker.name, email }])
+          .then(({ error }) => {
+            if (error) {
+              console.error("Error inserting ticker into DB:", error);
+            }
+          });
+      });
     onAddTicker(ticker);
     setIsAddDialogOpen(false);
     setSearchQuery("");
@@ -160,9 +165,23 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
     <Sidebar className="border-r border-border bg-sidebar">
       <SidebarHeader className="p-6 border-b border-border">
         <div className="h-16" />
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <Dialog
+          open={isAddDialogOpen}
+          onOpenChange={(open) => {
+            if (open && !email) {
+              // Redirect to login instead of opening the dialog
+              router.push("/login");
+              return;
+            }
+            setIsAddDialogOpen(open);
+          }}
+        >
           <DialogTrigger asChild>
-            <Button variant="outline" size="sm" className="mt-4 w-full">
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-4 w-full"
+            >
               <Plus className="w-4 h-4 mr-2" />
               Add Ticker
             </Button>

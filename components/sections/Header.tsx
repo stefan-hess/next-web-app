@@ -93,9 +93,9 @@ const Header = () => {
             ))}
           </nav>
           <div className="flex items-center space-x-4">
-            <a href="/premium-form">
+            <a href="/login">
               <Button variant="financial" size="sm">
-                Premium
+                Log In
               </Button>
             </a>
             <a href="#contactus">

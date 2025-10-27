@@ -524,7 +524,7 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
               </div>
             </>
           ) : (
-            <div className="p-8 text-center text-muted-foreground border rounded-lg">No recent developments found for this ticker.</div>
+            <div className="p-8 text-center text-muted-foreground border rounded-lg">Feature in Beta. No recent developments found for this ticker. Hold this ticker in your portfolio at month end to receive latest news.</div>
           )}
         </div>
       )}
@@ -610,8 +610,8 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
         </div>
       ) : mainComments && mainComments.length > 0 ? (
         <ul className="space-y-3">
-          {mainComments.map((post: any) => (
-            <li key={post.id}>
+          {mainComments.map((post: any, idx: number) => (
+            <li key={post?.id ?? `${post?.related_ticker ?? 't'}-${post?.post_title ?? 'untitled'}-${post?.created_at ?? 'ts'}-${idx}`}>
               <button
                 className="w-full text-left p-4 border rounded-lg bg-card hover:bg-muted/40 transition-colors shadow-sm"
                 onClick={() => {

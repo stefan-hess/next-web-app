@@ -1,6 +1,5 @@
-import { Bell, Settings, User, Search, BarChart3, FileText } from "lucide-react";
+import { Bell, Settings, User, BarChart3, FileText } from "lucide-react";
 import { Button } from "components/ui/Button/Button_new";
-import { Input } from "components/ui/input";
 import { supabase } from "app/lib/supabaseClient";
 import { useState } from "react";
 
@@ -39,13 +38,6 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ ticker, market
               StockTickerNews
             </h1>
           </div>
-        </div>
-        <div className="relative ml-[64px]">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input 
-            placeholder="Search tickers..." 
-            className="pl-10 w-80 h-9 bg-background"
-          />
         </div>
       </div>
 

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "components/ui/card";
 import { Input } from "components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "components/ui/dialog";
 import type { Ticker } from "./Dashboard";
-import { cn } from "app/lib/utils";
+// removed cn utility import since price/change display was removed
 
 interface GetStartedProps {
   onAddTicker: (ticker: Ticker) => void;
@@ -85,15 +85,7 @@ export const GetStarted = ({ onAddTicker }: GetStartedProps) => {
                             <div className="font-semibold text-sm">{ticker.symbol}</div>
                             <div className="text-xs text-muted-foreground truncate">{ticker.name}</div>
                           </div>
-                          <div className="text-right ml-4">
-                            <div className="font-medium text-sm">${ticker.price}</div>
-                            <div className={cn(
-                              "text-xs",
-                              ticker.change >= 0 ? "text-success" : "text-danger"
-                            )}>
-                              {ticker.changePercent >= 0 ? '+' : ''}{ticker.changePercent}%
-                            </div>
-                          </div>
+                          {/* Removed price, change, and change percent from list item UI */}
                           <ArrowRight className="w-4 h-4 ml-3 text-muted-foreground" />
                         </div>
                       </CardContent>
@@ -119,19 +111,8 @@ export const GetStarted = ({ onAddTicker }: GetStartedProps) => {
                   <CardTitle className="text-lg">{ticker.symbol}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-2">
-                    <div className="font-semibold text-lg">${ticker.price}</div>
-                    <div className={cn(
-                      "text-sm font-medium flex items-center gap-1",
-                      ticker.change >= 0 ? "text-success" : "text-danger"
-                    )}>
-                      <TrendingUp className={cn(
-                        "w-3 h-3",
-                        ticker.change < 0 && "rotate-180"
-                      )} />
-                      {ticker.changePercent >= 0 ? '+' : ''}{ticker.changePercent}%
-                    </div>
-                  </div>
+                  {/* Removed price, change, and change percent from card UI; show name for context */}
+                  <div className="text-sm text-muted-foreground truncate">{ticker.name}</div>
                 </CardContent>
               </Card>
             ))}
@@ -146,7 +127,7 @@ export const GetStarted = ({ onAddTicker }: GetStartedProps) => {
                 <TrendingUp className="w-5 h-5 text-success" />
               </div>
               <h3 className="font-semibold">Trusted Data</h3>
-              <p className="text-sm text-muted-foreground">Access latest official financial information and market data, powered by Alpha Vantage.</p>
+              <p className="text-sm text-muted-foreground">Access latest official financial information submitted to regulators and current market data.</p>
             </div>
             <div className="space-y-2">
               <div className="w-10 h-10 rounded-lg bg-warning-light flex items-center justify-center">
