@@ -31,7 +31,7 @@ export function useLatestNews(ticker: string) {
           .select("news_output")
           .eq("ticker", ticker)
           .eq("year", currentYear)
-          .eq("month", prevMonth)
+          .eq("month_end", prevMonth)
           .maybeSingle();
 
         if (prevRes.error) {
@@ -53,7 +53,7 @@ export function useLatestNews(ticker: string) {
           .select("news_output")
           .eq("ticker", ticker)
           .eq("year", currentYear)
-          .eq("month", currentMonth)
+          .eq("month_end", currentMonth)
           .maybeSingle();
 
         if (currRes.error) {
