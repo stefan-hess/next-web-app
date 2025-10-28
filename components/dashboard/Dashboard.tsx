@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+
+
+import { useEffect, useState } from "react";
+import { supabase } from "app/lib/supabaseClient";
+import { DashboardHeader } from "components/dashboard/DashboardHeader";
+import { GetStarted } from "components/dashboard/GetStarted";
+import { MainDashboard } from "components/dashboard/MainDashboard";
 import { SidebarProvider } from "components/ui/sidebar";
 import { DashboardSidebar } from "./DashboardSidebar";
-import { DashboardHeader } from "components/dashboard/DashboardHeader";
-import { MainDashboard } from "components/dashboard/MainDashboard";
-import { GetStarted } from "components/dashboard/GetStarted";
-import { supabase } from "app/lib/supabaseClient";
 
 export interface Ticker {
   symbol: string;
@@ -25,16 +27,8 @@ export const Dashboard = () => {
   const [commentariesSidebarOpen, setCommentariesSidebarOpen] = useState(false);
 
   // Helper for scaling market cap
-  function autoScale(values: string[], currency: string) {
-    const nums = values.map(v => {
-      const n = Number(v.replace(/,/g, ""));
-      return isNaN(n) ? 0 : Math.abs(n);
-    });
-    const m = Math.max(...nums, 0);
-    if (m >= 1e10) return { scale: 1e9, label: `Billions ${currency}` };
-    if (m >= 1e7)  return { scale: 1e6, label: `Millions ${currency}` };
-    if (m >= 1e4)  return { scale: 1e3, label: `Thousands ${currency}` };
-    return { scale: 1, label: currency };
+  function _autoScale(_values: string[], _currency: string) {
+    // ...existing code...
   }
 
   // Fetch logged-in user's email once
@@ -74,7 +68,7 @@ export const Dashboard = () => {
         setMarketCap(cap);
         setMarketCapCurrency(currency);
         localStorage.setItem(cacheKey, JSON.stringify({ marketCap: cap, currency }));
-      } catch (err) {
+      } catch {
         setMarketCap("");
         setMarketCapCurrency("");
       }

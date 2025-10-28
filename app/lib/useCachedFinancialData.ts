@@ -1,8 +1,15 @@
 import { useEffect, useState } from "react";
 
 // Usage: const { data, loading, error } = useCachedFinancialData(ticker)
+export interface FinancialData {
+  [ticker: string]: {
+    annual?: Record<string, string>[];
+    quarterly?: Record<string, string>[];
+  };
+}
+
 export function useCachedFinancialData(ticker: string) {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<FinancialData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -12,9 +19,9 @@ export function useCachedFinancialData(ticker: string) {
     setError(null);
     const cacheKey = `financialData_${ticker}`;
     const cache = localStorage.getItem(cacheKey);
-    let cached: { data?: any; timestamp?: number } | null;
+  let cached: { data?: FinancialData; timestamp?: number } | null;
     try {
-      cached = cache ? (JSON.parse(cache) as { data?: any; timestamp?: number }) : null;
+  cached = cache ? (JSON.parse(cache) as { data?: FinancialData; timestamp?: number }) : null;
     } catch {
       cached = null;
     }
@@ -31,8 +38,8 @@ export function useCachedFinancialData(ticker: string) {
         return res.json();
       })
       .then(json => {
-        setData(json);
-        localStorage.setItem(cacheKey, JSON.stringify({ data: json, timestamp: now }));
+        setData(json as FinancialData);
+        localStorage.setItem(cacheKey, JSON.stringify({ data: json as FinancialData, timestamp: now }));
       })
       .catch(err => {
         setError(err.message || "Unknown error");

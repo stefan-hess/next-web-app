@@ -5,7 +5,7 @@ import { spawn } from 'child_process';
 
 export async function GET(req: NextRequest): Promise<Response> {
   const { searchParams } = new URL(req.url);
-  let ticker = searchParams.get('ticker');
+  const ticker = searchParams.get('ticker');
   if (!ticker || typeof ticker !== 'string') {
     return new Response(JSON.stringify({ error: 'Missing or invalid ticker parameter' }), { status: 400 });
   }

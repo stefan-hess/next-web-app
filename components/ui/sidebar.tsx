@@ -1,11 +1,12 @@
-import * as React from "react";
-import { Slot } from "@radix-ui/react-slot";
-import { VariantProps, cva } from "class-variance-authority";
-import { PanelLeft } from "lucide-react";
 
-import { useIsMobile } from "components/ui/hooks/use-mobile";
+
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
+import { PanelLeft } from "lucide-react";
+import * as React from "react";
 import { cn } from "app/lib/utils";
 import { Button } from "components/ui/Button/Button_new";
+import { useIsMobile } from "components/ui/hooks/use-mobile";
 import { Input } from "components/ui/input";
 import { Separator } from "components/ui/separator";
 import { Sheet, SheetContent } from "components/ui/sheet";

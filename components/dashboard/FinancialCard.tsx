@@ -11,10 +11,10 @@ function autoScale(values: string[], currency: string) {
   return { scale: 1, label: currency };
 }
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "components/ui/card";
+import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { cn } from "app/lib/utils";
-import { useState } from "react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "components/ui/card";
+// Removed unused useState import
 
 
 export interface FinancialCategory {
@@ -143,7 +143,7 @@ export const FinancialCard: React.FC<FinancialCardProps> = ({ category, isExpand
                     {[...category.data.slice(0, maxPeriods)].reverse().map((period, idx) => {
                       const raw = period[key] || "";
                       const scale = metricScales[key]?.scale ?? 1;
-                      let num = Number(raw.replace(/,/g, ""));
+                      const num = Number(raw.replace(/,/g, ""));
                       let display = raw;
                       if (!isNaN(num) && scale !== 1 && raw !== "") {
                         display = (num / scale).toLocaleString(undefined, { maximumFractionDigits: 2 });
@@ -166,7 +166,7 @@ export const FinancialCard: React.FC<FinancialCardProps> = ({ category, isExpand
               const chartPeriods = isExpanded ? maxPeriods : 3;
               const chartHeight = isExpanded ? 220 : 120;
               const chartData = category.data.slice(0, chartPeriods).map((period: Record<string, string>) => {
-                const obj: Record<string, any> =
+                const obj: Record<string, number | null | string> =
                   category.id === "shares-outstanding"
                     ? { date: period.date || '' }
                     : { date: period.fiscalDateEnding || '' };

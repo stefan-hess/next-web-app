@@ -1,15 +1,16 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
-import { useSharesOutstandingData } from "app/lib/useSharesOutstandingData";
-import { useInsiderTradesData } from "app/lib/useInsiderTradesData";
+
+import { Activity, BarChart3, DollarSign, ScrollText } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { supabase } from "app/lib/supabaseClient";
 import { useCachedFinancialData } from "app/lib/useCachedFinancialData";
 import { useDividendData } from "app/lib/useDividendData";
+import { useInsiderTradesData } from "app/lib/useInsiderTradesData";
 import { useLatestNews } from "app/lib/useLatestNews";
-import { DollarSign, BarChart3, ScrollText, Activity } from "lucide-react";
-import { FinancialCard } from "./FinancialCard";
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+import { useSharesOutstandingData } from "app/lib/useSharesOutstandingData";
 import type { Ticker } from "./Dashboard";
-import { supabase } from 'app/lib/supabaseClient';
+import { FinancialCard } from "./FinancialCard";
 
 
 
@@ -24,7 +25,8 @@ interface MainDashboardProps {
 export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentariesSidebarOpen, setCommentariesSidebarOpen }: MainDashboardProps) => {
   // Sidebar state for replying to a main post
   const [replySidebarOpen, setReplySidebarOpen] = useState(false);
-  const [selectedMainPost, setSelectedMainPost] = useState<any | null>(null);
+  type SelectedMainPostType = Record<string, unknown> | null | 'NEW_POST';
+  const [selectedMainPost, setSelectedMainPost] = useState<SelectedMainPostType>(null);
   // Commentary draft state
   const [commentTitle, setCommentTitle] = useState('');
   const [commentContent, setCommentContent] = useState('');
@@ -32,7 +34,7 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
   const [commentError, setCommentError] = useState('');
   const [commentSuccess, setCommentSuccess] = useState('');
   const [loadingComments, setLoadingComments] = useState(false);
-  const [mainComments, setMainComments] = useState<any[]>([]);
+  const [mainComments, setMainComments] = useState<Record<string, unknown>[]>([]);
   const { data: insiderData, loading: insiderLoading, error: insiderError } = useInsiderTradesData(ticker.symbol);
   const [expandedCards, setExpandedCards] = useState<string[]>([]);
   const [period, setPeriod] = useState<'annual' | 'quarterly'>('annual');
@@ -73,7 +75,7 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
         console.debug('[Commentaries] cache lookup', { cacheKey, found: !!cachedRaw });
         if (cachedRaw) {
           try {
-            const cached = JSON.parse(cachedRaw) as { ts: number; data: any[] };
+            const cached = JSON.parse(cachedRaw) as { ts: number; data: Record<string, unknown>[] };
             const isFresh = Date.now() - (cached.ts || 0) < 5 * 60 * 1000;
             console.debug('[Commentaries] cache parsed', { ts: cached.ts, isFresh, size: Array.isArray(cached.data) ? cached.data.length : -1 });
             if (isFresh && Array.isArray(cached.data)) {
@@ -158,17 +160,17 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
   };
 
   // Utility to convert array of objects to CSV string
-  function arrayToCSV(data: Record<string, any>[]): string {
+  function arrayToCSV(data: Record<string, string | number | null>[]): string {
   if (!data.length || !data[0]) return '';
-  const cols = Object.keys(data[0] as Record<string, any>);
-  const escape = (val: any) => (typeof val === 'string' ? `"${val.replace(/"/g, '""')}"` : val);
+  const cols = Object.keys(data[0] ?? {});
+  const escape = (val: string | number | null) => (typeof val === 'string' ? `"${val.replace(/"/g, '""')}"` : val);
   const header = cols.join(',');
   const rows = data.map(row => cols.map(col => escape(row[col] ?? '')).join(','));
   return [header, ...rows].join('\n');
   }
 
   // Download CSV file
-  function downloadCSV(data: Record<string, any>[], filename: string) {
+  function downloadCSV(data: Record<string, string | number | null>[], filename: string) {
     const csv = arrayToCSV(data);
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
@@ -229,14 +231,14 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
    * Helper to pick only certain keys.
    * Usage: pick(rawData, ["a","b"])
    */
-  const pick = <T extends object, K extends keyof T>(
-    obj: T,
-    keys: K[]
-  ): Pick<T, K> =>
-    keys.reduce((acc, k) => {
-      acc[k] = obj[k];
-      return acc;
-    }, {} as Pick<T, K>);
+    const _pick = <T extends object, K extends keyof T>(
+      obj: T,
+      keys: K[]
+    ): Pick<T, K> =>
+      keys.reduce((acc, k) => {
+        acc[k] = obj[k];
+        return acc;
+      }, {} as Pick<T, K>);
 
   const handleCardClick = (cardId: string) => {
     setExpandedCards((prev) =>
@@ -352,7 +354,7 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
       setCheckingAlias(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const { data, error } = await supabase
+        const { data, error: _error } = await supabase
           .from('news_subscribed_clients')
           .select('user_alias')
           .eq('client_id', user.id)
@@ -467,14 +469,39 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
               <div className="mb-4">
                 <div className="flex gap-3 items-center mb-2">
                   <div className="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center">
-                    <span className="font-bold text-blue-700 text-lg">{selectedMainPost.created_by ? selectedMainPost.created_by.charAt(0).toUpperCase() : 'U'}</span>
+                    <span className="font-bold text-blue-700 text-lg">{
+                      typeof selectedMainPost === 'object' && selectedMainPost &&
+                      'created_by' in selectedMainPost && typeof (selectedMainPost as { created_by?: unknown }).created_by === 'string'
+                        ? ((selectedMainPost as { created_by: string }).created_by.charAt(0).toUpperCase())
+                        : 'U'
+                    }</span>
                   </div>
                   <div>
-                    <span className="font-semibold text-primary text-lg">{selectedMainPost.post_title}</span>
-                    <span className="block text-xs text-muted-foreground">by {selectedMainPost.created_by ?? 'User'} • {new Date(selectedMainPost.created_at).toLocaleString()}</span>
+                    <span className="font-semibold text-primary text-lg">{
+                      typeof selectedMainPost === 'object' && selectedMainPost &&
+                      'post_title' in selectedMainPost && typeof (selectedMainPost as { post_title?: unknown }).post_title === 'string'
+                        ? ((selectedMainPost as { post_title: string }).post_title)
+                        : ''
+                    }</span>
+                    <span className="block text-xs text-muted-foreground">by {
+                      typeof selectedMainPost === 'object' && selectedMainPost &&
+                      'created_by' in selectedMainPost && typeof (selectedMainPost as { created_by?: unknown }).created_by === 'string'
+                        ? ((selectedMainPost as { created_by: string }).created_by)
+                        : 'User'
+                    } • {
+                      typeof selectedMainPost === 'object' && selectedMainPost &&
+                      'created_at' in selectedMainPost && typeof (selectedMainPost as { created_at?: unknown }).created_at === 'string'
+                        ? new Date((selectedMainPost as { created_at: string }).created_at).toLocaleString()
+                        : ''
+                    }</span>
                   </div>
                 </div>
-                <div className="whitespace-pre-line text-base text-foreground">{selectedMainPost.post_content}</div>
+                <div className="whitespace-pre-line text-base text-foreground">{
+                  typeof selectedMainPost === 'object' && selectedMainPost &&
+                  'post_content' in selectedMainPost && typeof (selectedMainPost as { post_content?: unknown }).post_content === 'string'
+                    ? ((selectedMainPost as { post_content: string }).post_content)
+                    : ''
+                }</div>
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center text-center border rounded-lg bg-card shadow-sm p-6">
@@ -485,7 +512,7 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
                 <p className="text-sm text-muted-foreground mb-4">No commentaries for {ticker.symbol} yet. Share your insights to kick things off.</p>
                 <button
                   className="px-4 py-2 rounded font-semibold border border-blue-300 bg-blue-100 text-blue-700 shadow-sm hover:bg-blue-200 transition-colors"
-                  onClick={() => setSelectedMainPost('NEW_POST')}
+                  onClick={() => setSelectedMainPost('NEW_POST' as SelectedMainPostType)}
                 >Create New Post</button>
               </div>
             )}
@@ -543,13 +570,13 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
               <table className="w-full border rounded-lg bg-card shadow-sm text-xs">
                 <thead className="bg-blue-50">
                   <tr>
-                    {fullQuarterlyData.length > 0 && Object.keys(fullQuarterlyData[0]).map((col) => (
+                    {fullQuarterlyData.length > 0 && Object.keys(fullQuarterlyData[0] ?? {}).map((col) => (
                       <th key={col} className="px-2 py-1 text-left whitespace-nowrap">{col}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {fullQuarterlyData.map((row: Record<string, any>, idx: number) => (
+                  {fullQuarterlyData.map((row: Record<string, string | number | null>, idx: number) => (
                     <tr key={idx} className="border-b last:border-b-0">
                       {Object.keys(row).map((col) => (
                         <td key={col} className="px-2 py-1 whitespace-nowrap">{row[col] ?? "-"}</td>
@@ -573,13 +600,13 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
               <table className="w-full border rounded-lg bg-card shadow-sm text-xs">
                 <thead className="bg-blue-50">
                   <tr>
-                    {fullAnnualData.length > 0 && Object.keys(fullAnnualData[0]).map((col) => (
+                    {fullAnnualData.length > 0 && Object.keys(fullAnnualData[0] ?? {}).map((col) => (
                       <th key={col} className="px-2 py-1 text-left whitespace-nowrap">{col}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {fullAnnualData.map((row: Record<string, any>, idx: number) => (
+                  {fullAnnualData.map((row: Record<string, string | number | null>, idx: number) => (
                     <tr key={idx} className="border-b last:border-b-0">
                       {Object.keys(row).map((col) => (
                         <td key={col} className="px-2 py-1 whitespace-nowrap">{row[col] ?? "-"}</td>
@@ -597,7 +624,7 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
     <button
       className="mb-6 px-4 py-2 rounded font-semibold border border-blue-300 bg-blue-100 text-blue-700 shadow-sm hover:bg-blue-200 transition-colors"
       onClick={() => {
-        setSelectedMainPost('NEW_POST');
+  setSelectedMainPost('NEW_POST' as SelectedMainPostType);
         setReplySidebarOpen(true);
       }}
     >Add New Post</button>
@@ -610,8 +637,12 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
         </div>
       ) : mainComments && mainComments.length > 0 ? (
         <ul className="space-y-3">
-          {mainComments.map((post: any, idx: number) => (
-            <li key={post?.id ?? `${post?.related_ticker ?? 't'}-${post?.post_title ?? 'untitled'}-${post?.created_at ?? 'ts'}-${idx}`}>
+          {mainComments.map((post: Record<string, unknown>, idx: number) => (
+            <li key={
+              typeof post.id === 'string' || typeof post.id === 'number'
+                ? String(post.id)
+                : `${'related_ticker' in post && typeof post.related_ticker === 'string' ? post.related_ticker : 't'}-${'post_title' in post && typeof post.post_title === 'string' ? post.post_title : 'untitled'}-${'created_at' in post && typeof post.created_at === 'string' ? post.created_at : 'ts'}-${idx}`
+            }>
               <button
                 className="w-full text-left p-4 border rounded-lg bg-card hover:bg-muted/40 transition-colors shadow-sm"
                 onClick={() => {
@@ -620,12 +651,18 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
                 }}
               >
                 <div className="flex items-center justify-between">
-                  <div className="font-semibold text-primary truncate pr-2">{post.post_title || 'Untitled'}</div>
+                  <div className="font-semibold text-primary truncate pr-2">{
+                    'post_title' in post && typeof post.post_title === 'string' ? post.post_title : 'Untitled'
+                  }</div>
                   <div className="text-xs text-muted-foreground whitespace-nowrap">
-                    {post.created_by || 'User'} • {post.created_at ? new Date(post.created_at).toLocaleString() : ''}
+                    {
+                      'created_by' in post && typeof post.created_by === 'string' ? post.created_by : 'User'
+                    } • {
+                      'created_at' in post && typeof post.created_at === 'string' ? new Date(post.created_at).toLocaleString() : ''
+                    }
                   </div>
                 </div>
-                {post.post_content && (
+                {'post_content' in post && typeof post.post_content === 'string' && (
                   <div className="mt-1 text-sm text-foreground line-clamp-2">
                     {post.post_content}
                   </div>
@@ -644,7 +681,7 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
           <button
             className="px-4 py-2 rounded font-semibold border border-blue-300 bg-blue-100 text-blue-700 shadow-sm hover:bg-blue-200 transition-colors"
             onClick={() => {
-              setSelectedMainPost('NEW_POST');
+              setSelectedMainPost('NEW_POST' as SelectedMainPostType);
               setReplySidebarOpen(true);
             }}
           >Create New Post</button>
@@ -799,9 +836,9 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
             return kpis.map((kpi) => {
               // Prepare chart data
               const chartData = periodData
-                .filter((p: Record<string, any>) => p[kpi.key] !== undefined && p[kpi.key] !== null && !isNaN(Number(p[kpi.key])))
-                .map((p: Record<string, any>) => ({
-                  fiscalDateEnding: p.fiscalDateEnding,
+                .filter((p: Record<string, string | number | null>) => p[kpi.key] !== undefined && p[kpi.key] !== null && !isNaN(Number(p[kpi.key])))
+                .map((p: Record<string, string | number | null>) => ({
+                  fiscalDateEnding: typeof p.fiscalDateEnding === 'string' ? p.fiscalDateEnding : '',
                   value: Number(p[kpi.key])
                 }))
                 .sort((a: { fiscalDateEnding: string }, b: { fiscalDateEnding: string }) => (a.fiscalDateEnding || '').localeCompare(b.fiscalDateEnding || ''));
@@ -926,17 +963,17 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
                 </thead>
                 <tbody>
                   {insiderData.map((trade, idx) => {
-                    const t = trade as Record<string, any>;
+                    const t = trade as Record<string, string | number | null>;
                     return (
-                      <tr key={t.transaction_date + t.executive + t.security_type + idx} className="border-b last:border-b-0">
-                        <td className="px-2 py-1 whitespace-nowrap font-semibold text-primary">{t.transaction_date}</td>
-                        <td className="px-2 py-1 whitespace-nowrap text-muted-foreground">{t.ticker}</td>
-                        <td className="px-2 py-1 whitespace-nowrap">{t.executive}</td>
-                        <td className="px-2 py-1 whitespace-nowrap text-muted-foreground">{t.executive_title}</td>
-                        <td className="px-2 py-1 whitespace-nowrap">{t.security_type}</td>
-                        <td className="px-2 py-1 whitespace-nowrap">{t.acquisition_or_disposal === 'A' ? 'Acquisition' : 'Disposal'}</td>
-                        <td className="px-2 py-1 whitespace-nowrap text-right">{t.shares}</td>
-                        <td className="px-2 py-1 whitespace-nowrap text-right">{t.share_price}</td>
+                      <tr key={String(t.transaction_date) + String(t.executive) + String(t.security_type) + idx} className="border-b last:border-b-0">
+                        <td className="px-2 py-1 whitespace-nowrap font-semibold text-primary">{t.transaction_date ?? '-'}</td>
+                        <td className="px-2 py-1 whitespace-nowrap text-muted-foreground">{t.ticker ?? '-'}</td>
+                        <td className="px-2 py-1 whitespace-nowrap">{t.executive ?? '-'}</td>
+                        <td className="px-2 py-1 whitespace-nowrap text-muted-foreground">{t.executive_title ?? '-'}</td>
+                        <td className="px-2 py-1 whitespace-nowrap">{t.security_type ?? '-'}</td>
+                        <td className="px-2 py-1 whitespace-nowrap">{t.acquisition_or_disposal === 'A' ? 'Acquisition' : t.acquisition_or_disposal === 'D' ? 'Disposal' : '-'}</td>
+                        <td className="px-2 py-1 whitespace-nowrap text-right">{t.shares ?? '-'}</td>
+                        <td className="px-2 py-1 whitespace-nowrap text-right">{t.share_price ?? '-'}</td>
                         <td className="px-2 py-1 whitespace-nowrap text-right">{t.total_value !== undefined && t.total_value !== null ? Number(t.total_value).toLocaleString(undefined, { maximumFractionDigits: 2 }) : '-'}</td>
                       </tr>
                     );
@@ -976,7 +1013,7 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
               onClick={async () => {
                 setCheckingAlias(true);
                 setAliasError('');
-                const { data: existing, error: aliasCheckError } = await supabase
+                const { data: existing, error: _aliasCheckError } = await supabase
                   .from('news_subscribed_clients')
                   .select('user_alias')
                   .eq('user_alias', aliasInput.trim())

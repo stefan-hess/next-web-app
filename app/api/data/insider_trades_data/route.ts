@@ -4,8 +4,8 @@ import { spawn } from 'child_process';
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   // Accept tickers as comma-separated string: ?tickers=AAPL,MSFT,GOOG
-  let tickersParam = searchParams.get('tickers') || searchParams.get('ticker');
-  let maxTradesParam = searchParams.get('maxTrades') || '10';
+  const tickersParam = searchParams.get('tickers') || searchParams.get('ticker');
+  const maxTradesParam = searchParams.get('maxTrades') || '10';
   if (!tickersParam || typeof tickersParam !== 'string') {
     return new Response(JSON.stringify({ error: 'Missing or invalid tickers parameter' }), { status: 400 });
   }

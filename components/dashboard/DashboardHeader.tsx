@@ -1,7 +1,8 @@
-import { Bell, Settings, User, BarChart3, FileText } from "lucide-react";
-import { Button } from "components/ui/Button/Button_new";
-import { supabase } from "app/lib/supabaseClient";
+
+import { BarChart3, Bell, FileText, Settings, User } from "lucide-react";
 import { useState } from "react";
+import { supabase } from "app/lib/supabaseClient";
+import { Button } from "components/ui/Button/Button_new";
 
 interface DashboardHeaderProps {
   ticker?: { symbol: string; name: string };
@@ -10,19 +11,9 @@ interface DashboardHeaderProps {
   onOpenCommentariesSidebar?: () => void; // Add prop
 }
 
-export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ ticker, marketCap, marketCapCurrency, onOpenCommentariesSidebar }) => {
+export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onOpenCommentariesSidebar }) => {
   // Scaling logic
-  function autoScale(values: string[], currency: string) {
-    const nums = values.map(v => {
-      const n = Number(v.replace(/,/g, ""));
-      return isNaN(n) ? 0 : Math.abs(n);
-    });
-    const m = Math.max(...nums, 0);
-    if (m >= 1e10) return { scale: 1e9, label: `Billions ${currency}` };
-    if (m >= 1e7)  return { scale: 1e6, label: `Millions ${currency}` };
-    if (m >= 1e4)  return { scale: 1e3, label: `Thousands ${currency}` };
-    return { scale: 1, label: currency };
-  }
+  // ...existing code...
   const [dropdownOpen, setDropdownOpen] = useState(false);
   async function handleLogout() {
     await supabase.auth.signOut();

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { Card } from 'components/ui/card';
 
 interface DataPoint {
@@ -16,11 +16,17 @@ interface TimeseriesChartProps {
   subtitle?: string;
 }
 
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    const isPositive = data.change >= 0;
-    
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: Array<{ payload: DataPoint }>;
+  label?: string;
+}
+
+const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
+  if (active && payload && payload.length && payload[0]) {
+    const data = payload[0].payload as DataPoint | undefined;
+    if (!data) return null;
+    const isPositive = typeof data.change === 'number' ? data.change >= 0 : true;
     return (
       <div className="bg-card border border-border rounded-lg p-4 shadow-hover">
         <div className="text-sm font-medium text-foreground mb-2">{label}</div>
@@ -31,7 +37,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
               ${data.value.toLocaleString('en-US', { minimumFractionDigits: 2 })}
             </span>
           </div>
-          {data.change !== undefined && (
+          {typeof data.change === 'number' && (
             <div className="flex items-center justify-between gap-4">
               <span className="text-sm text-muted-foreground">Change:</span>
               <span className={`font-medium ${isPositive ? 'text-chart-positive' : 'text-chart-negative'}`}>
@@ -39,7 +45,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
               </span>
             </div>
           )}
-          {data.volume && (
+          {typeof data.volume === 'number' && (
             <div className="flex items-center justify-between gap-4">
               <span className="text-sm text-muted-foreground">Volume:</span>
               <span className="font-medium text-foreground">
@@ -51,12 +57,11 @@ const CustomTooltip = ({ active, payload, label }: any) => {
       </div>
     );
   }
-  
   return null;
 };
 
 export const TimeseriesChart = ({ data, title, subtitle }: TimeseriesChartProps) => {
-  const [hoveredPoint, setHoveredPoint] = useState<DataPoint | null>(null);
+  const [_hoveredPoint, setHoveredPoint] = useState<DataPoint | null>(null);
   
   const latestValue = data[data.length - 1]?.value || 0;
   const latestChange = data[data.length - 1]?.change || 0;
@@ -88,8 +93,7 @@ export const TimeseriesChart = ({ data, title, subtitle }: TimeseriesChartProps)
             data={data}
             margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
             onMouseMove={(e) => {
-              const anyEvent = e as any;
-              const payload = anyEvent.tooltipPayload || anyEvent.activePayload;
+              const payload = (e as { tooltipPayload?: Array<{ payload: DataPoint }>; activePayload?: Array<{ payload: DataPoint }> }).tooltipPayload || (e as { tooltipPayload?: Array<{ payload: DataPoint }>; activePayload?: Array<{ payload: DataPoint }> }).activePayload;
               if (payload && payload[0]) {
                 setHoveredPoint(payload[0].payload);
               }

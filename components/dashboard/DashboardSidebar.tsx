@@ -1,29 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+
+
+import { Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Search, Plus, X } from "lucide-react";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "components/ui/sidebar";
-import { Button } from "components/ui/Button/Button_new";
-import { Input } from "components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogOverlay
-} from "components/ui/dialog";
-import type { Ticker } from "./Dashboard";
+import { useEffect, useState } from "react";
 import { supabase } from "app/lib/supabaseClient";
 import { cn } from "app/lib/utils";
+import { Button } from "components/ui/Button/Button_new";
+import { Dialog, DialogContent, DialogHeader, DialogOverlay, DialogTitle, DialogTrigger } from "components/ui/dialog";
+import { Input } from "components/ui/input";
+import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "components/ui/sidebar";
+import type { Ticker } from "./Dashboard";
 
 export interface DashboardSidebarProps {
   tickers: Ticker[];
@@ -48,9 +36,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   const [allowedTickers, setAllowedTickers] = useState<string[]>([]);
 
   // NEW: results + loading for Alpha Vantage search
-  const [searchResults, setSearchResults] = useState<
-    { symbol: string; name: string }[]
-  >([]);
+  const [searchResults, setSearchResults] = useState<Array<{ symbol: string; name: string }>>([]);
   const [loadingResults, setLoadingResults] = useState(false);
 
   /** Load tickers that this user is allowed to see */
@@ -87,10 +73,10 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
           `/api/search-ticker?query=${encodeURIComponent(searchQuery)}`,
           { signal: controller.signal }
         );
-        const json = (await res.json()) as { bestMatches?: any[] };
-        const matches = (json.bestMatches || []).map((m: any) => ({
-          symbol: m["1. symbol"],
-          name: m["2. name"],
+        const json = (await res.json()) as { bestMatches?: Array<{ [key: string]: string }> };
+        const matches = (json.bestMatches || []).map((m: { [key: string]: string }) => ({
+          symbol: m["1. symbol"] ?? "",
+          name: m["2. name"] ?? "",
         }));
         setSearchResults(matches);
       } catch (err) {

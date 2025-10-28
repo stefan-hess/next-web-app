@@ -1,9 +1,9 @@
+import { ArrowRight, Plus, Search, TrendingUp } from "lucide-react";
 import { useState } from "react";
-import { Plus, TrendingUp, Search, ArrowRight } from "lucide-react";
 import { Button } from "components/ui/Button/Button_new";
 import { Card, CardContent, CardHeader, CardTitle } from "components/ui/card";
-import { Input } from "components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "components/ui/dialog";
+import { Input } from "components/ui/input";
 import type { Ticker } from "./Dashboard";
 // removed cn utility import since price/change display was removed
 
