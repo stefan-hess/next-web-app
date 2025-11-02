@@ -10,7 +10,7 @@ const plans = [
     price: 4.99,
     description: "Perfect for individual investors getting started",
     features: [
-      "Monthly fundamental reports for 10 stocks",
+      "Coverage of 10 stocks",
       "Business developments of the month",
       "Latest SEC filings for quarterly and annual financial data",
       "Insider trading activities"
@@ -20,12 +20,13 @@ const plans = [
   {
     name: "Buffett Tier",
     price: 8.99,
-    description: "Ideal for investors managing their portfolios",
+    description: "Ideal for sophisticated investors and professionals that manage portfolios",
     features: [
-      "Monthly fundamental reports for 20 stocks",
+      "Coverage of 20 stocks",
       "Business developments of the month",
       "Latest SEC filings for quarterly and annual financial data",
-      "Insider trading activities"
+      "Insider trading activities",
+      "Monthly email summary report"
     ],
     popular: true
   },
@@ -34,11 +35,12 @@ const plans = [
     price: 99,
     description: "Best for analysts, small research teams, investors with a large number of stocks",
     features: [
-      "Unlimited stock reports",
+      "Unlimited stocks coverage",
       "Business developments of the month",
       "Latest SEC filings for quarterly and annual financial data",
       "Insider trading alerts",
-      "Custom reports"
+      "Monthly email summary report",
+      "Customized reports"
     ],
     popular: false
   }
@@ -185,7 +187,7 @@ const PricingSection = () => {
             Choose Your Investment Plan
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Start with our free trial and upgrade to unlock more stocks and advanced features. 
+            Start with our free trial of 2 stocks and upgrade to select more stocks and advanced features. 
             Cancel anytime.
           </p>
         </div>

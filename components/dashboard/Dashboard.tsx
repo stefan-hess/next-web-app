@@ -149,6 +149,7 @@ export const Dashboard = () => {
           marketCap={marketCap}
           marketCapCurrency={marketCapCurrency}
           onOpenCommentariesSidebar={handleOpenCommentariesSidebar}
+          selectedTickers={selectedTickers}
         />
         <div className="flex flex-1">
           <DashboardSidebar

@@ -7,9 +7,8 @@ export async function GET(req: NextRequest) {
   }
 
   const apiKey = process.env.ALPHA_VANTAGE_API_KEY; // set in .env.local
-  const url = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${encodeURIComponent(
-    query
-  )}&apikey=${apiKey}`;
+  console.log("Loaded Alpha Vantage API key (last 6):", apiKey ? apiKey.slice(-6) : 'undefined');
+  const url = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${encodeURIComponent(query)}&apikey=${apiKey}`;
 
   try {
     console.log("Alpha Vantage request URL:", url);

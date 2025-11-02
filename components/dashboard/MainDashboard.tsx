@@ -54,6 +54,30 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
   const fullAnnualData = data?.[ticker.symbol]?.annual || [];
   const { data: sharesData, loading: sharesLoading, error: sharesError } = useSharesOutstandingData(ticker.symbol);
 
+  // Prepare filtered Shares Outstanding data based on toggle (quarterly vs annual)
+  const getFilteredSharesData = useCallback(() => {
+    const rows = Array.isArray(sharesData) ? (sharesData as Record<string, string>[]) : [];
+    if (rows.length === 0) return [] as Record<string, string>[];
+
+    // Sort DESC by date (most recent first)
+    const sorted = [...rows].sort((a, b) => {
+      const ad = new Date(a.date || '').getTime();
+      const bd = new Date(b.date || '').getTime();
+      return isNaN(bd - ad) ? 0 : bd - ad;
+    });
+
+    if (period === 'quarterly') return sorted;
+
+    // Annual: group by calendar year (assumption) and pick the most recent entry per year
+    const byYear = new Map<string, Record<string, string>>();
+    for (const entry of sorted) {
+      const d = entry.date || '';
+      const year = d.slice(0, 4);
+      if (!byYear.has(year)) byYear.set(year, entry);
+    }
+    return Array.from(byYear.values());
+  }, [sharesData, period]);
+
   const fetchMainComments = useCallback(async () => {
     console.debug('[Commentaries] fetchMainComments:start', { ticker: ticker.symbol });
     setLoadingComments(true);
@@ -326,7 +350,7 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
         <button
           className={`px-4 py-2 font-semibold ${activeTab === 'shares' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
           onClick={() => setActiveTab('shares')}
-        >Shares Outstanding</button>
+        >Shares Outstanding & Market Cap</button>
         <button
           className={`px-4 py-2 font-semibold ${activeTab === 'insider' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
           onClick={() => setActiveTab('insider')}
@@ -914,6 +938,7 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Shares Outstanding Card (basic/diluted) */}
             <FinancialCard
               key="shares-outstanding"
               category={{
@@ -921,14 +946,40 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
                 title: "Shares Outstanding",
                 icon: ScrollText,
                 color: "secondary",
-                  data: Array.isArray(sharesData) ? (sharesData as Record<string, string>[]).map(entry => ({
-                      ...entry,
-                      date: entry.date || ""
-                    })) : [],
+                data: getFilteredSharesData().map((entry: Record<string, string>) => ({
+                  date: entry.date || "",
+                  shares_outstanding_basic: entry.shares_outstanding_basic || "",
+                  shares_outstanding_diluted: entry.shares_outstanding_diluted || "",
+                })),
               }}
               isExpanded={expandedCards.includes("shares-outstanding")}
               onClick={() => handleCardClick("shares-outstanding")}
               fullWidth={expandedCards.includes("shares-outstanding")}
+              view={view}
+            />
+
+            {/* Market Cap Card (computed) */}
+            <FinancialCard
+              key="market-cap"
+              category={{
+                id: "market-cap",
+                title: "Market Capitalization",
+                icon: DollarSign,
+                color: "primary",
+                labels: {
+                  market_cap_undiluted: "Market Cap (undiluted)",
+                  market_cap_diluted: "Market Cap (diluted)",
+                },
+                data: getFilteredSharesData().map((entry: Record<string, string>) => ({
+                  date: entry.date || "",
+                  fiscalDateEnding: entry.date || "", // for label rendering in FinancialCard
+                  market_cap_undiluted: entry.market_cap_undiluted || "",
+                  market_cap_diluted: entry.market_cap_diluted || "",
+                })),
+              }}
+              isExpanded={expandedCards.includes("market-cap")}
+              onClick={() => handleCardClick("market-cap")}
+              fullWidth={expandedCards.includes("market-cap")}
               view={view}
             />
           </div>

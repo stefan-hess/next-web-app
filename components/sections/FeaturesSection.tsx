@@ -17,25 +17,25 @@ const features = [
   {
     icon: UserCheck,
     title: "Insider Trading Data",
-    description: "Monitor the latest executive transactions to confirm insiders' conviction of the business.",
+    description: "Monitor the latest executive transactions to track insiders' conviction of the business. Never miss a red flag again.",
     color: "text-financial-accent"
   },
   {
     icon: TrendingUp,
     title: "Market Trends",
-    description: "Identify disconnections of stock prices and underlying value with our report.",
+    description: "Identify disconnections of market capitalization and underlying value with intuitive visualizations.",
     color: "text-financial-success"
   },
   {
     icon: Clock,
     title: "Timely Delivery",
-    description: "Receive your comprehensive report every month, delivered to your inbox to stay updated.",
+    description: "Receive a comprehensive report for your watchlist every month, delivered to your inbox.",
     color: "text-financial-primary"
   },
   {
     icon: Shield,
     title: "Trusted Data",
-    description: "All data sourced from verified financial publications and regulatory filings for accuracy and reliability.",
+    description: "Trusted news from financial publications and data from regulatory filings for maximum accuracy and reliability.",
     color: "text-financial-secondary"
   }
 ];

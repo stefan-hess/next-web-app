@@ -31,18 +31,12 @@ const HeroSection = () => {
               </h1>
 
               <p className="text-xl text-muted-foreground leading-relaxed">
-                Get monthly updates on what has been moving the core of the
-                business, not just the stock price. Invest as the likes of Graham, Buffett and Munger.
+                Get up to date quarterly and annual financial filings data and what has been moving the core of the
+                business, not just the stock price moves. Invest as the likes of Graham, Buffett and Munger and observe the intrinsic value of your investments.
               </p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <a href="/form">
-                <Button variant="hero" size="lg" className="group">
-                  Get started
-                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Button>
-              </a>
               <a
                 href="#productDemo"
                 className="transition-transform duration-300 hover:-translate-y-1 hover:scale-102 border-2 border-financial-primary text-financial-primary bg-transparent font-bold py-3 px-8 rounded-lg shadow text-lg flex items-center justify-center"
@@ -52,11 +46,11 @@ const HeroSection = () => {
                 View Sample Report
               </a>
               <a
-                href="/premium-form"
+                href="/login"
                 className="transition-transform duration-300 hover:-translate-y-1 hover:scale-102 border-2 font-bold py-3 px-8 rounded-lg shadow text-lg flex items-center justify-center"
                 style={{ borderColor: '#bfa76a', color: '#bfa76a', background: 'transparent', minHeight: '48px' }}
               >
-                Go to Premium
+                Log In
               </a>
             </div>
 

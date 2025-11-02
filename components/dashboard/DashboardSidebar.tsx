@@ -3,6 +3,7 @@
 
 
 import { Plus, X } from "lucide-react";
+import { GLOBAL_VARS } from "../../globalVars";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "app/lib/supabaseClient";
@@ -34,28 +35,60 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [allowedTickers, setAllowedTickers] = useState<string[]>([]);
+  const [userPlan, setUserPlan] = useState<string>(GLOBAL_VARS.PLAN_FREE);
+  // Fetch user's plan from DB
+  useEffect(() => {
+    async function fetchUserPlan() {
+      if (!email) return;
+      const { data, error } = await supabase
+        .from(GLOBAL_VARS.TABLE_NEWS_SUBSCRIBED_CLIENTS)
+        .select(GLOBAL_VARS.COL_STRIPE_PLAN)
+        .eq(GLOBAL_VARS.COL_EMAIL, email)
+        .single();
+      if (error) {
+        console.error("Error fetching user plan:", error);
+        setUserPlan(GLOBAL_VARS.PLAN_FREE);
+        return;
+      }
+      if (data && typeof data === 'object' && 'stripe_plan' in data) {
+        setUserPlan((data as { stripe_plan?: string }).stripe_plan || GLOBAL_VARS.PLAN_FREE);
+      } else {
+        setUserPlan(GLOBAL_VARS.PLAN_FREE);
+      }
+    }
+    fetchUserPlan();
+  }, [email]);
+  // Determine max tickers by plan
+  const getMaxTickers = () => {
+    if (userPlan === GLOBAL_VARS.PLAN_MUNGER) return 10;
+    if (userPlan === GLOBAL_VARS.PLAN_BUFFETT) return 20;
+    // Free or no plan: allow a small number
+    return 2;
+  };
+  const maxTickers = getMaxTickers();
+  const isAtLimit = tickers.length >= maxTickers;
 
   // NEW: results + loading for Alpha Vantage search
   const [searchResults, setSearchResults] = useState<Array<{ symbol: string; name: string }>>([]);
   const [loadingResults, setLoadingResults] = useState(false);
 
-  /** Load tickers that this user is allowed to see */
-  useEffect(() => {
-    async function fetchAllowedTickers() {
-      if (!email) return;
-      const { data, error } = await supabase
-        .from("ticker_selection_clients")
-        .select("ticker")
-        .eq("email", email);
-      if (error) {
-        console.error("Error fetching allowed tickers:", error);
-        setAllowedTickers([]);
-        return;
-      }
-      setAllowedTickers(
-        data?.map((row: { ticker: string }) => row.ticker) || []
-      );
+  // Load tickers that this user is allowed to see
+  const fetchAllowedTickers = async () => {
+    if (!email) return;
+    const { data, error } = await supabase
+      .from("ticker_selection_clients")
+      .select("ticker")
+      .eq("email", email);
+    if (error) {
+      console.error("Error fetching allowed tickers:", error);
+      setAllowedTickers([]);
+      return;
     }
+    setAllowedTickers(
+      data?.map((row: { ticker: string }) => row.ticker) || []
+    );
+  };
+  useEffect(() => {
     fetchAllowedTickers();
   }, [email]);
 
@@ -93,40 +126,38 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
     };
   }, [searchQuery]);
 
-  const handleAddTicker = (ticker: Ticker) => {
+  const handleAddTicker = async (ticker: Ticker) => {
     // Redirect to login if user is not authenticated
     if (!email) {
       router.push("/login");
       return;
     }
     // Prevent duplicate insert
-    supabase
+    const { data, error } = await supabase
       .from("ticker_selection_clients")
       .select("ticker")
       .eq("email", email)
-      .eq("ticker", ticker.symbol)
-      .then(({ data, error }) => {
-        if (error) {
-          console.error("Error checking for existing ticker:", error);
-          return;
-        }
-        if (data && data.length > 0) {
-          console.warn("Ticker already exists for user, not inserting.")
-          return;
-        }
-        supabase
-          .from("ticker_selection_clients")
-          .insert([{ ticker: ticker.symbol, name: ticker.name, email }])
-          .then(({ error }) => {
-            if (error) {
-              console.error("Error inserting ticker into DB:", error);
-            }
-          });
-      });
+      .eq("ticker", ticker.symbol);
+    if (error) {
+      console.error("Error checking for existing ticker:", error);
+      return;
+    }
+    if (data && data.length > 0) {
+      console.warn("Ticker already exists for user, not inserting.");
+      return;
+    }
+    const { error: insertError } = await supabase
+      .from("ticker_selection_clients")
+      .insert([{ ticker: ticker.symbol, name: ticker.name, email }]);
+    if (insertError) {
+      console.error("Error inserting ticker into DB:", insertError);
+    }
     onAddTicker(ticker);
     setIsAddDialogOpen(false);
     setSearchQuery("");
     setSearchResults([]);
+    // Refresh allowed tickers after add
+    await fetchAllowedTickers();
   };
 
   const handleRemoveTicker = async (symbol: string) => {
@@ -167,6 +198,8 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
               variant="outline"
               size="sm"
               className="mt-4 w-full"
+              disabled={isAtLimit}
+              title={isAtLimit ? `You have reached your plan's limit (${maxTickers} stocks)` : undefined}
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Ticker

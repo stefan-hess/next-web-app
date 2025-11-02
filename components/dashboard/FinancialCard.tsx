@@ -23,6 +23,8 @@ export interface FinancialCategory {
   icon: React.ComponentType<{ className?: string }>;
   color: string;
   data: Array<Record<string, string>>;
+  // Optional mapping from data keys to display labels
+  labels?: Record<string, string>;
 }
 
 export interface FinancialCardProps {
@@ -54,11 +56,22 @@ export const FinancialCard: React.FC<FinancialCardProps> = ({ category, isExpand
     }
   };
 
-  const formatLabel = (key: string): string => {
-    return key
-      .replace(/([A-Z])/g, ' $1')
-      .replace(/^./, str => str.toUpperCase())
+  // Default label formatter: handle camelCase and snake_case
+  const defaultFormatLabel = (key: string): string => {
+    // Replace underscores with spaces first (snake_case), then split camelCase
+    const withSpaces = key.replace(/_/g, ' ').replace(/([A-Z])/g, ' $1');
+    // Title case
+    return withSpaces
+      .split(' ')
+      .filter(Boolean)
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ')
       .trim();
+  };
+
+  const resolveLabel = (key: string): string => {
+    if (category.labels && category.labels[key]) return category.labels[key];
+    return defaultFormatLabel(key);
   };
 
   // Collect all keys from all periods
@@ -138,7 +151,7 @@ export const FinancialCard: React.FC<FinancialCardProps> = ({ category, isExpand
                 {allKeys.map((key) => (
                   <tr key={key}>
                     <td className="py-2 border-b border-border/50 text-muted-foreground font-medium">
-                      {formatLabel(key)}
+                      {resolveLabel(key)}
                     </td>
                     {[...category.data.slice(0, maxPeriods)].reverse().map((period, idx) => {
                       const raw = period[key] || "";
@@ -189,7 +202,7 @@ export const FinancialCard: React.FC<FinancialCardProps> = ({ category, isExpand
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="date" tick={{ fontSize: 12 }} />
                       <YAxis tick={{ fontSize: 12 }} />
-                      <Tooltip formatter={(value: number, name: string) => [`${value?.toLocaleString(undefined, { maximumFractionDigits: 2 })}`, formatLabel(name)]} />
+                      <Tooltip formatter={(value: number, name: string) => [`${value?.toLocaleString(undefined, { maximumFractionDigits: 2 })}`, resolveLabel(name)]} />
                       {allKeys.map((key, idx) => (
                         <Line
                           key={key}
@@ -198,7 +211,7 @@ export const FinancialCard: React.FC<FinancialCardProps> = ({ category, isExpand
                           stroke={colors[idx % colors.length]}
                           strokeWidth={2}
                           dot={{ r: 3 }}
-                          name={formatLabel(key)}
+                          name={resolveLabel(key)}
                           connectNulls
                         />
                       ))}
@@ -209,7 +222,7 @@ export const FinancialCard: React.FC<FinancialCardProps> = ({ category, isExpand
                     {allKeys.map((key, idx) => (
                       <div key={key} className="flex items-center gap-2">
                         <span style={{ background: colors[idx % colors.length], width: 16, height: 4, display: 'inline-block', borderRadius: 2 }}></span>
-                        <span className="text-xs text-muted-foreground">{formatLabel(key)}</span>
+                        <span className="text-xs text-muted-foreground">{resolveLabel(key)}</span>
                       </div>
                     ))}
                   </div>

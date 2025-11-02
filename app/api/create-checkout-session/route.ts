@@ -16,8 +16,10 @@ function getStripe(): Stripe {
   return stripe;
 }
 
-const _BASE_URL = process.env.NEXT_PUBLIC_BASE_URL?.startsWith("http")
-  ? process.env.NEXT_PUBLIC_BASE_URL
+// Determine the absolute base URL. If an env var is provided without a scheme, prefix https://
+const rawBase = process.env.NEXT_PUBLIC_BASE_URL;
+const _BASE_URL = rawBase
+  ? (rawBase.startsWith("http") ? rawBase : `https://${rawBase}`)
   : "http://localhost:3000";
 
 export async function POST(req: Request) {
@@ -30,26 +32,21 @@ export async function POST(req: Request) {
       plan?: string;
     };
 
-    // Calculate trial_end (first day of next month, 00:00 UTC)
-    const now = new Date();
-    const trialEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0, 0));
-    const trialEndUnix = Math.floor(trialEnd.getTime() / 1000);
+  // Charge immediately: no trial period. If any trial is configured at the Price level,
+  // override it by setting trial_end to 'now'.
 
   const session = await getStripe().checkout.sessions.create({
       mode: "subscription",
       payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
-  success_url: `www.stock-ticker-news.com/payment-success`,
-      cancel_url: `www.stock-ticker-news.com`,
+      success_url: `${_BASE_URL}/payment-success`,
+      cancel_url: `${_BASE_URL}`,
       customer_email: email,
       metadata: {
         email: email || "",
         first_name: firstName || "",
         last_name: lastName || "",
         plan: plan || "",
-      },
-      subscription_data: {
-        trial_end: trialEndUnix,
       },
     });
 
