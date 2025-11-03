@@ -22,8 +22,8 @@ const features = [
   },
   {
     icon: TrendingUp,
-    title: "Market Trends",
-    description: "Identify disconnections of market capitalization and underlying value with intuitive visualizations.",
+    title: "Community of Shareholders",
+    description: "Share your thoughts with other Shareholders and assess the strategic and financial performance of the company.",
     color: "text-financial-success"
   },
   {
