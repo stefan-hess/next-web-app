@@ -2,7 +2,6 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "display": "Next.js",
   "compilerOptions": {
-    "ignoreDeprecations": "6.0",
     "target": "es5",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
@@ -18,7 +17,11 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "baseUrl": ".",
+    "paths": {
+  "app/*": ["./app/*"],
+  "components/*": ["./components/*"],
+  "globalVars": ["./globalVars.ts"]
+    },
     "types": ["node", "vitest/globals", "@testing-library/jest-dom"],
     "plugins": [
       {

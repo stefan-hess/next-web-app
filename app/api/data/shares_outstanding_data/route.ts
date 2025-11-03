@@ -1,14 +1,14 @@
 import { NextRequest } from 'next/server';
 import { spawn } from 'child_process';
 
-export async function GET(req: NextRequest) {
+export async function GET(req: NextRequest): Promise<Response> {
   const { searchParams } = new URL(req.url);
   const ticker = searchParams.get('ticker');
   if (!ticker || typeof ticker !== 'string') {
     return new Response(JSON.stringify({ error: 'Missing or invalid ticker parameter' }), { status: 400 });
   }
 
-  return new Promise((resolve) => {
+  return new Promise<Response>((resolve) => {
     const py = spawn('python3', ['data/fetch_shares_outstanding_data.py', ticker]);
     let data = '';
     py.stdout.on('data', (chunk) => { data += chunk; });

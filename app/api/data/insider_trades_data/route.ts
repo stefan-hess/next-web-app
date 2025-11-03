@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { spawn } from 'child_process';
 
-export async function GET(req: NextRequest) {
+export async function GET(req: NextRequest): Promise<Response> {
   const { searchParams } = new URL(req.url);
   // Accept tickers as comma-separated string: ?tickers=AAPL,MSFT,GOOG
   const tickersParam = searchParams.get('tickers') || searchParams.get('ticker');
@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
   const tickers = tickersParam.split(',').map(t => t.trim()).filter(Boolean);
   const maxTrades = String(parseInt(maxTradesParam, 10));
 
-  return new Promise((resolve) => {
+  return new Promise<Response>((resolve) => {
     const py = spawn('python3', ['data/fetch_insider_trades_data.py', ...tickers, maxTrades]);
     let data = '';
     py.stdout.on('data', (chunk) => { data += chunk; });

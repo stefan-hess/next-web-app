@@ -1,8 +1,27 @@
 import { useEffect, useState } from "react";
 
-export function useSharesOutstandingData(ticker: string) {
+interface SharesOutstandingRow {
+  date?: string | number | null;
+  shares_outstanding_basic?: number | string | null;
+  shares_outstanding_diluted?: number | string | null;
+  market_cap_undiluted?: number | string | null;
+  market_cap_diluted?: number | string | null;
+  [key: string]: unknown;
+}
+
+interface SharesOutstandingResponse {
+  shares_outstanding?: Record<string, SharesOutstandingRow[]>;
+}
+
+interface UseSharesOutstandingDataResult {
+  data: Record<string, string>[] | null;
+  loading: boolean;
+  error: string | null;
+}
+
+export function useSharesOutstandingData(ticker: string): UseSharesOutstandingDataResult {
   const [data, setData] = useState<Record<string, string>[] | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -10,22 +29,9 @@ export function useSharesOutstandingData(ticker: string) {
     setLoading(true);
     setError(null);
     fetch(`/api/data/shares_outstanding_data?ticker=${ticker}`)
-      .then((res) => res.json())
+      .then((res) => res.json() as Promise<SharesOutstandingResponse>)
       .then((json) => {
-        // Expect shape: { shares_outstanding: { [ticker]: [ { date, shares_outstanding_basic, shares_outstanding_diluted, market_cap_undiluted, market_cap_diluted }, ... ] } }
-        interface SharesOutstandingRow {
-          date?: string | number | null;
-          shares_outstanding_basic?: number | string | null;
-          shares_outstanding_diluted?: number | string | null;
-          market_cap_undiluted?: number | string | null;
-          market_cap_diluted?: number | string | null;
-          [key: string]: unknown;
-        }
-        interface SharesOutstandingResponse {
-          shares_outstanding?: Record<string, SharesOutstandingRow[]>;
-        }
-        const j = json as SharesOutstandingResponse;
-        const raw = (j?.shares_outstanding?.[ticker] ?? []) as SharesOutstandingRow[];
+        const raw = (json?.shares_outstanding?.[ticker] ?? []);
         // Coerce all values to strings for FinancialCard compatibility
         const coerced = raw.map((row) => {
           const out: Record<string, string> = {};
