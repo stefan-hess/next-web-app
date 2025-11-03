@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export function useInsiderTradesData(ticker: string, maxTrades: number = 10) {
+export function useInsiderTradesData(ticker: string, maxTrades: number = 1000) {
   const [data, setData] = useState<Record<string, string>[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

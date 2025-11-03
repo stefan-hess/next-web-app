@@ -35,7 +35,8 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
   const [commentSuccess, setCommentSuccess] = useState('');
   const [loadingComments, setLoadingComments] = useState(false);
   const [mainComments, setMainComments] = useState<Record<string, unknown>[]>([]);
-  const { data: insiderData, loading: insiderLoading, error: insiderError } = useInsiderTradesData(ticker.symbol);
+  // Request up to 1000 trades to display more history
+  const { data: insiderData, loading: insiderLoading, error: insiderError } = useInsiderTradesData(ticker.symbol, 1000);
   const [expandedCards, setExpandedCards] = useState<string[]>([]);
   const [period, setPeriod] = useState<'annual' | 'quarterly'>('annual');
   const [view, setView] = useState<'table' | 'chart'>('table');
@@ -344,62 +345,62 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
       {/* Tabs Bar below header */}
       <div className="flex gap-2 border-b border-border bg-card sticky top-0 z-20">
         <button
-          className={`px-4 py-2 font-semibold ${activeTab === 'fundamentals' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
+          className={`px-4 py-2 font-semibold text-sm ${activeTab === 'fundamentals' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
           onClick={() => setActiveTab('fundamentals')}
         >Fundamental Data</button>
         <button
-          className={`px-4 py-2 font-semibold ${activeTab === 'shares' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
+          className={`px-4 py-2 font-semibold text-sm ${activeTab === 'shares' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
           onClick={() => setActiveTab('shares')}
         >Shares Outstanding & Market Cap</button>
         <button
-          className={`px-4 py-2 font-semibold ${activeTab === 'insider' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
+          className={`px-4 py-2 font-semibold text-sm ${activeTab === 'insider' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
           onClick={() => setActiveTab('insider')}
         >Insider Trades Data</button>
         <button
-          className={`px-4 py-2 font-semibold ${activeTab === 'dividends' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
+          className={`px-4 py-2 font-semibold text-sm ${activeTab === 'dividends' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
           onClick={() => setActiveTab('dividends')}
         >Dividends</button>
         <button
-          className={`px-4 py-2 font-semibold ${activeTab === 'latest' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
+          className={`px-4 py-2 font-semibold text-sm ${activeTab === 'latest' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
           onClick={() => setActiveTab('latest')}
         >Latest Developments</button>
         <button
-          className={`px-4 py-2 font-semibold ${activeTab === 'kpi' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
+          className={`px-4 py-2 font-semibold text-sm ${activeTab === 'kpi' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
           onClick={() => setActiveTab('kpi')}
         >KPI</button>
         <button
-          className={`px-4 py-2 font-semibold ${activeTab === 'reports' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
+          className={`px-4 py-2 font-semibold text-sm ${activeTab === 'reports' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
           onClick={() => setActiveTab('reports')}
         >Report Filings</button>
-<button
-  className={`px-4 py-2 font-semibold ${activeTab === 'commentaries' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
-  onClick={async () => {
-    if (!userAlias) {
-      setCheckingAlias(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data, error: _error } = await supabase
-          .from('news_subscribed_clients')
-          .select('user_alias')
-          .eq('client_id', user.id)
-          .single();
-        if (data && data.user_alias) {
-          setUserAlias(data.user_alias);
-          setActiveTab('commentaries');
-        } else {
-          setShowAliasPrompt(true);
-        }
-      } else {
-        setAliasError('You must be logged in to comment.');
-      }
-      setCheckingAlias(false);
-    } else {
-      setActiveTab('commentaries');
-    }
-  }}
->
-  Commentaries
-</button>
+        <button
+          className={`px-4 py-2 font-semibold text-sm ${activeTab === 'commentaries' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
+          onClick={async () => {
+            if (!userAlias) {
+              setCheckingAlias(true);
+              const { data: { user } } = await supabase.auth.getUser();
+              if (user) {
+                const { data, error: _error } = await supabase
+                  .from('news_subscribed_clients')
+                  .select('user_alias')
+                  .eq('client_id', user.id)
+                  .single();
+                if (data && data.user_alias) {
+                  setUserAlias(data.user_alias);
+                  setActiveTab('commentaries');
+                } else {
+                  setShowAliasPrompt(true);
+                }
+              } else {
+                setAliasError('You must be logged in to comment.');
+              }
+              setCheckingAlias(false);
+            } else {
+              setActiveTab('commentaries');
+            }
+          }}
+        >
+          Commentaries
+        </button>
       </div>
 
       {/* Global Discussions Sidebar Overlay (always available) */}
