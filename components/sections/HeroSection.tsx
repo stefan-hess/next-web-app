@@ -1,6 +1,5 @@
-import { ArrowRight, BarChart3 } from "lucide-react";
+import { BarChart3 } from "lucide-react";
 import Image from "next/image";
-import { Button } from "components/ui/Button/Button_new";
 
 const HeroSection = () => {
   return (

@@ -1,6 +1,6 @@
 
 import { BarChart3, Bell, FileText, Settings, User } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "app/lib/supabaseClient";
 import { Button } from "components/ui/Button/Button_new";
 
@@ -24,7 +24,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onOpenCommenta
   const [latestComments, setLatestComments] = useState<Record<string, { alias: string; timestamp: string } | null>>({});
   const [loadingNotifications, setLoadingNotifications] = useState(false);
 
-  const [refreshTick, setRefreshTick] = useState(0);
+  // Removed unused setRefreshTick to fix lint warning
 
   useEffect(() => {
     async function fetchLatestComments() {
@@ -57,7 +57,12 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onOpenCommenta
               console.debug('[Notifications] REST fetch failed', { symbol, status: resp.status });
               return { symbol, value: null };
             }
-            const rows = (await resp.json()) as Array<Record<string, any>>;
+            interface TickerCommentaryRow {
+              created_by?: string;
+              created_at?: string;
+              [key: string]: unknown;
+            }
+            const rows = (await resp.json()) as TickerCommentaryRow[];
             if (!rows?.length) return { symbol, value: null };
             const r = rows[0] || {};
             return {
@@ -84,7 +89,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onOpenCommenta
     if (notificationOpen) {
       fetchLatestComments();
     }
-  }, [selectedTickers, notificationOpen, refreshTick]);
+  }, [selectedTickers, notificationOpen]);
   async function handleLogout() {
     await supabase.auth.signOut();
     window.location.href = "/"; // Redirect to landing page

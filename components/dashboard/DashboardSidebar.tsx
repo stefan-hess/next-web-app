@@ -3,7 +3,6 @@
 
 
 import { Plus, X } from "lucide-react";
-import { GLOBAL_VARS } from "../../globalVars";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "app/lib/supabaseClient";
@@ -13,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogOverlay, DialogTitle, Dialog
 import { Input } from "components/ui/input";
 import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "components/ui/sidebar";
 import type { Ticker } from "./Dashboard";
+import { GLOBAL_VARS } from "../../globalVars";
 
 export interface DashboardSidebarProps {
   tickers: Ticker[];

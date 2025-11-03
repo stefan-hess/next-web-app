@@ -13,8 +13,19 @@ export function useSharesOutstandingData(ticker: string) {
       .then((res) => res.json())
       .then((json) => {
         // Expect shape: { shares_outstanding: { [ticker]: [ { date, shares_outstanding_basic, shares_outstanding_diluted, market_cap_undiluted, market_cap_diluted }, ... ] } }
-        const j = json as any;
-        const raw = (j?.shares_outstanding?.[ticker] ?? []) as Array<Record<string, unknown>>;
+        interface SharesOutstandingRow {
+          date?: string | number | null;
+          shares_outstanding_basic?: number | string | null;
+          shares_outstanding_diluted?: number | string | null;
+          market_cap_undiluted?: number | string | null;
+          market_cap_diluted?: number | string | null;
+          [key: string]: unknown;
+        }
+        interface SharesOutstandingResponse {
+          shares_outstanding?: Record<string, SharesOutstandingRow[]>;
+        }
+        const j = json as SharesOutstandingResponse;
+        const raw = (j?.shares_outstanding?.[ticker] ?? []) as SharesOutstandingRow[];
         // Coerce all values to strings for FinancialCard compatibility
         const coerced = raw.map((row) => {
           const out: Record<string, string> = {};
