@@ -1,8 +1,7 @@
 // No special config needed for app router
+import { createClient } from "@supabase/supabase-js"
 import { NextResponse } from "next/server"
 import Stripe from "stripe"
-import { GLOBAL_VARS } from "globalVars"
-import { getDbConnection } from "../../lib/db"
 
 let stripe: Stripe | null = null
 function getStripe(): Stripe {
@@ -15,6 +14,15 @@ function getStripe(): Stripe {
     stripe = new Stripe(key)
   }
   return stripe
+}
+
+function getServiceRoleSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !key) {
+    throw new Error("Missing Supabase service role env vars")
+  }
+  return createClient(url, key)
 }
 
 export async function POST(req: Request) {
@@ -49,76 +57,67 @@ export async function POST(req: Request) {
   console.log("Customer Email:", session.customer_email)
 
     try {
-      const conn = await getDbConnection()
-      const request = conn.request()
-
-      const clientEmail = session.customer_email || session.metadata?.email || null
-      const firstName = session.metadata?.first_name || null
-      const lastName = session.metadata?.last_name || null
-      // Safe extraction of possible string or object-with-id values without using 'any'
+      const clientEmail = session.customer_email || session.metadata?.email || null;
+      const firstName = session.metadata?.first_name || null;
+      const lastName = session.metadata?.last_name || null;
       const extractId = (val: unknown): string | null => {
-        if (typeof val === 'string') return val
+        if (typeof val === 'string') return val;
         if (val && typeof val === 'object' && 'id' in val) {
-          const idVal = (val as { id?: unknown }).id
-            return typeof idVal === 'string' ? idVal : null
+          const idVal = (val as { id?: unknown }).id;
+          return typeof idVal === 'string' ? idVal : null;
         }
-        return null
-      }
-      const stripeCustomerId = extractId(session.customer)
-      const stripeSubscriptionId = extractId(session.subscription)
-      const stripePlan = session.metadata?.plan || null
-      const createdAt = new Date()
-      const updatedAt = new Date()
-      const subscriptionCancelled = false
+        return null;
+      };
+      const stripeCustomerId = extractId(session.customer);
+      const stripeSubscriptionId = extractId(session.subscription);
+      const stripePlan = session.metadata?.plan || null;
+      const updatedAt = new Date().toISOString();
+      const subscriptionCancelled = false;
 
       if (!clientEmail) {
-        console.error("No customer email found in session")
+        console.error("No customer email found in session");
         return NextResponse.json(
           { error: "No customer email found in session" },
           { status: 400 }
-        )
+        );
       }
 
-      // Insert or update client in subscribed_clients
-      await request
-        .input("email", clientEmail)
-        .input("first_name", firstName)
-        .input("last_name", lastName)
-        .input("stripe_customer_id", stripeCustomerId)
-        .input("stripe_subscription_id", stripeSubscriptionId)
-        .input("stripe_plan", stripePlan)
-        .input("created_at", createdAt)
-        .input("updated_at", updatedAt)
-        .input("subscription_cancelled", subscriptionCancelled)
-        .query(`
-          MERGE INTO ${GLOBAL_VARS.TABLE_NEWS_SUBSCRIBED_CLIENTS} AS target
-          USING (SELECT @email AS email) AS source
-          ON target.email = source.email
-          WHEN MATCHED THEN
-            UPDATE SET
-              first_name = @first_name,
-              last_name = @last_name,
-              stripe_customer_id = @stripe_customer_id,
-              stripe_subscription_id = @stripe_subscription_id,
-              stripe_plan = @stripe_plan,
-              updated_at = @updated_at,
-              subscription_cancelled = @subscription_cancelled
-          WHEN NOT MATCHED THEN
-            INSERT (email, first_name, last_name, stripe_customer_id, stripe_subscription_id, stripe_plan, created_at, updated_at, subscription_cancelled)
-            VALUES (@email, @first_name, @last_name, @stripe_customer_id, @stripe_subscription_id, @stripe_plan, @created_at, @updated_at, @subscription_cancelled);
-        `)
+      // Upsert client in Supabase (do not update created_at)
+      const supabaseService = getServiceRoleSupabase();
+      const { error: upsertError } = await supabaseService
+        .from("news_subscribed_clients")
+        .upsert([
+          {
+            email: clientEmail,
+            first_name: firstName,
+            last_name: lastName,
+            stripe_customer_id: stripeCustomerId,
+            stripe_subscription_id: stripeSubscriptionId,
+            stripe_plan: stripePlan,
+            updated_at: updatedAt,
+            subscription_cancelled: subscriptionCancelled,
+          },
+        ], { onConflict: "email" });
 
-      console.log(`Client ${clientEmail} inserted/updated successfully.`)
+      if (upsertError) {
+        console.error("Supabase upsert failed:", upsertError.message);
+        return NextResponse.json(
+          { error: "Failed to update subscription in Supabase", details: upsertError.message },
+          { status: 500 }
+        );
+      }
+
+      console.log(`Client ${clientEmail} inserted/updated successfully in Supabase.`);
     } catch (err) {
       if (err instanceof Error) {
-        console.error("Database update failed:", err.message, err.stack)
+        console.error("Supabase update failed:", err.message, err.stack);
       } else {
-        console.error("Database update failed:", err)
+        console.error("Supabase update failed:", err);
       }
       return NextResponse.json(
-        { error: "Failed to update subscription in DB" },
+        { error: "Failed to update subscription in Supabase" },
         { status: 500 }
-      )
+      );
     }
   }
 
@@ -134,37 +133,29 @@ try {
 
     // Decide if the subscription is considered cancelled
     const isCancelled =
-      status === "canceled" || status === "incomplete_expired" ? 1 : 0;
+      status === "canceled" || status === "incomplete_expired";
 
-    try {
-      const conn = await getDbConnection();
-      const req = conn.request();
+    // Update subscription_cancelled in Supabase
+    const supabaseService = getServiceRoleSupabase();
+    const { error: updateError } = await supabaseService
+      .from("news_subscribed_clients")
+      .update({
+        subscription_cancelled: isCancelled,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("stripe_subscription_id", stripeSubscriptionId);
 
-      await req
-        .input("stripe_subscription_id", stripeSubscriptionId)
-        .input("subscription_cancelled", isCancelled)
-        .query(`
-          UPDATE ${GLOBAL_VARS.TABLE_NEWS_SUBSCRIBED_CLIENTS}
-          SET subscription_cancelled = @subscription_cancelled,
-              updated_at = GETDATE()
-          WHERE stripe_subscription_id = @stripe_subscription_id
-        `);
-
-      console.log(
-        `Updated subscription state for ${stripeSubscriptionId}: cancelled=${isCancelled}`
-      );
-    } catch (dbErr) {
-      console.error(
-        "Failed to update subscription state in DB from webhook:",
-        dbErr
-      );
-
-      // **Return a 500 so Stripe retries the webhook**
+    if (updateError) {
+      console.error("Supabase subscription update failed:", updateError.message);
       return NextResponse.json(
-        { error: "Database update failed" },
+        { error: "Failed to update subscription state in Supabase", details: updateError.message },
         { status: 500 }
       );
     }
+
+    console.log(
+      `Updated subscription state for ${stripeSubscriptionId} in Supabase: cancelled=${isCancelled}`
+    );
   }
 } catch (e) {
   console.error("Error processing subscription webhook:", e);

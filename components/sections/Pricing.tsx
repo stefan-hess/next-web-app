@@ -100,6 +100,7 @@ const PricingSection = () => {
   const [firstName, setFirstName] = React.useState("");
   const [lastName, setLastName] = React.useState("");
   const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
   const [formError, setFormError] = React.useState<string|null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const [agreedToTerms, setAgreedToTerms] = React.useState(false);
@@ -120,7 +121,7 @@ const PricingSection = () => {
   const handleSubmit = async (e: React.FormEvent, planName: string) => {
     e.preventDefault();
     setFormError(null);
-    if (!firstName || !lastName || !email) {
+    if (!firstName || !lastName || !email || !password) {
       setFormError("All fields are required.");
       return;
     }
@@ -130,6 +131,27 @@ const PricingSection = () => {
     }
     setIsLoading(true);
     try {
+      // 1. Call API route to sign up and create subscription
+      const resSignup = await fetch("/api/signup-and-subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          password,
+          firstName,
+          lastName,
+          stripe_plan: planName
+        })
+      });
+      const signupData = await resSignup.json();
+      const signupSuccess = typeof signupData === 'object' && signupData !== null && 'success' in signupData && signupData.success;
+      const signupError = typeof signupData === 'object' && signupData !== null && 'error' in signupData ? signupData.error : undefined;
+      if (!resSignup.ok || !signupSuccess) {
+        setFormError(typeof signupError === 'string' ? signupError : "Failed to sign up and create subscription.");
+        setIsLoading(false);
+        return;
+      }
+      // 3. Proceed to Stripe checkout
       const priceId = priceIdMap[planName];
       if (!priceId) {
         setFormError("Invalid plan selected.");
@@ -147,7 +169,7 @@ const PricingSection = () => {
           plan: planName
         })
       });
-  const data = await res.json() as { id?: string; error?: string };
+      const data = await res.json() as { id?: string; error?: string };
       if (!res.ok || !data || typeof data !== 'object' || !('id' in data) || !data.id) {
         setFormError((data && typeof data === 'object' && 'error' in data && data.error) || "Failed to create checkout session.");
         setIsLoading(false);
@@ -163,12 +185,12 @@ const PricingSection = () => {
       }
       await stripe.redirectToCheckout({ sessionId: data.id });
     } catch (err: unknown) {
-  if (err instanceof Error) {
-    setFormError(err.message || "An error occurred. Please try again.");
-    } else {
-    setFormError("An error occurred. Please try again.");
-    }
-    setIsLoading(false);
+      if (err instanceof Error) {
+        setFormError(err.message || "An error occurred. Please try again.");
+      } else {
+        setFormError("An error occurred. Please try again.");
+      }
+      setIsLoading(false);
     }
   };
 
@@ -186,10 +208,6 @@ const PricingSection = () => {
           <h2 className="text-3xl lg:text-5xl font-bold text-foreground">
             Choose Your Investment Plan
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Start with our free trial of 2 stocks and upgrade to select more stocks and advanced features. 
-            Cancel anytime.
-          </p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto relative" style={{zIndex:1}}>
@@ -304,6 +322,16 @@ const PricingSection = () => {
                             required
                           />
                         </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                          <input
+                            className="mt-1 block w-full rounded-md border border-black bg-[#fdf6ee] shadow-sm focus:border-black focus:ring-black transition"
+                            type="password"
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
+                            required
+                          />
+                        </div>
                         <div className="flex items-center mt-2">
                           <input
                             type="checkbox"
@@ -335,7 +363,7 @@ const PricingSection = () => {
             Need a custom solution? We offer enterprise packages with tailored features.
           </p>
           <div className="text-financial-primary text-lg font-semibold">
-            Contact Sales Team at: info@stocktickernews.com
+            Contact Sales Team at: info@stock-ticker-news.com
           </div>
         </div>
       </div>

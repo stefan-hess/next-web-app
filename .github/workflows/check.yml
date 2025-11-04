@@ -17,27 +17,24 @@ jobs:
       - uses: actions/checkout@v4
       - run: echo "node_version=$(cat .github/nodejs.version)" >> $GITHUB_ENV
       - name: "use node ${{ env.node_version }}"
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: "${{ env.node_version }}"
+          cache: 'npm'
 
-      - name: "Install pnpm & dependencies"
-        uses: pnpm/action-setup@v4
-        with:
-          run_install: |
-            - recursive: true
-            - args: [--frozen-lockfile]
+      - name: Install dependencies
+        run: npm ci
 
       - name: Lint check
-        run: pnpm run lint
+        run: npm run lint
       - name: Format check
-        run: pnpm run prettier
+        run: npm run prettier
       - name: Unit & Integration tests
-        run: pnpm run test
+        run: npm test
       - name: Smoke & Acceptance tests
         run: |
-          pnpm run build-storybook --quiet
-          pnpm playwright install
-          pnpm dlx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
-            "pnpm dlx http-server storybook-static --port 6006 --silent" \
-            "pnpm dlx wait-on tcp:127.0.0.1:6006 && pnpm run test-storybook"
+          npm run build-storybook --silent
+          npx playwright install
+          npx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
+            "npx http-server storybook-static --port 6006 --silent" \
+            "npx wait-on tcp:127.0.0.1:6006 && npm run test-storybook"

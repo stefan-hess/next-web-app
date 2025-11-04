@@ -1,3 +1,6 @@
+// not used anymore, see page login for handling of new users
+
+
 "use client"
 
 import { useState } from 'react'
