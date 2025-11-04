@@ -620,7 +620,7 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
               <h2 className="text-lg font-semibold text-primary flex-1 text-left">Annual Full Extract</h2>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full border rounded-lg bg-card shadow-sm text-xs">
+          <table className="w-full border rounded-lg bg-card shadow-sm text-xs" style={{ tableLayout: 'auto' }}>
                 <thead className="bg-blue-50">
                   <tr>
                     {fullAnnualData.length > 0 && Object.keys(fullAnnualData[0] ?? {}).map((col) => (
