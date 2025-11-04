@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader } from "components/ui/card";
 
 const plans = [
   {
-    name: "Munger Tier",
+    name: "Munger",
     price: 4.99,
     description: "Perfect for individual investors getting started",
     features: [
@@ -18,7 +18,7 @@ const plans = [
     popular: false
   },
   {
-    name: "Buffett Tier",
+    name: "Buffett",
     price: 8.99,
     description: "Ideal for sophisticated investors and professionals that manage portfolios",
     features: [
@@ -113,9 +113,9 @@ const PricingSection = () => {
 
   // Map plan name to Stripe priceId
   const priceIdMap: Record<string, string> = {
-    "Munger Tier": "price_1S58CGI8pTUJRz6FyikGu4R7",
-    "Buffett Tier": "price_1S58CtI8pTUJRz6FSh35gDnU",
-    "Graham Tier (Enterprise)": "price_graham" // TODO: Replace with real price IDs
+    "Munger": "price_1S58CGI8pTUJRz6FyikGu4R7",
+    "Buffett": "price_1S58CtI8pTUJRz6FSh35gDnU",
+    "Graham": "price_graham" // TODO: Replace with real price IDs
   };
 
   const handleSubmit = async (e: React.FormEvent, planName: string) => {
@@ -165,7 +165,6 @@ const PricingSection = () => {
           email,
           firstName,
           lastName,
-          plan: planName
         })
       });
       const data = await res.json() as { id?: string; error?: string };
@@ -235,21 +234,21 @@ const PricingSection = () => {
                 <div className="space-y-2">
                   <div className="text-4xl font-bold text-foreground">
                     <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: '0.25em' }}>
-                      {plan.name === "Munger Tier" && (
+                      {plan.name === "Munger" && (
                         <>
                           <div className="text-xs line-through mb-1">$9.99</div>
                           $<span className="text-black">{plan.price}</span>
                         </>
                       )}
-                      {plan.name === "Buffett Tier" && (
+                      {plan.name === "Buffett" && (
                         <>
                           <div className="text-xs line-through mb-1">$17.99</div>
                           $<span className="text-black">{plan.price}</span>
                         </>
                       )}
-                      {plan.name !== "Munger Tier" && plan.name !== "Buffett Tier" && (
+                      {plan.name !== "Munger" && plan.name !== "Buffett" && (
                         <>
-                          {plan.name === "Graham Tier (Enterprise)" && (
+                          {plan.name === "Graham" && (
                             <div className="text-xs line-through mb-1">$199</div>
                           )}
                           ${plan.price}
@@ -272,7 +271,7 @@ const PricingSection = () => {
                   ))}
                 </ul>
 
-                {plan.name === "Graham Tier (Enterprise)" ? (
+                {plan.name === "Graham" ? (
                   <a
                     href="#contactus"
                     className="w-full block rounded-xl border border-black bg-[#fdf6ee] px-6 py-3 font-semibold text-black text-center shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl active:scale-95"
@@ -282,7 +281,7 @@ const PricingSection = () => {
                 ) : (
                   <>
                     <Button 
-                      variant={plan.name === "Buffett Tier" || plan.name === "Munger Tier" ? "financial-outline" : "hero"} 
+                      variant={plan.name === "Buffett" || plan.name === "Munger" ? "financial-outline" : "hero"} 
                       className="w-full"
                       size="lg"
                       onClick={() => handleExpand(index)}
