@@ -139,8 +139,7 @@ const PricingSection = () => {
           email,
           password,
           firstName,
-          lastName,
-          stripe_plan: planName
+          lastName
         })
       });
       const signupData = await resSignup.json();
