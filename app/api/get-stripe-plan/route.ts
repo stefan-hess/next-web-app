@@ -1,21 +1,27 @@
 import { NextRequest, NextResponse } from "next/server"
+import { createClient } from "@supabase/supabase-js"
 import { GLOBAL_VARS } from "globalVars"
-import { getDbConnection } from "../../lib/db"
 
 export async function POST(req: NextRequest) {
   const { email } = (await req.json()) as { email: string }
   if (!email) return NextResponse.json({ error: "Email required" }, { status: 400 })
   try {
-    const conn = await getDbConnection()
-    const request = conn.request()
-    const result = await request.input("email", email).query(`
-  SELECT stripe_plan, subscription_cancelled FROM ${GLOBAL_VARS.TABLE_NEWS_SUBSCRIBED_CLIENTS} WHERE email = @email
-    `)
-    const row = result.recordset[0]
-    if (!row || row.subscription_cancelled === true) {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+    const { data, error } = await supabase
+      .from(GLOBAL_VARS.TABLE_NEWS_SUBSCRIBED_CLIENTS)
+      .select("stripe_plan, subscription_cancelled")
+      .eq("email", email)
+      .single()
+    if (error) {
+      throw error
+    }
+    if (!data || data.subscription_cancelled === true) {
       return NextResponse.json({ plan: null })
     }
-    return NextResponse.json({ plan: row.stripe_plan || null })
+    return NextResponse.json({ plan: data.stripe_plan || null })
   } catch (err) {
     if (err instanceof Error) {
       console.error("Get Stripe plan failed:", err.message, err.stack)
