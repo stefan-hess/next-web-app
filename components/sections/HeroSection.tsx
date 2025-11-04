@@ -12,12 +12,12 @@ const HeroSection = () => {
         <div className="w-full h-full rounded-full bg-gradient-to-bl from-green-400 via-blue-300 to-blue-400 opacity-60 blur-3xl animate-[blob2_22s_ease-in-out_infinite]" />
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 lg:px-8 py-20 lg:py-32">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 lg:py-32">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* Text Section */}
           <div className="space-y-8">
             <div className="space-y-4">
-              <h1 className="text-4xl lg:text-6xl font-bold text-foreground leading-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-foreground leading-tight">
                 Stay updated with
                 <span className="relative inline-block">
                   <span className="bg-gradient-primary bg-clip-text text-blue-800">
@@ -29,7 +29,7 @@ const HeroSection = () => {
                 Stock Insights
               </h1>
 
-              <p className="text-xl text-muted-foreground leading-relaxed">
+              <p className="text-base sm:text-lg lg:text-xl text-muted-foreground leading-relaxed">
                 Get up to date quarterly and annual financial filings data and what has been moving the core of the
                 business, not just the stock price moves. Invest as the likes of Graham, Buffett and Munger and observe the intrinsic value of your investments.
               </p>
@@ -38,7 +38,7 @@ const HeroSection = () => {
             <div className="flex flex-col sm:flex-row gap-4">
               <a
                 href="#productDemo"
-                className="transition-transform duration-300 hover:-translate-y-1 hover:scale-102 border-2 border-financial-primary text-financial-primary bg-transparent font-bold py-3 px-8 rounded-lg shadow text-lg flex items-center justify-center"
+                className="transition-transform duration-300 hover:-translate-y-1 hover:scale-102 border-2 border-financial-primary text-financial-primary bg-transparent font-bold py-3 px-6 sm:px-8 rounded-lg shadow text-base sm:text-lg flex items-center justify-center"
                 style={{ minHeight: '48px' }}
               >
                 <BarChart3 className="mr-2 h-4 w-4" />
@@ -46,7 +46,7 @@ const HeroSection = () => {
               </a>
               <a
                 href="/login"
-                className="transition-transform duration-300 hover:-translate-y-1 hover:scale-102 border-2 font-bold py-3 px-8 rounded-lg shadow text-lg flex items-center justify-center"
+                className="transition-transform duration-300 hover:-translate-y-1 hover:scale-102 border-2 font-bold py-3 px-6 sm:px-8 rounded-lg shadow text-base sm:text-lg flex items-center justify-center"
                 style={{ borderColor: '#bfa76a', color: '#bfa76a', background: 'transparent', minHeight: '48px' }}
               >
                 Log In
@@ -57,19 +57,19 @@ const HeroSection = () => {
           </div>
 
           {/* Image Section – full left edge to center */}
-          <div className="relative flex lg:block">
+          <div className="relative flex lg:block w-full justify-center">
             {/* Right-side animated blob */}
             <div className="pointer-events-none absolute right-[-80px] top-[-60px] h-[500px] w-[220px] z-0 hidden lg:block">
               <div className="w-full h-full rounded-full bg-gradient-to-bl from-red-400 via-blue-300 to-blue-400 opacity-60 blur-3xl animate-[blob2_22s_ease-in-out_infinite]" />
             </div>
-            <div className="relative z-10 h-[420px] w-screen lg:w-[50vw] overflow-hidden rounded-none">
+            <div className="relative z-10 h-[220px] sm:h-[320px] md:h-[420px] w-full max-w-xs sm:max-w-md md:max-w-lg lg:w-[50vw] overflow-hidden rounded-xl mx-auto">
               <Image
-              src="/assets/Hero_image.jpg"
-              alt="Financial dashboard showing stock charts and market data"
-              fill
-              className="absolute left-0 top-0 h-full w-full object-cover shadow-card"
-              style={{ objectPosition: "left center" }}
-              priority
+                src="/assets/Hero_image.jpg"
+                alt="Financial dashboard showing stock charts and market data"
+                fill
+                className="absolute left-0 top-0 h-full w-full object-cover shadow-card"
+                style={{ objectPosition: "left center" }}
+                priority
               />
             </div>
             <div className="absolute -inset-4 bg-gradient-primary opacity-20 blur-3xl rounded-full pointer-events-none"></div>

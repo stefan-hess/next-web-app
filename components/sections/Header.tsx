@@ -14,6 +14,7 @@ const Header = () => {
 
   const [activeSection, setActiveSection] = useState<string>("features");
   const [hovered, setHovered] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
   const blobRef = useRef<HTMLDivElement | null>(null);
 
@@ -56,13 +57,14 @@ const Header = () => {
 
   return (
     <header className="border-b border-border bg-[#fdf6ee] sticky top-0 z-50 overflow-hidden">
-      <div className="container mx-auto px-4 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <ChartColumn className="h-8 w-8 text-financial-primary" />
-            <span className="text-xl font-bold text-foreground">StockTickerNews</span>
+      <div className="container mx-auto px-2 sm:px-4 lg:px-8">
+        <div className="flex h-12 sm:h-14 md:h-16 items-center justify-between">
+          <div className="flex items-center space-x-1 sm:space-x-2">
+            <ChartColumn className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-financial-primary" />
+            <span className="text-base sm:text-lg md:text-xl font-bold text-foreground">StockTickerNews</span>
           </div>
-          <nav className="hidden md:flex items-center space-x-8 relative" style={{ position: "relative" }}>
+          {/* Desktop Nav */}
+          <nav className="hidden md:flex items-center space-x-4 lg:space-x-8 relative" style={{ position: "relative" }}>
             {/* Animated blob */}
             <div
               ref={blobRef}
@@ -82,7 +84,7 @@ const Header = () => {
                 key={item.id}
                 href={`#${item.id}`}
                 ref={(el: HTMLAnchorElement | null) => { navRefs.current[item.id] = el; }}
-                className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors relative z-10 ${
+                className={`text-xs sm:text-sm font-medium text-muted-foreground hover:text-foreground transition-colors relative z-10 ${
                   (hovered === item.id || (!hovered && activeSection === item.id)) ? "font-bold text-financial-primary" : ""
                 }`}
                 onMouseEnter={() => setHovered(item.id)}
@@ -92,7 +94,8 @@ const Header = () => {
               </a>
             ))}
           </nav>
-          <div className="flex items-center space-x-4">
+          {/* Mobile Nav Button */}
+          <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4">
             <a href="/login">
               <Button variant="financial" size="sm">
                 Log In
@@ -103,11 +106,37 @@ const Header = () => {
                 Contact Us
               </Button>
             </a>
-            <Button variant="ghost" size="icon" className="md:hidden">
+            <Button variant="ghost" size="icon" className="md:hidden p-1" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Open navigation menu">
               <Menu className="h-4 w-4" />
             </Button>
           </div>
         </div>
+        {/* Mobile Nav Drawer */}
+        {mobileMenuOpen && (
+          <div className="md:hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex flex-col">
+            <div className="bg-[#fdf6ee] shadow-lg rounded-b-2xl p-4 pt-6 flex flex-col gap-4 w-full max-w-xs mx-auto mt-0">
+              {NAV_ITEMS.map(item => (
+                <a
+                  key={item.id}
+                  href={`#${item.id}`}
+                  className="text-base font-semibold text-financial-primary py-2 px-3 rounded hover:bg-indigo-50 transition"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {item.label}
+                </a>
+              ))}
+              <a href="/login" className="text-base font-semibold text-financial-primary py-2 px-3 rounded hover:bg-indigo-50 transition" onClick={() => setMobileMenuOpen(false)}>
+                Log In
+              </a>
+              <a href="#contactus" className="text-base font-semibold text-financial-primary py-2 px-3 rounded hover:bg-indigo-50 transition" onClick={() => setMobileMenuOpen(false)}>
+                Contact Us
+              </a>
+              <Button variant="ghost" size="sm" className="mt-2" onClick={() => setMobileMenuOpen(false)}>
+                Close
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
       <style>{`
         .blur-2xl {
