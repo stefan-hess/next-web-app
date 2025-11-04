@@ -62,7 +62,7 @@ const HeroSection = () => {
             <div className="pointer-events-none absolute right-[-80px] top-[-60px] h-[500px] w-[220px] z-0 hidden lg:block">
               <div className="w-full h-full rounded-full bg-gradient-to-bl from-red-400 via-blue-300 to-blue-400 opacity-60 blur-3xl animate-[blob2_22s_ease-in-out_infinite]" />
             </div>
-            <div className="relative z-10 h-[220px] sm:h-[320px] md:h-[420px] w-full max-w-xs sm:max-w-md md:max-w-lg lg:w-[50vw] overflow-hidden rounded-xl mx-auto">
+            <div className="relative z-10 h-[220px] sm:h-[320px] md:h-[420px] w-full max-w-xs sm:max-w-md md:max-w-lg lg:w-[800px] lg:max-w-none lg:mx-0 lg:-mr-32 overflow-hidden rounded-xl mx-auto">
               <Image
                 src="/assets/Hero_image.jpg"
                 alt="Financial dashboard showing stock charts and market data"
