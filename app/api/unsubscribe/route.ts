@@ -1,8 +1,8 @@
 
+import { createClient } from "@supabase/supabase-js"
 import { NextRequest, NextResponse } from "next/server"
 import Stripe from "stripe"
 import { GLOBAL_VARS } from "globalVars"
-import { createClient } from "@supabase/supabase-js"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: GLOBAL_VARS.STRIPE_API_VERSION as "2025-08-27.basil" })
 
