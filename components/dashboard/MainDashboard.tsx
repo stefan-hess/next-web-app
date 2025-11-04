@@ -557,22 +557,20 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
             <div className="text-center text-destructive py-8">
               <span>Error: {newsError}</span>
             </div>
-          ) : news ? (
+          ) : Array.isArray(news) && news.length > 0 ? (
             <>
-              {/* Month end and year title */}
-              <div className="mb-2 text-lg font-semibold text-primary text-center">
-                Latest Developments for {ticker.symbol} - {(() => {
-                  const now = new Date();
-                  let month = now.getMonth(); // previous month (0-based)
-                  let year = now.getFullYear();
-                  if (month === 0) { month = 12; year -= 1; }
-                  // Format month name
-                  const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'long' });
-                  return `${monthName} ${year}`;
-                })()}
+              <div className="mb-4 text-lg font-semibold text-primary text-center">
+                Latest Developments for {ticker.symbol}
               </div>
-              <div className="p-6 text-base text-foreground border rounded-lg bg-card shadow-sm whitespace-pre-line">
-                {news}
+              <div className="space-y-6">
+                {news.map((item, idx) => (
+                  <div key={idx} className="p-6 text-base text-foreground border rounded-lg bg-card shadow-sm whitespace-pre-line">
+                    <div className="mb-2 text-sm text-muted-foreground text-right">
+                      {item.month_end && item.year ? `${item.month_end}/${item.year}` : ''}
+                    </div>
+                    {item.news_output}
+                  </div>
+                ))}
               </div>
             </>
           ) : (
