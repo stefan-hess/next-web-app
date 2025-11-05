@@ -95,7 +95,11 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onOpenCommenta
     window.location.href = "/"; // Redirect to landing page
   }
   return (
-    <header className="sticky top-0 z-30 h-16 bg-card border-b border-border flex items-center justify-between px-6 shadow-sm">
+    <>
+      <div className="block md:hidden w-full bg-yellow-100 text-yellow-900 text-center py-2 px-4 text-sm font-medium border-b border-yellow-300">
+        You are currently using the mobile view, for enhanced experience, please use the desktop version.
+      </div>
+      <header className="sticky top-0 z-30 h-16 bg-card border-b border-border flex items-center justify-between px-6 shadow-sm">
       <div className="flex items-center gap-4">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
@@ -169,6 +173,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onOpenCommenta
           )}
         </div>
       </div>
-    </header>
+      </header>
+    </>
   );
 };
