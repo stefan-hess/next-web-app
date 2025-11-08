@@ -17,6 +17,7 @@ const plans = [
       "Business developments of the month",
       "Dividend history",
       "Insider trading activities",
+      "News Sentiment Analysis",
       "Access to community discussions",
     ],
     popular: false
@@ -33,8 +34,9 @@ const plans = [
       "Business developments of the month",
       "Dividend history",
       "Insider trading activities",
+      "News Sentiment Analysis",
       "Access to community discussions",
-      "AI Assistant",
+  <span className="font-bold">AI Assistant</span>,
     ],
     popular: true
   },
@@ -50,9 +52,10 @@ const plans = [
       "Business developments of the month",
       "Dividend history",
       "Insider trading activities",
+      "News Sentiment Analysis",
       "Access to community discussions",
-      "AI Assistant",
-      "Customized reports"
+  <span className="font-bold">AI Assistant</span>,
+  <span className="font-bold">Customized reports</span>
     ],
     popular: false
   }
@@ -211,7 +214,7 @@ const PricingSection = () => {
         <div className="w-full h-full rounded-full bg-gradient-to-bl from-green-400 via-blue-300 to-blue-400 opacity-60 blur-3xl animate-[blob2_22s_ease-in-out_infinite]" />
       </div>
       <div className="container mx-auto px-4 lg:px-8 relative z-10">
-        <div className="text-center space-y-4 mb-16">
+  <div className="text-center space-y-4 mb-24">
           <div className="inline-block bg-green-100 text-green-800 px-4 py-2 rounded-full font-semibold text-base mb-2 shadow">
             🎉 Limited Offer: <span className="font-bold">50% OFF</span> on all plans!
           </div>
@@ -230,15 +233,18 @@ const PricingSection = () => {
               onMouseLeave={() => setHoveredCard(null)}
               ref={el => { cardRefs.current[index] = el; }}
               className={`group relative bg-gradient-card border-border transition-all duration-300 hover:shadow-glow hover:-translate-y-2 hover:scale-105 ${
-                plan.popular ? 'shadow-glow scale-105' : ''
+                plan.popular ? 'shadow-glow scale-105 border-4 border-blue-500' : ''
               } ${expandedIndex === index ? 'ring-2 ring-blue-500' : ''}`}
             >
-              {plan.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <div className="bg-gradient-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-medium flex items-center space-x-1">
+                {plan.popular && (
+                  <div className="absolute -top-10 left-1/2 transform -translate-x-1/2">
+                    <div className="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-medium flex items-center space-x-2 shadow-md">
+                      {/* Star icon */}
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.966a1 1 0 00.95.69h4.175c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.287 3.966c.3.921-.755 1.688-1.54 1.118l-3.38-2.455a1 1 0 00-1.175 0l-3.38 2.455c-.784.57-1.838-.197-1.539-1.118l1.287-3.966a1 1 0 00-.364-1.118L2.049 9.393c-.783-.57-.38-1.81.588-1.81h4.175a1 1 0 00.95-.69l1.286-3.966z"/></svg>
+                      <span>Popular</span>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
               
               <CardHeader className="text-center space-y-4 pb-8">
                 <h3 className="text-2xl font-bold text-foreground">{plan.name}</h3>
