@@ -1,8 +1,8 @@
 "use client";
 
 import { Activity, BarChart3, DollarSign, ScrollText } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { CartesianGrid, Line, LineChart, ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis } from "recharts";
 import { supabase } from "app/lib/supabaseClient";
 import { useCachedFinancialData } from "app/lib/useCachedFinancialData";
 import { useDividendData } from "app/lib/useDividendData";
@@ -33,6 +33,35 @@ interface MainDashboardProps {
 }
 
 export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentariesSidebarOpen, setCommentariesSidebarOpen, onProvideAssistantData }: MainDashboardProps) => {
+  // Sentiment tab state
+  interface SentimentFeedItem {
+    time_published?: string;
+    overall_sentiment_score?: number | string;
+    title?: string;
+    headline?: string;
+    source?: string;
+    [key: string]: unknown;
+  }
+  const [sentimentData, setSentimentData] = useState<SentimentFeedItem[] | null>(null);
+  const [sentimentLoading, setSentimentLoading] = useState(false);
+  const [sentimentError, setSentimentError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!ticker?.symbol) return;
+    setSentimentLoading(true);
+    setSentimentError(null);
+    fetch(`/api/data/sentiment_data?ticker=${ticker.symbol}`)
+      .then(res => res.json())
+      .then(json => {
+  const result = (json && typeof json === 'object' && ticker.symbol in json) ? (json as Record<string, { feed?: SentimentFeedItem[] }>)[ticker.symbol] : null;
+  setSentimentData(result?.feed ?? []);
+        setSentimentLoading(false);
+      })
+      .catch((_err) => {
+        setSentimentError('Failed to fetch sentiment data');
+        setSentimentLoading(false);
+      });
+  }, [ticker.symbol]);
   // Sidebar state for replying to a main post
   const [replySidebarOpen, setReplySidebarOpen] = useState(false);
   type SelectedMainPostType = Record<string, unknown> | null | 'NEW_POST';
@@ -50,7 +79,7 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
   const [expandedCards, setExpandedCards] = useState<string[]>([]);
   const [period, setPeriod] = useState<'annual' | 'quarterly'>('annual');
   const [view, setView] = useState<'table' | 'chart'>('table');
-  const [activeTab, setActiveTab] = useState<'fundamentals' | 'shares' | 'insider' | 'dividends' | 'latest' | 'kpi' | 'reports' | 'commentaries'>('fundamentals');
+  const [activeTab, setActiveTab] = useState<'fundamentals' | 'shares' | 'insider' | 'dividends' | 'latest' | 'kpi' | 'reports' | 'commentaries' | 'sentiment'>('fundamentals');
   const [userAlias, setUserAlias] = useState<string | null>(null);
   const [showAliasPrompt, setShowAliasPrompt] = useState(false);
   const [aliasInput, setAliasInput] = useState('');
@@ -65,20 +94,34 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
   const fullAnnualData = data?.[ticker.symbol]?.annual || [];
   const { data: sharesData, loading: sharesLoading, error: sharesError } = useSharesOutstandingData(ticker.symbol);
 
-  // Provide cached data to parent for assistant
+  // Provide cached data to parent for assistant (guarded to avoid update loops)
+  const onProvideAssistantDataRef = useRef(onProvideAssistantData);
+  useEffect(() => { onProvideAssistantDataRef.current = onProvideAssistantData; }, [onProvideAssistantData]);
+  const lastAssistantPayloadRef = useRef<string>("");
   useEffect(() => {
-    if (onProvideAssistantData) {
-      // Ensure insider trades are always included and not undefined
-      onProvideAssistantData({
-        annual: fullAnnualData,
-        quarterly: fullQuarterlyData,
-        shares: Array.isArray(sharesData) ? sharesData : [],
-        news: Array.isArray(news) ? news : [],
-        insider: Array.isArray(insiderData) ? insiderData.filter(Boolean) : [],
-        dividends: Array.isArray(dividendData) ? dividendData : [],
-      });
+    const payload = {
+      annual: fullAnnualData,
+      quarterly: fullQuarterlyData,
+      shares: Array.isArray(sharesData) ? sharesData : [],
+      news: Array.isArray(news) ? news : [],
+      insider: Array.isArray(insiderData) ? insiderData.filter(Boolean) : [],
+      dividends: Array.isArray(dividendData) ? dividendData : [],
+    } as const;
+    // Serialize to detect real content changes; avoids new object identity each render
+    let snapshot = "";
+    try {
+      snapshot = JSON.stringify(payload);
+    } catch {
+      // Fallback: if serialization fails, still try to send once
+      snapshot = Math.random().toString(36);
     }
-  }, [onProvideAssistantData, fullAnnualData, fullQuarterlyData, sharesData, news, insiderData, dividendData]);
+    if (snapshot !== lastAssistantPayloadRef.current) {
+      lastAssistantPayloadRef.current = snapshot;
+      if (onProvideAssistantDataRef.current) {
+        onProvideAssistantDataRef.current(payload as unknown as ClientData);
+      }
+    }
+  }, [fullAnnualData, fullQuarterlyData, sharesData, news, insiderData, dividendData]);
 
   // Prepare filtered Shares Outstanding data based on toggle (quarterly vs annual)
   const getFilteredSharesData = useCallback(() => {
@@ -368,37 +411,41 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
       </div>
 
       {/* Tabs Bar below header */}
-      <div className="flex gap-2 border-b border-border bg-card sticky top-0 z-20">
+  <div className="flex gap-2 border-b border-border bg-card sticky top-0 z-20">
         <button
-          className={`px-4 py-2 font-semibold text-sm ${activeTab === 'fundamentals' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
+          className={`px-4 py-2 font-semibold text-xs ${activeTab === 'fundamentals' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
           onClick={() => setActiveTab('fundamentals')}
         >Fundamental Data</button>
         <button
-          className={`px-4 py-2 font-semibold text-sm ${activeTab === 'shares' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
+          className={`px-4 py-2 font-semibold text-xs ${activeTab === 'shares' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
           onClick={() => setActiveTab('shares')}
         >Shares Outstanding & Market Cap</button>
         <button
-          className={`px-4 py-2 font-semibold text-sm ${activeTab === 'insider' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
+          className={`px-4 py-2 font-semibold text-xs ${activeTab === 'insider' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
           onClick={() => setActiveTab('insider')}
         >Insider Trades Data</button>
         <button
-          className={`px-4 py-2 font-semibold text-sm ${activeTab === 'dividends' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
+          className={`px-4 py-2 font-semibold text-xs ${activeTab === 'dividends' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
           onClick={() => setActiveTab('dividends')}
         >Dividends</button>
         <button
-          className={`px-4 py-2 font-semibold text-sm ${activeTab === 'latest' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
+          className={`px-4 py-2 font-semibold text-xs ${activeTab === 'latest' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
           onClick={() => setActiveTab('latest')}
         >Latest Developments</button>
         <button
-          className={`px-4 py-2 font-semibold text-sm ${activeTab === 'kpi' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
+          className={`px-4 py-2 font-semibold text-xs ${activeTab === 'sentiment' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
+          onClick={() => setActiveTab('sentiment')}
+        >Sentiment</button>
+        <button
+          className={`px-4 py-2 font-semibold text-xs ${activeTab === 'kpi' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
           onClick={() => setActiveTab('kpi')}
         >KPI</button>
         <button
-          className={`px-4 py-2 font-semibold text-sm ${activeTab === 'reports' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
+          className={`px-4 py-2 font-semibold text-xs ${activeTab === 'reports' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
           onClick={() => setActiveTab('reports')}
         >Report Filings</button>
         <button
-          className={`px-4 py-2 font-semibold text-sm ${activeTab === 'commentaries' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
+          className={`px-4 py-2 font-semibold text-xs ${activeTab === 'commentaries' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
           onClick={async () => {
             if (!userAlias) {
               setCheckingAlias(true);
@@ -795,6 +842,127 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
       )}
 
       {/* Tab Content */}
+      {activeTab === 'sentiment' && (
+        <div className="w-full">
+          <div className="mb-4 text-lg font-semibold text-primary text-center">
+            {(() => {
+              let avg = null;
+              if (Array.isArray(sentimentData) && sentimentData.length > 0) {
+                const scores = sentimentData.map((item: SentimentFeedItem) => typeof item.overall_sentiment_score === 'number' ? item.overall_sentiment_score : Number(item.overall_sentiment_score)).filter((v: number) => !isNaN(v));
+                if (scores.length > 0) avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+              }
+              // Dictionary for sentiment labels
+              const sentimentLabels: { [key: string]: string } = {
+                'very_bullish': 'Very Bullish',
+                'bullish': 'Bullish',
+                'neutral': 'Neutral',
+                'bearish': 'Bearish',
+                'very_bearish': 'Very Bearish',
+              };
+              // Function to get label from avg
+              function getSentimentLabel(avg: number | null): string {
+                if (avg === null) return '';
+                if (avg >= 0.6) return sentimentLabels['very_bullish'] ?? 'Very Bullish';
+                if (avg >= 0.2) return sentimentLabels['bullish'] ?? 'Bullish';
+                if (avg > -0.2 && avg < 0.2) return sentimentLabels['neutral'] ?? 'Neutral';
+                if (avg <= -0.6) return sentimentLabels['very_bearish'] ?? 'Very Bearish';
+                if (avg < 0.2 && avg > -0.6) return sentimentLabels['bearish'] ?? 'Bearish';
+                return '';
+              }
+              const label = getSentimentLabel(avg);
+              return `News Sentiment for ${ticker.symbol}` + (avg !== null ? ` (Avg: ${avg.toFixed(3)} — ${label})` : '');
+            })()}
+          </div>
+          {sentimentLoading ? (
+            <div className="p-8 text-center text-muted-foreground border rounded-lg">Loading sentiment data...</div>
+          ) : sentimentError ? (
+            <div className="p-8 text-center text-destructive border rounded-lg">{sentimentError}</div>
+          ) : Array.isArray(sentimentData) && sentimentData.length > 0 ? (
+            <div className="w-full max-w-3xl mx-auto">
+              <div className="mb-2 text-xs text-muted-foreground text-right">Sentiment Score per Article (Scatter Plot)</div>
+              <div style={{ width: '100%', margin: '0 auto', height: 480 }}>
+                <ResponsiveContainer width="100%" height={480}>
+                  {/* Prepare data: each article as a dot, x axis = day */}
+                  {/* Convert time_published to YYYY-MM-DD for x axis */}
+                  {(() => {
+                    const scatterData = sentimentData.map((item: SentimentFeedItem) => {
+                      let day = '';
+                      if (item.time_published) {
+                        const match = String(item.time_published).match(/^(\d{4})(\d{2})(\d{2})/);
+                        if (match) {
+                          day = `${match[1]}-${match[2]}-${match[3]}`;
+                        } else {
+                          day = String(item.time_published);
+                        }
+                      }
+                      return {
+                        day,
+                        overall_sentiment_score: typeof item.overall_sentiment_score === 'number' ? item.overall_sentiment_score : Number(item.overall_sentiment_score),
+                        headline: item.title || item.headline || '',
+                        source: item.source || '',
+                      };
+                    });
+                    // Ensure oldest dates on the left (ascending by day)
+                    const sortedScatterData = [...scatterData]
+                      .filter(d => d.day)
+                      .sort((a, b) => new Date(a.day).getTime() - new Date(b.day).getTime());
+                    // Compute first available day for each month to use as X-axis ticks
+                    const monthTicks = Array.from(
+                      new Map(
+                        [...scatterData]
+                          .filter(d => typeof d.day === 'string' && d.day.length >= 7)
+                          .sort((a, b) => (a.day || '').localeCompare(b.day || ''))
+                          .map(d => [String(d.day).slice(0, 7), d.day])
+                      ).values()
+                    );
+                    return (
+                      <ScatterChart margin={{ top: 30, right: 40, left: 0, bottom: 10 }}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis
+                          dataKey="day"
+                          type="category"
+                          ticks={monthTicks}
+                          tick={{ fontSize: 12 }}
+                          angle={-45}
+                          textAnchor="end"
+                          height={60}
+                          interval={0}
+                          allowDuplicatedCategory={false}
+                          tickFormatter={(value: string) => (typeof value === 'string' ? value.slice(0, 7) : value)}
+                        />
+                        <YAxis dataKey="overall_sentiment_score" tick={{ fontSize: 12 }} domain={[-1, 1]} />
+                        <Tooltip
+                          cursor={{ strokeDasharray: '3 3' }}
+                          formatter={(value: number, _name: string, _props: unknown) => [`${value.toFixed(3)}`, 'Sentiment']}
+                          labelFormatter={(_label: string) => `Day: ${_label}`}
+                          content={({ active, payload, _label }: { active?: boolean; payload?: Array<{ payload?: SentimentFeedItem & { day: string; overall_sentiment_score: number } }>; _label?: string }) => {
+                            const d = payload?.[0]?.payload;
+                            if (active && d) {
+                              return (
+                                <div className="p-2 text-xs bg-white border rounded shadow">
+                                  <div><strong>{d.headline}</strong></div>
+                                  <div>Score: {typeof d.overall_sentiment_score === 'number' ? d.overall_sentiment_score.toFixed(3) : d.overall_sentiment_score}</div>
+                                  <div>Source: {d.source}</div>
+                                  <div>Date: {d.day}</div>
+                                </div>
+                              );
+                            }
+                            return null;
+                          }}
+                        />
+                        <Scatter name="Articles" data={sortedScatterData} fill="#2563eb" line={false} />
+                      </ScatterChart>
+                    );
+                  })()}
+                </ResponsiveContainer>
+              </div>
+              <div className="mt-4 text-xs text-muted-foreground">Each dot represents an article published on a given day. Hover for details. Score: -1 (Bearish) to +1 (Bullish).</div>
+            </div>
+          ) : (
+            <div className="p-8 text-center text-muted-foreground border rounded-lg">No sentiment data found.</div>
+          )}
+        </div>
+      )}
       {activeTab === 'fundamentals' && (
         loading ? (
           <div className="flex justify-center items-center h-32">
@@ -1126,6 +1294,6 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
         </div>
       </div>
     )}
-  </div>
-);
-};
+    </div>
+  );
+}
