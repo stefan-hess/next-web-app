@@ -11,6 +11,7 @@ import { useLatestNews } from "app/lib/useLatestNews";
 import { useSharesOutstandingData } from "app/lib/useSharesOutstandingData";
 import type { Ticker } from "./Dashboard";
 import { FinancialCard } from "./FinancialCard";
+import ChatAssistant from "./Chatbot";
 
 
 
@@ -20,9 +21,10 @@ interface MainDashboardProps {
   marketCapCurrency?: string;
   commentariesSidebarOpen?: boolean;
   setCommentariesSidebarOpen?: (open: boolean) => void;
+  onProvideAssistantData?: (clientData: any) => void;
 }
 
-export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentariesSidebarOpen, setCommentariesSidebarOpen }: MainDashboardProps) => {
+export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentariesSidebarOpen, setCommentariesSidebarOpen, onProvideAssistantData }: MainDashboardProps) => {
   // Sidebar state for replying to a main post
   const [replySidebarOpen, setReplySidebarOpen] = useState(false);
   type SelectedMainPostType = Record<string, unknown> | null | 'NEW_POST';
@@ -54,6 +56,21 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
   const fullQuarterlyData = data?.[ticker.symbol]?.quarterly || [];
   const fullAnnualData = data?.[ticker.symbol]?.annual || [];
   const { data: sharesData, loading: sharesLoading, error: sharesError } = useSharesOutstandingData(ticker.symbol);
+
+  // Provide cached data to parent for assistant
+  useEffect(() => {
+    if (onProvideAssistantData) {
+      // Ensure insider trades are always included and not undefined
+      onProvideAssistantData({
+        annual: fullAnnualData,
+        quarterly: fullQuarterlyData,
+        shares: Array.isArray(sharesData) ? sharesData : [],
+        news: Array.isArray(news) ? news : [],
+        insider: Array.isArray(insiderData) ? insiderData.filter(Boolean) : [],
+        dividends: Array.isArray(dividendData) ? dividendData : [],
+      });
+    }
+  }, [onProvideAssistantData, fullAnnualData, fullQuarterlyData, sharesData, news, insiderData, dividendData]);
 
   // Prepare filtered Shares Outstanding data based on toggle (quarterly vs annual)
   const getFilteredSharesData = useCallback(() => {
@@ -304,7 +321,7 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
           </div>
         </div>
         {/* Toggles for annual/quarterly and table/chart */}
-        <div className="flex gap-4 items-center">
+  <div className="flex gap-4 items-center">
           <div className="flex gap-2 items-center">
             <span className="text-sm text-muted-foreground">Data:</span>
             <button
@@ -544,6 +561,7 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
           </div>
         </div>
       )}
+      {/* AI Assistant drawer removed; handled at top-level Dashboard */}
 
       {/* latest developments */}
       {activeTab === 'latest' && (

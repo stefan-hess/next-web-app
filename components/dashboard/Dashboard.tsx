@@ -1,15 +1,17 @@
+
 "use client";
+import { useEffect, useState, useCallback } from "react";
 
 
 
-import { useEffect, useState } from "react";
+// ...existing code...
 import { supabase } from "app/lib/supabaseClient";
 import { DashboardHeader } from "components/dashboard/DashboardHeader";
 import { GetStarted } from "components/dashboard/GetStarted";
 import { MainDashboard } from "components/dashboard/MainDashboard";
 import { SidebarProvider } from "components/ui/sidebar";
 import { DashboardSidebar } from "./DashboardSidebar";
-
+import ChatAssistant from "./Chatbot";
 export interface Ticker {
   symbol: string;
   name: string;
@@ -22,9 +24,16 @@ export const Dashboard = () => {
   const [userEmail, setUserEmail] = useState("");
   const [selectedTickers, setSelectedTickers] = useState<Ticker[]>([]);
   const [activeTicker, setActiveTicker] = useState("");
+  // Memoized setter to avoid update loop
+  const handleSelectTicker = useCallback((symbol: string) => {
+    setActiveTicker(symbol);
+  }, []);
   const [marketCap, setMarketCap] = useState<string>("");
   const [marketCapCurrency, setMarketCapCurrency] = useState<string>("");
   const [commentariesSidebarOpen, setCommentariesSidebarOpen] = useState(false);
+  const [assistantOpen, setAssistantOpen] = useState(false);
+  const [assistantClientData, setAssistantClientData] = useState<any>(null);
+  const [hasBuffettTier, setHasBuffettTier] = useState(false);
 
   // Helper for scaling market cap
   function _autoScale(_values: string[], _currency: string) {
@@ -43,6 +52,23 @@ export const Dashboard = () => {
     };
     fetchUserEmail();
   }, []);
+
+  // Check Buffett tier only when userEmail changes (i.e., new session)
+  useEffect(() => {
+    if (!userEmail) return;
+    const checkBuffettTier = async () => {
+      const { data: tierData, error: tierError } = await supabase
+        .from("news_subscribed_clients")
+        .select("stripe_plan")
+        .eq("email", userEmail)
+        .single();
+      if (tierError) {
+        console.error("Error fetching user tier:", tierError);
+      }
+      setHasBuffettTier(tierData?.stripe_plan === "Buffett");
+    };
+    checkBuffettTier();
+  }, [userEmail]);
 
   // Fetch market cap and currency for active ticker
   useEffect(() => {
@@ -139,23 +165,32 @@ export const Dashboard = () => {
   // Handler to open commentaries sidebar
   const handleOpenCommentariesSidebar = () => {
     setCommentariesSidebarOpen(true);
-  };
+  } 
+
+  // Handler to toggle assistant chatbox
+  const handleOpenAssistant = () => {
+    setAssistantOpen((prev) => !prev);
+  }
 
   return (
     <SidebarProvider>
       <div className="min-h-screen flex flex-col w-full bg-dashboard-bg">
-        <DashboardHeader 
-          ticker={currentTicker}
-          marketCap={marketCap}
-          marketCapCurrency={marketCapCurrency}
-          onOpenCommentariesSidebar={handleOpenCommentariesSidebar}
-          selectedTickers={selectedTickers}
-        />
+        <div className="w-full sticky top-0 z-40" style={{ backgroundColor: '#fff' }}>
+          <DashboardHeader 
+            ticker={currentTicker}
+            marketCap={marketCap}
+            marketCapCurrency={marketCapCurrency}
+            onOpenCommentariesSidebar={handleOpenCommentariesSidebar}
+            selectedTickers={selectedTickers}
+            onOpenAssistant={hasBuffettTier ? handleOpenAssistant : undefined}
+            showAssistantButton={hasBuffettTier}
+          />
+        </div>
         <div className="flex flex-1">
           <DashboardSidebar
             tickers={selectedTickers}
             activeTicker={activeTicker}
-            onTickerSelect={setActiveTicker}
+            onTickerSelect={handleSelectTicker}
             onTickerRemove={removeTicker}
             onAddTicker={addTicker}
             email={userEmail}
@@ -168,9 +203,29 @@ export const Dashboard = () => {
                 marketCapCurrency={marketCapCurrency}
                 commentariesSidebarOpen={commentariesSidebarOpen}
                 setCommentariesSidebarOpen={setCommentariesSidebarOpen}
+                onProvideAssistantData={setAssistantClientData}
               />
             ) : (
               <GetStarted onAddTicker={addTicker} />
+            )}
+            {/* Assistant chatbox at bottom */}
+            {assistantOpen && currentTicker && (
+              <div
+                className="fixed bottom-0 right-0 z-50 pb-4 pr-4 pointer-events-auto"
+                style={{ width: '100%', maxWidth: '420px' }}
+              >
+                <div className="max-w-md w-full relative bg-white border border-gray-300 rounded-lg shadow-lg" style={{ backgroundColor: '#fff' }}>
+                  {/* Exit button */}
+                  <button
+                    className="absolute top-2 right-2 z-10 bg-gray-100 hover:bg-gray-200 rounded-full p-2 shadow"
+                    aria-label="Close chatbox"
+                    onClick={() => setAssistantOpen(false)}
+                  >
+                    <span style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>&times;</span>
+                  </button>
+                  <ChatAssistant ticker={currentTicker.symbol} clientData={assistantClientData} />
+                </div>
+              </div>
             )}
           </main>
         </div>

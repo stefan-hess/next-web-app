@@ -1,5 +1,5 @@
 
-import { BarChart3, Bell, FileText, Settings, User } from "lucide-react";
+import { BarChart3, Bell, Bot, Settings, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "app/lib/supabaseClient";
 import { Button } from "components/ui/Button/Button_new";
@@ -13,10 +13,12 @@ export interface DashboardHeaderProps {
   marketCap?: string;
   marketCapCurrency?: string;
   onOpenCommentariesSidebar?: () => void;
+  onOpenAssistant?: () => void;
   selectedTickers?: { symbol: string; name: string }[];
+  showAssistantButton?: boolean;
 }
 
-export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onOpenCommentariesSidebar, selectedTickers = [] }) => {
+export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onOpenCommentariesSidebar, selectedTickers = [], onOpenAssistant, showAssistantButton }) => {
   // Scaling logic
   // ...existing code...
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -91,7 +93,14 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onOpenCommenta
     }
   }, [selectedTickers, notificationOpen]);
   async function handleLogout() {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      // Ignore AuthSessionMissingError and always redirect
+      if (typeof e === "object" && e && "name" in e && (e as any).name !== "AuthSessionMissingError") {
+        console.error("Logout error:", e);
+      }
+    }
     window.location.href = "/"; // Redirect to landing page
   }
   return (
@@ -116,10 +125,19 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onOpenCommenta
           <BarChart3 className="h-4 w-4" />
           Discussions
         </Button>
-        <Button variant="ghost" size="sm" className="gap-2">
-          <FileText className="h-4 w-4" />
-          Reports
-        </Button>
+        {showAssistantButton && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-2"
+            onClick={onOpenAssistant}
+            aria-label="Open AI Assistant"
+            title="AI Assistant"
+          >
+            <Bot className="h-4 w-4" />
+            AI Assistant
+          </Button>
+        )}
         <div className="h-4 w-px bg-border mx-2" />
         <div className="relative">
           <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setNotificationOpen((open) => !open)}>

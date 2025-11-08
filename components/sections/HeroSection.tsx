@@ -42,7 +42,7 @@ const HeroSection = () => {
                 style={{ minHeight: '48px' }}
               >
                 <BarChart3 className="mr-2 h-4 w-4" />
-                View Sample Report
+                View Demo
               </a>
               <a
                 href="/login"

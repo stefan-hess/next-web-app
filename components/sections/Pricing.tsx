@@ -8,7 +8,7 @@ const plans = [
   {
     name: "Munger",
     price: 4.99,
-    description: "Perfect for individual investors getting started",
+    description: "Ideal for sophisticated investors and finance professionals",
     features: [
       "Coverage of 10 stocks",
       "Business developments of the month",
@@ -20,26 +20,24 @@ const plans = [
   {
     name: "Buffett",
     price: 8.99,
-    description: "Ideal for sophisticated investors and professionals that manage portfolios",
+    description: "Best for analysts, small research teams, investors with a large number of stocks",
     features: [
       "Coverage of 20 stocks",
       "Business developments of the month",
       "Latest SEC filings for quarterly and annual financial data",
       "Insider trading activities",
-      "Monthly email summary report"
     ],
     popular: true
   },
   {
     name: "Graham Tier (Enterprise)",
     price: 99,
-    description: "Best for analysts, small research teams, investors with a large number of stocks",
+    description: "Customized solutions for enterprises and large teams, starting at",
     features: [
       "Unlimited stocks coverage",
       "Business developments of the month",
       "Latest SEC filings for quarterly and annual financial data",
-      "Insider trading alerts",
-      "Monthly email summary report",
+      "Insider trading activities",
       "Customized reports"
     ],
     popular: false
@@ -271,86 +269,35 @@ const PricingSection = () => {
                   ))}
                 </ul>
 
-                {plan.name === "Graham" ? (
-                  <a
-                    href="#contactus"
-                    className="w-full block rounded-xl border border-black bg-[#fdf6ee] px-6 py-3 font-semibold text-black text-center shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl active:scale-95"
-                  >
-                    Get in touch
-                  </a>
-                ) : (
-                  <>
-                    <Button 
-                      variant={plan.name === "Buffett" || plan.name === "Munger" ? "financial-outline" : "hero"} 
+                <div className="flex items-end justify-center min-h-[60px] mt-8">
+                  {plan.name === "Graham Tier (Enterprise)" ? (
+                    <Button
+                      asChild
+                      variant="financial-outline"
                       className="w-full"
                       size="lg"
-                      onClick={() => handleExpand(index)}
-                      type="button"
                     >
-                      {expandedIndex === index ? "Hide" : "Get Started"}
+                      <a href="#contactus">Get in touch</a>
                     </Button>
-                    {expandedIndex === index && (
-                      <form onSubmit={e => handleSubmit(e, plan.name)} className="mt-6 space-y-4 bg-[#fdf6ee] rounded-xl p-6 border border-gray-200 shadow">
-                        <h4 className="text-lg font-semibold text-center mb-2">Enter your details</h4>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-                          <input
-                            className="mt-1 block w-full rounded-md border border-black bg-[#fdf6ee] shadow-sm focus:border-black focus:ring-black transition"
-                            value={firstName}
-                            onChange={e => setFirstName(e.target.value)}
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-                          <input
-                            className="mt-1 block w-full rounded-md border border-black bg-[#fdf6ee] shadow-sm focus:border-black focus:ring-black transition"
-                            value={lastName}
-                            onChange={e => setLastName(e.target.value)}
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                          <input
-                            className="mt-1 block w-full rounded-md border border-black bg-[#fdf6ee] shadow-sm focus:border-black focus:ring-black transition"
-                            type="email"
-                            value={email}
-                            onChange={e => setEmail(e.target.value)}
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                          <input
-                            className="mt-1 block w-full rounded-md border border-black bg-[#fdf6ee] shadow-sm focus:border-black focus:ring-black transition"
-                            type="password"
-                            value={password}
-                            onChange={e => setPassword(e.target.value)}
-                            required
-                          />
-                        </div>
-                        <div className="flex items-center mt-2">
-                          <input
-                            type="checkbox"
-                            id={`terms-${index}`}
-                            checked={agreedToTerms}
-                            onChange={e => setAgreedToTerms(e.target.checked)}
-                            className="mr-2 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                            required
-                          />
-                          <label htmlFor={`terms-${index}`} className="text-sm text-gray-700">
-                            I have read and agree to the <a href="/terms" target="_blank" className="text-indigo-600 underline">Terms &amp; Conditions</a>
-                          </label>
-                        </div>
-                        <button type="submit" className="w-full rounded-xl border border-black bg-[#fdf6ee] px-6 py-3 font-semibold text-black shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed" disabled={isLoading || !agreedToTerms}>
-                          {isLoading ? <span className="loading loading-spinner"></span> : "Proceed to checkout"}
-                        </button>
-                        {formError && <div className="alert alert-error mt-2">{formError}</div>}
-                      </form>
-                    )}
-                  </>
-                )}
+                  ) : (
+                    <>
+                      <Button 
+                        variant={plan.name === "Buffett" || plan.name === "Munger" ? "financial-outline" : "hero"} 
+                        className="w-full"
+                        size="lg"
+                        onClick={() => handleExpand(index)}
+                        type="button"
+                      >
+                        {expandedIndex === index ? "Hide" : "Get Started"}
+                      </Button>
+                      {expandedIndex === index && (
+                        <form onSubmit={e => handleSubmit(e, plan.name)} className="mt-6 space-y-4 bg-[#fdf6ee] rounded-xl p-6 border border-gray-200 shadow">
+                          {/* ...existing code... */}
+                        </form>
+                      )}
+                    </>
+                  )}
+                </div>
               </CardContent>
             </Card>
           ))}
