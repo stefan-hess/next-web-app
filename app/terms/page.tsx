@@ -9,7 +9,9 @@ export default function TermsPage() {
           <ol className="list-decimal pl-4 space-y-4">
             <li>
               <strong>Service Description</strong><br />
-              The Service provides subscribers with curated summaries and insights on stock market events, news, and trends. The Service is provided for informational and educational purposes only and does not constitute financial, investment, or trading advice.
+              The Service provides subscribers with curated summaries and insights on stock market events, news, and trends. The Service is provided for informational and educational purposes only and does not constitute financial, investment, or trading advice. StockTickerNews is not a securities broker-dealer, investment adviser, or any other type of financial professional. No content on the StockTickerNews platform should be considered an offer, solicitation of an offer, or advice to buy or sell securities or any other type of investment or financial product.
+              
+              By using the StockTickerNews platform, you understand and agree that StockTickerNews does not provide investment advice, recommend any security, transaction, or order, issue securities, produce or provide research.
             </li>
             <li>
               <strong>Eligibility</strong><br />
@@ -40,7 +42,7 @@ export default function TermsPage() {
             </li>
             <li>
               <strong>User Responsibilities</strong><br />
-              You agree not to share, resell, or distribute newsletter content without prior written consent.<br />
+              You agree not to share, resell, or distribute platform content without prior written consent.<br />
               You agree to use the Service only for lawful purposes.<br />
               Any misuse may result in suspension or termination of your account.
             </li>
@@ -53,7 +55,7 @@ export default function TermsPage() {
               <strong>Limitation of Liability</strong><br />
               To the maximum extent permitted by law, we are not liable for:<br />
               <ul className="list-disc pl-6">
-                <li>Losses incurred from reliance on the Service</li>
+                <li>Losses incurred from reliance on the Service, including the accuracy or completeness of the data provided.</li>
                 <li>Trading or investment losses</li>
                 <li>Service interruptions, errors, or data inaccuracies</li>
               </ul>
@@ -80,7 +82,7 @@ export default function TermsPage() {
             </li>
             <li>
               <strong>Contact Us</strong><br />
-              If you have questions about these Terms, please contact us at: info@stocktickernews.com
+              If you have questions about these Terms, please contact us at: info@stock-ticker-news.com
             </li>
           </ol>
         </div>

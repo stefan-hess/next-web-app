@@ -11,9 +11,13 @@ const plans = [
     description: "Ideal for sophisticated investors and finance professionals",
     features: [
       "Coverage of 10 stocks",
+      "10 years of historical Balance Sheet, Income Statement, Cash Flow Statement data",
+      "Quarterly and Annual official filings of financial reportings data",
+      "Historical market cap data",
       "Business developments of the month",
-      "Latest SEC filings for quarterly and annual financial data",
-      "Insider trading activities"
+      "Dividend history",
+      "Insider trading activities",
+      "Access to community discussions",
     ],
     popular: false
   },
@@ -23,9 +27,13 @@ const plans = [
     description: "Best for analysts, small research teams, investors with a large number of stocks",
     features: [
       "Coverage of 20 stocks",
+      "10 years of historical Balance Sheet, Income Statement, Cash Flow Statement data",
+      "Quarterly and Annual official filings of financial reportings data",
+      "Historical market cap data",
       "Business developments of the month",
-      "Latest SEC filings for quarterly and annual financial data",
+      "Dividend history",
       "Insider trading activities",
+      "Access to community discussions",
       "AI Assistant",
     ],
     popular: true
@@ -36,9 +44,13 @@ const plans = [
     description: "Customized solutions for enterprises and large teams, starting at",
     features: [
       "Unlimited stocks coverage",
+      "10 years of historical Balance Sheet, Income Statement, Cash Flow Statement data",
+      "Quarterly and Annual official filings of financial reportings data",
+      "Historical market cap data",
       "Business developments of the month",
-      "Latest SEC filings for quarterly and annual financial data",
+      "Dividend history",
       "Insider trading activities",
+      "Access to community discussions",
       "AI Assistant",
       "Customized reports"
     ],
