@@ -1,5 +1,5 @@
 
-import { BarChart3, Bell, Bot, Settings, User } from "lucide-react";
+import { BarChart3, Bell, Bot, MessagesSquare, Settings, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "app/lib/supabaseClient";
 import { Button } from "components/ui/Button/Button_new";
@@ -127,7 +127,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onOpenCommenta
 
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="sm" className="gap-2" onClick={onOpenCommentariesSidebar}>
-          <BarChart3 className="h-4 w-4" />
+          <MessagesSquare className="h-4 w-4" />
           Discussions
         </Button>
         {showAssistantButton && (
