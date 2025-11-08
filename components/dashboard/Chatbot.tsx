@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 // Helper to format assistant replies for better readability
 function formatAssistantReply(content: string): string {
@@ -17,7 +17,16 @@ function formatAssistantReply(content: string): string {
 
 type ChatMsg = { role: "user" | "assistant"; content: string };
 
-export default function ChatAssistant({ ticker, clientData }: { ticker: string; clientData?: any }) {
+interface ClientData {
+  annual?: unknown[];
+  quarterly?: unknown[];
+  shares?: unknown[];
+  news?: unknown[];
+  insider?: unknown[];
+  dividends?: unknown[];
+}
+
+export default function ChatAssistant({ ticker, clientData }: { ticker: string; clientData?: ClientData }) {
   const [msgs, setMsgs] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);

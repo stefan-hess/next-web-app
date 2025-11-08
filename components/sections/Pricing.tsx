@@ -26,6 +26,7 @@ const plans = [
       "Business developments of the month",
       "Latest SEC filings for quarterly and annual financial data",
       "Insider trading activities",
+      "AI Assistant",
     ],
     popular: true
   },
@@ -38,6 +39,7 @@ const plans = [
       "Business developments of the month",
       "Latest SEC filings for quarterly and annual financial data",
       "Insider trading activities",
+      "AI Assistant",
       "Customized reports"
     ],
     popular: false
@@ -95,18 +97,18 @@ const PricingSection = () => {
 
   // Expanded card state
   const [expandedIndex, setExpandedIndex] = React.useState<number|null>(null);
-  const [firstName, setFirstName] = React.useState("");
-  const [lastName, setLastName] = React.useState("");
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [formError, setFormError] = React.useState<string|null>(null);
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [firstName, _setFirstName] = React.useState("");
+  const [lastName, _setLastName] = React.useState("");
+  const [email, _setEmail] = React.useState("");
+  const [password, _setPassword] = React.useState("");
+  const [_formError, _setFormError] = React.useState<string|null>(null);
+  const [_isLoading, _setIsLoading] = React.useState(false);
   const [agreedToTerms, setAgreedToTerms] = React.useState(false);
 
   const handleExpand = (idx: number) => {
-    setExpandedIndex(expandedIndex === idx ? null : idx);
-    setFormError(null);
-    setAgreedToTerms(false);
+  setExpandedIndex(expandedIndex === idx ? null : idx);
+  _setFormError(null);
+  setAgreedToTerms(false);
   };
 
   // Map plan name to Stripe priceId
@@ -118,16 +120,16 @@ const PricingSection = () => {
 
   const handleSubmit = async (e: React.FormEvent, planName: string) => {
     e.preventDefault();
-    setFormError(null);
+  _setFormError(null);
     if (!firstName || !lastName || !email || !password) {
-      setFormError("All fields are required.");
+      _setFormError("All fields are required.");
       return;
     }
     if (!agreedToTerms) {
-      setFormError("You must agree to the Terms & Conditions to submit.");
+      _setFormError("You must agree to the Terms & Conditions to submit.");
       return;
     }
-    setIsLoading(true);
+    _setIsLoading(true);
     try {
       // 1. Call API route to sign up and create subscription
       const resSignup = await fetch("/api/signup-and-subscribe", {
@@ -144,15 +146,15 @@ const PricingSection = () => {
       const signupSuccess = typeof signupData === 'object' && signupData !== null && 'success' in signupData && signupData.success;
       const signupError = typeof signupData === 'object' && signupData !== null && 'error' in signupData ? signupData.error : undefined;
       if (!resSignup.ok || !signupSuccess) {
-        setFormError(typeof signupError === 'string' ? signupError : "Failed to sign up and create subscription.");
-        setIsLoading(false);
+  _setFormError(typeof signupError === 'string' ? signupError : "Failed to sign up and create subscription.");
+  _setIsLoading(false);
         return;
       }
       // 3. Proceed to Stripe checkout
       const priceId = priceIdMap[planName];
       if (!priceId) {
-        setFormError("Invalid plan selected.");
-        setIsLoading(false);
+  _setFormError("Invalid plan selected.");
+  _setIsLoading(false);
         return;
       }
       const res = await fetch("/api/create-checkout-session", {
@@ -167,26 +169,26 @@ const PricingSection = () => {
       });
       const data = await res.json() as { id?: string; error?: string };
       if (!res.ok || !data || typeof data !== 'object' || !('id' in data) || !data.id) {
-        setFormError((data && typeof data === 'object' && 'error' in data && data.error) || "Failed to create checkout session.");
-        setIsLoading(false);
+  _setFormError((data && typeof data === 'object' && 'error' in data && data.error) || "Failed to create checkout session.");
+  _setIsLoading(false);
         return;
       }
       // Load Stripe.js and redirect
       const stripeJs = await import("@stripe/stripe-js");
       const stripe = await stripeJs.loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
       if (!stripe) {
-        setFormError("Stripe.js failed to load.");
-        setIsLoading(false);
+  _setFormError("Stripe.js failed to load.");
+  _setIsLoading(false);
         return;
       }
       await stripe.redirectToCheckout({ sessionId: data.id });
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setFormError(err.message || "An error occurred. Please try again.");
+  _setFormError(err.message || "An error occurred. Please try again.");
       } else {
-        setFormError("An error occurred. Please try again.");
+  _setFormError("An error occurred. Please try again.");
       }
-      setIsLoading(false);
+  _setIsLoading(false);
     }
   };
 

@@ -1,8 +1,8 @@
 export const runtime = "nodejs";
 
+import { createClient } from "@supabase/supabase-js";
 import { NextRequest } from "next/server";
 import OpenAI from "openai";
-import { createClient } from "@supabase/supabase-js";
 
 function getSupabaseService() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -12,7 +12,28 @@ function getSupabaseService() {
 
 // This chatbot focuses on the raw full extracts visible in the Report Filings tab.
 
-async function buildContext(ticker: string, clientData?: any) {
+interface ClientData {
+  annual?: unknown[];
+  quarterly?: unknown[];
+  shares?: unknown[];
+  news?: unknown[];
+  insider?: unknown[];
+  dividends?: unknown[];
+}
+
+interface ChatbotContext {
+  ticker: string;
+  reports: {
+    annual: unknown[];
+    quarterly: unknown[];
+  };
+  shares: unknown[];
+  news: unknown[];
+  insider: unknown[];
+  dividends: unknown[];
+}
+
+async function buildContext(ticker: string, clientData?: ClientData): Promise<ChatbotContext> {
   if (clientData) {
     // Use client-provided data for context
     return {
@@ -80,7 +101,7 @@ export async function POST(req: NextRequest) {
     const { messages, ticker, clientData } = (await req.json()) as {
       messages: { role: "user" | "system" | "assistant"; content: string }[];
       ticker: string;
-      clientData?: any;
+      clientData?: ClientData;
     };
 
     // Debug: log received clientData

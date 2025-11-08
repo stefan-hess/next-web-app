@@ -1,6 +1,6 @@
 
 "use client";
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 
 
@@ -10,8 +10,16 @@ import { DashboardHeader } from "components/dashboard/DashboardHeader";
 import { GetStarted } from "components/dashboard/GetStarted";
 import { MainDashboard } from "components/dashboard/MainDashboard";
 import { SidebarProvider } from "components/ui/sidebar";
-import { DashboardSidebar } from "./DashboardSidebar";
 import ChatAssistant from "./Chatbot";
+import { DashboardSidebar } from "./DashboardSidebar";
+interface ClientData {
+  annual?: unknown[];
+  quarterly?: unknown[];
+  shares?: unknown[];
+  news?: unknown[];
+  insider?: unknown[];
+  dividends?: unknown[];
+}
 export interface Ticker {
   symbol: string;
   name: string;
@@ -32,7 +40,7 @@ export const Dashboard = () => {
   const [marketCapCurrency, setMarketCapCurrency] = useState<string>("");
   const [commentariesSidebarOpen, setCommentariesSidebarOpen] = useState(false);
   const [assistantOpen, setAssistantOpen] = useState(false);
-  const [assistantClientData, setAssistantClientData] = useState<any>(null);
+  const [assistantClientData, setAssistantClientData] = useState<ClientData | null>(null);
   const [hasBuffettTier, setHasBuffettTier] = useState(false);
 
   // Helper for scaling market cap
@@ -223,7 +231,7 @@ export const Dashboard = () => {
                   >
                     <span style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>&times;</span>
                   </button>
-                  <ChatAssistant ticker={currentTicker.symbol} clientData={assistantClientData} />
+                  <ChatAssistant ticker={currentTicker.symbol} clientData={assistantClientData ?? undefined} />
                 </div>
               </div>
             )}

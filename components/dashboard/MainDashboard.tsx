@@ -11,9 +11,17 @@ import { useLatestNews } from "app/lib/useLatestNews";
 import { useSharesOutstandingData } from "app/lib/useSharesOutstandingData";
 import type { Ticker } from "./Dashboard";
 import { FinancialCard } from "./FinancialCard";
-import ChatAssistant from "./Chatbot";
 
 
+
+interface ClientData {
+  annual?: unknown[];
+  quarterly?: unknown[];
+  shares?: unknown[];
+  news?: unknown[];
+  insider?: unknown[];
+  dividends?: unknown[];
+}
 
 interface MainDashboardProps {
   ticker: Ticker;
@@ -21,7 +29,7 @@ interface MainDashboardProps {
   marketCapCurrency?: string;
   commentariesSidebarOpen?: boolean;
   setCommentariesSidebarOpen?: (open: boolean) => void;
-  onProvideAssistantData?: (clientData: any) => void;
+  onProvideAssistantData?: (clientData: ClientData) => void;
 }
 
 export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentariesSidebarOpen, setCommentariesSidebarOpen, onProvideAssistantData }: MainDashboardProps) => {

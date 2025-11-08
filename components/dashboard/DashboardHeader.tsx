@@ -97,7 +97,12 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onOpenCommenta
       await supabase.auth.signOut();
     } catch (e) {
       // Ignore AuthSessionMissingError and always redirect
-      if (typeof e === "object" && e && "name" in e && (e as any).name !== "AuthSessionMissingError") {
+      if (
+        typeof e === "object" &&
+        e &&
+        "name" in e &&
+        (e as { name?: string }).name !== "AuthSessionMissingError"
+      ) {
         console.error("Logout error:", e);
       }
     }
