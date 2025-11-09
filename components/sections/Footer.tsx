@@ -45,7 +45,7 @@ const Footer = () => {
 
         <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <p className="text-sm text-muted-foreground">
-            © 2025 StockTickerNews. All rights reserved.
+            © 2025. All rights reserved.
           </p>
           <p className="text-sm text-muted-foreground">
           </p>
