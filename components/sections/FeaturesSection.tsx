@@ -3,39 +3,39 @@ import { Card, CardContent } from "components/ui/card";
 
 const features = [
   {
+    icon: BarChart3,
+    title: "Fundamental Analysis",
+    description: "Full quarterly and annual financial reporting data updated with most recent official submissions to SEC. Dive into detailed income statements, balance sheets, cash flow statements, dividend distributions, historical market capitalizations, and more.",
+    color: "text-financial-primary"
+  },
+  {
+    icon: UserCheck,
+    title: "Insider Trading Data",
+    description: "Monitor the latest executive transactions to track insiders' conviction of the business.",
+    color: "text-financial-accent"
+  },
+  {
+    icon: TrendingUp,
+    title: "Community of Shareholders",
+    description: "Engage in ticker specific discussions with others and collectively assess the strategic and financial performance of the company or even participate in shareholder activism.",
+    color: "text-financial-success"
+  },
+    {
     icon: Building2,
     title: "Business Developments",
     description: "Stay informed about acquisitions, partnerships, product launches, and strategic initiatives that impact underlying business thesis.",
     color: "text-financial-secondary"
   },
   {
-    icon: BarChart3,
-    title: "Fundamental Analysis",
-    description: "Comprehensive quarterly and annual financial metrics updated monthly with official data submitted to the SEC.",
-    color: "text-financial-primary"
-  },
-  {
-    icon: UserCheck,
-    title: "Insider Trading Data",
-    description: "Monitor the latest executive transactions to track insiders' conviction of the business. Never miss a red flag again.",
-    color: "text-financial-accent"
-  },
-  {
-    icon: TrendingUp,
-    title: "Community of Shareholders",
-    description: "Share your thoughts with other Shareholders and assess the strategic and financial performance of the company.",
-    color: "text-financial-success"
-  },
-  {
     icon: Clock,
-    title: "Timely Delivery",
-    description: "Receive a comprehensive report for your watchlist every month, delivered to your inbox.",
+    title: "News Sentiment Analysis",
+    description: "Scoring of news articles with sentiment to gauge bullish or bearish market perception.",
     color: "text-financial-primary"
   },
   {
     icon: Shield,
-    title: "Trusted Data",
-    description: "Trusted news from financial publications and data from regulatory filings for maximum accuracy and reliability.",
+    title: "Built-In AI Assistant",
+    description: "Your personal AI Assistant with access to context data at your fingertips.",
     color: "text-financial-secondary"
   }
 ];
