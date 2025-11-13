@@ -35,6 +35,7 @@ export interface FinancialCardProps {
   view?: 'table' | 'chart';
 }
 
+
 export const FinancialCard: React.FC<FinancialCardProps> = ({ category, isExpanded, onClick, fullWidth, view = 'table' }) => {
   const Icon = category.icon;
 
@@ -88,11 +89,31 @@ export const FinancialCard: React.FC<FinancialCardProps> = ({ category, isExpand
     .slice(0, maxPeriods)
     .reverse();
 
-  // For each metric, compute scale and label (use only displayed periods)
+  // --- Leading metric scaling logic ---
+  // Define leading metric for each card type
+  const leadingMetricMap: Record<string, string> = {
+    'balance-sheet': 'totalAssets',
+    'income-statement': 'totalRevenue',
+    'cashflow': 'operatingCashflow',
+    // fallback: first key
+  };
+  // Try to find a leading metric for this card
+  let leadingMetric = allKeys[0];
+  if (category.id in leadingMetricMap) {
+    const candidate = leadingMetricMap[category.id];
+    if (candidate && typeof candidate === 'string' && allKeys.includes(candidate)) {
+      leadingMetric = candidate;
+    }
+  }
+  // Use leading metric's scale for all metrics
+  let leadingValues: string[] = [];
+  if (leadingMetric && typeof leadingMetric === 'string') {
+    leadingValues = category.data.slice(0, maxPeriods).map(period => period[leadingMetric] ?? "");
+  }
+  const leadingScaleObj = autoScale(leadingValues, currency);
   const metricScales: Record<string, { scale: number; label: string }> = {};
   allKeys.forEach(key => {
-    const values = category.data.slice(0, maxPeriods).map(period => period[key] || "");
-    metricScales[key] = autoScale(values, currency);
+    metricScales[key] = leadingScaleObj;
   });
 
   return (
