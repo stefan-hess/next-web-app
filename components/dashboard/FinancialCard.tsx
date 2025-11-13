@@ -5,9 +5,10 @@ function autoScale(values: string[], currency: string) {
     return isNaN(n) ? 0 : Math.abs(n);
   });
   const m = Math.max(...nums, 0);
-  if (m >= 1e10) return { scale: 1e9, label: `Billions ${currency}` };
-  if (m >= 1e7)  return { scale: 1e6, label: `Millions ${currency}` };
-  if (m >= 1e4)  return { scale: 1e3, label: `Thousands ${currency}` };
+  if (m >= 1e12) return { scale: 1e12, label: `Trillions ${currency}` };
+  if (m >= 1e9)  return { scale: 1e9, label: `Billions ${currency}` };
+  if (m >= 1e6)  return { scale: 1e6, label: `Millions ${currency}` };
+  if (m >= 1e3)  return { scale: 1e3, label: `Thousands ${currency}` };
   return { scale: 1, label: currency };
 }
 import { ChevronDown, ChevronRight } from "lucide-react";
