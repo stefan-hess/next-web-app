@@ -1,4 +1,5 @@
-import { BarChart3 } from "lucide-react";
+"use client"
+
 import Image from "next/image";
 
 const HeroSection = () => {
@@ -13,44 +14,36 @@ const HeroSection = () => {
       </div>
 
       <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 lg:py-32">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-2 items-center">
           {/* Text Section */}
           <div className="space-y-8">
             <div className="space-y-4">
               <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-foreground leading-tight">
-                Stay updated with
+                See through the Noise, {" "}
                 <span className="relative inline-block">
                   <span className="bg-gradient-primary bg-clip-text text-blue-800">
                     {" "}
-                    Fundamental
+                    Find Value.
                   </span>
                   <span className="block h-1 w-3/4 bg-blue-800 rounded-full mt-1 mx-auto"></span>
                 </span>{" "}
-                Stock Insights
               </h1>
 
               <p className="text-base sm:text-lg lg:text-xl text-muted-foreground leading-relaxed">
-                Get up to date quarterly and annual financial filings data and what has been moving the core of the
-                business, not just the stock price moves. Invest as the likes of Graham, Buffett and Munger and observe the intrinsic value of your investments.
+                The essential yet affordable suite of fundamental data for NYSE and NASDAQ <br /> listed stocks for professional investors.
               </p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <a
-                href="#productDemo"
-                className="transition-transform duration-300 hover:-translate-y-1 hover:scale-102 border-2 border-financial-primary text-financial-primary bg-transparent font-bold py-3 px-6 sm:px-8 rounded-lg shadow text-base sm:text-lg flex items-center justify-center"
-                style={{ minHeight: '48px' }}
-              >
-                <BarChart3 className="mr-2 h-4 w-4" />
-                View Demo
-              </a>
-              <a
-                href="/login"
-                className="transition-transform duration-300 hover:-translate-y-1 hover:scale-102 border-2 font-bold py-3 px-6 sm:px-8 rounded-lg shadow text-base sm:text-lg flex items-center justify-center"
-                style={{ borderColor: '#bfa76a', color: '#bfa76a', background: 'transparent', minHeight: '48px' }}
-              >
-                Log In
-              </a>
+              <div className="w-full sm:w-auto flex items-center gap-2">
+                <a
+                  href="#productDemo"
+                  className="transition-transform duration-300 hover:-translate-y-1 hover:scale-102 border-2 font-bold py-3 px-6 sm:px-8 rounded-lg shadow text-base sm:text-lg flex items-center justify-center"
+                  style={{ borderColor: '#bfa76a', color: '#bfa76a', background: 'transparent', minHeight: '48px' }}
+                >
+                  Go to Demo
+                </a>
+              </div>
             </div>
 
             <div className="flex items-center space-x-8 text-sm text-muted-foreground"></div>
@@ -62,13 +55,13 @@ const HeroSection = () => {
             <div className="pointer-events-none absolute right-[-80px] top-[-60px] h-[500px] w-[220px] z-0 hidden lg:block">
               <div className="w-full h-full rounded-full bg-gradient-to-bl from-red-400 via-blue-300 to-blue-400 opacity-60 blur-3xl animate-[blob2_22s_ease-in-out_infinite]" />
             </div>
-            <div className="relative z-10 h-[220px] sm:h-[320px] md:h-[420px] w-full max-w-xs sm:max-w-md md:max-w-lg lg:w-[800px] lg:max-w-none lg:mx-0 lg:-mr-32 overflow-hidden rounded-xl mx-auto">
+            <div className="relative z-10 h-auto w-full max-w-2xl md:max-w-4xl lg:max-w-7xl xl:max-w-screen-xl mx-auto rounded-xl bg-white shadow-card flex items-center justify-center">
               <Image
-                src="/assets/Hero_image.jpg"
+                src="/assets/Dashboard.png"
                 alt="Financial dashboard showing stock charts and market data"
-                fill
-                className="absolute left-0 top-0 h-full w-full object-cover shadow-card"
-                style={{ objectPosition: "left center" }}
+                width={1600}
+                height={900}
+                className="rounded-xl object-contain w-full h-auto"
                 priority
               />
             </div>

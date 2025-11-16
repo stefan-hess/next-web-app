@@ -219,7 +219,7 @@ const PricingSection = () => {
             🎉 Limited Offer: <span className="font-bold">50% OFF</span> on all plans!
           </div>
           <h2 className="text-3xl lg:text-5xl font-bold text-foreground">
-            Choose Your Investment Plan
+            Choose Your Plan
           </h2>
         </div>
 
@@ -327,9 +327,6 @@ const PricingSection = () => {
           <p className="text-muted-foreground mb-4">
             Need a custom solution? We offer enterprise packages with tailored features.
           </p>
-          <div className="text-financial-primary text-lg font-semibold">
-            Contact Sales Team at: info@stock-ticker-news.com
-          </div>
         </div>
       </div>
     </section>
