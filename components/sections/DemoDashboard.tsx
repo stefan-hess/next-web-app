@@ -72,7 +72,7 @@ const DemoDashboard = () => {
   <div className="container mx-auto px-4 lg:px-8 max-w-8xl relative z-10">
         <div className="text-center space-y-4 mb-12">
           <h2 className="text-3xl lg:text-5xl font-bold text-foreground">Demo Dashboard</h2>
-          <p className="w-full text-xl text-muted-foreground max-w-2xl mx-auto">Try out live fundamental data.</p>
+          <p className="w-full text-xl text-muted-foreground max-w-2xl mx-auto">Try the fundamental data platform.</p>
         </div>
   <div className="bg-[#fdf6ee] rounded-2xl shadow-xl p-8 border border-gray-200">
           <form onSubmit={handleSubmit} className="flex items-center justify-center gap-2 mb-8">

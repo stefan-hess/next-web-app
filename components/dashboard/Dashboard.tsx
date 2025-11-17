@@ -10,6 +10,7 @@ import { DashboardHeader } from "components/dashboard/DashboardHeader";
 import { GetStarted } from "components/dashboard/GetStarted";
 import { MainDashboard } from "components/dashboard/MainDashboard";
 import { SidebarProvider } from "components/ui/sidebar";
+import { GLOBAL_VARS } from "globalVars";
 import ChatAssistant from "./Chatbot";
 import { DashboardSidebar } from "./DashboardSidebar";
 interface ClientData {
@@ -73,7 +74,10 @@ export const Dashboard = () => {
       if (tierError) {
         console.error("Error fetching user tier:", tierError);
       }
-      setHasBuffettTier(tierData?.stripe_plan === "Buffett");
+      setHasBuffettTier(
+        tierData?.stripe_plan === GLOBAL_VARS.PLAN_BUFFETT ||
+        tierData?.stripe_plan === GLOBAL_VARS.PLAN_MUNGER
+      );
     };
     checkBuffettTier();
   }, [userEmail]);

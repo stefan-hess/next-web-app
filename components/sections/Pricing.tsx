@@ -3,12 +3,13 @@ import { Check } from "lucide-react";
 import React from "react";
 import { Button } from "components/ui/Button/Button_new";
 import { Card, CardContent, CardHeader } from "components/ui/card";
+import { GLOBAL_VARS } from "globalVars";
 
 const plans = [
   {
     name: "Munger",
-    price: 4.99,
-    description: "Ideal for sophisticated investors and finance professionals",
+    price: 49.00,
+    description: "Ideal for individual analysts and sophisticated retail investors",
     features: [
       "Coverage of 10 stocks",
       "10 years of historical Balance Sheet, Income Statement, Cash Flow Statement data",
@@ -19,15 +20,16 @@ const plans = [
       "Insider trading activities",
       "News Sentiment Analysis",
       "Access to community discussions",
+      <span className="font-bold">10 AI queries per day / user</span>,
     ],
     popular: false
   },
   {
     name: "Buffett",
-    price: 8.99,
-    description: "Best for analysts, small research teams, investors with a large number of stocks",
+    price: 99.00,
+    description: "Best for wealth managers and investment advisors",
     features: [
-      "Coverage of 20 stocks",
+      "Unlimited coverage of stocks",
       "10 years of historical Balance Sheet, Income Statement, Cash Flow Statement data",
       "Quarterly and Annual official filings of financial reportings data",
       "Historical market cap data",
@@ -36,14 +38,15 @@ const plans = [
       "Insider trading activities",
       "News Sentiment Analysis",
       "Access to community discussions",
-  <span className="font-bold">AI Assistant</span>,
+  <span className="font-bold">100 AI queries per day / user</span>,
+  <span className="font-bold">Advanced Support</span>,
     ],
     popular: true
   },
   {
     name: "Graham Tier (Enterprise)",
-    price: 99,
-    description: "Customized solutions for enterprises and large teams, starting at",
+    price: 499,
+    description: "Customized solutions for family offices, Hedge Funds, Asset Managers starting at",
     features: [
       "Unlimited stocks coverage",
       "10 years of historical Balance Sheet, Income Statement, Cash Flow Statement data",
@@ -54,8 +57,9 @@ const plans = [
       "Insider trading activities",
       "News Sentiment Analysis",
       "Access to community discussions",
-  <span className="font-bold">AI Assistant</span>,
-  <span className="font-bold">Customized reports</span>
+  <span className="font-bold">Unlimited AI queries</span>,
+  <span className="font-bold">Custom dashboards and KPI</span>,
+  <span className="font-bold">Priority Support</span>
     ],
     popular: false
   }
@@ -126,11 +130,11 @@ const PricingSection = () => {
   setAgreedToTerms(false);
   };
 
-  // Map plan name to Stripe priceId
+  // Map plan name to Stripe priceId (centralized in GLOBAL_VARS)
   const priceIdMap: Record<string, string> = {
-    "Munger": "price_1S58CGI8pTUJRz6FyikGu4R7",
-    "Buffett": "price_1S58CtI8pTUJRz6FSh35gDnU",
-    "Graham": "price_graham" // TODO: Replace with real price IDs
+    Munger: GLOBAL_VARS.PRICE_ID_MAP.Munger,
+    Buffett: GLOBAL_VARS.PRICE_ID_MAP.Buffett,
+    Graham: GLOBAL_VARS.PRICE_ID_MAP.Graham
   };
 
   const handleSubmit = async (e: React.FormEvent, planName: string) => {
@@ -254,13 +258,13 @@ const PricingSection = () => {
                     <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: '0.25em' }}>
                       {plan.name === "Munger" && (
                         <>
-                          <div className="text-xs line-through mb-1">$9.99</div>
+                          <div className="text-xs line-through mb-1">$99</div>
                           $<span className="text-black">{plan.price}</span>
                         </>
                       )}
                       {plan.name === "Buffett" && (
                         <>
-                          <div className="text-xs line-through mb-1">$17.99</div>
+                          <div className="text-xs line-through mb-1">$199</div>
                           $<span className="text-black">{plan.price}</span>
                         </>
                       )}
@@ -301,18 +305,94 @@ const PricingSection = () => {
                     </Button>
                   ) : (
                     <>
-                      <Button 
-                        variant={plan.name === "Buffett" || plan.name === "Munger" ? "financial-outline" : "hero"} 
-                        className="w-full"
-                        size="lg"
-                        onClick={() => handleExpand(index)}
-                        type="button"
-                      >
-                        {expandedIndex === index ? "Hide" : "Get Started"}
-                      </Button>
+                      {expandedIndex !== index && (
+                        <Button 
+                          variant={plan.name === "Buffett" || plan.name === "Munger" ? "financial-outline" : "hero"} 
+                          className="w-full"
+                          size="lg"
+                          onClick={() => handleExpand(index)}
+                          type="button"
+                        >
+                          Get Started
+                        </Button>
+                      )}
                       {expandedIndex === index && (
                         <form onSubmit={e => handleSubmit(e, plan.name)} className="mt-6 space-y-4 bg-[#fdf6ee] rounded-xl p-6 border border-gray-200 shadow">
-                          {/* ...existing code... */}
+                          {_formError && (
+                            <div className="text-red-600 text-sm font-medium">{_formError}</div>
+                          )}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="flex flex-col space-y-2">
+                              <label htmlFor={`firstName-${index}`} className="text-xs font-semibold text-muted-foreground">First Name</label>
+                              <input
+                                id={`firstName-${index}`}
+                                type="text"
+                                className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                                value={firstName}
+                                onChange={e => _setFirstName(e.target.value)}
+                                placeholder="Jane"
+                                required
+                              />
+                            </div>
+                            <div className="flex flex-col space-y-2">
+                              <label htmlFor={`lastName-${index}`} className="text-xs font-semibold text-muted-foreground">Last Name</label>
+                              <input
+                                id={`lastName-${index}`}
+                                type="text"
+                                className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                                value={lastName}
+                                onChange={e => _setLastName(e.target.value)}
+                                placeholder="Doe"
+                                required
+                              />
+                            </div>
+                          </div>
+                          <div className="flex flex-col space-y-2">
+                            <label htmlFor={`email-${index}`} className="text-xs font-semibold text-muted-foreground">Email</label>
+                            <input
+                              id={`email-${index}`}
+                              type="email"
+                              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                              value={email}
+                              onChange={e => _setEmail(e.target.value)}
+                              placeholder="you@example.com"
+                              required
+                            />
+                          </div>
+                          <div className="flex flex-col space-y-2">
+                            <label htmlFor={`password-${index}`} className="text-xs font-semibold text-muted-foreground">Password</label>
+                            <input
+                              id={`password-${index}`}
+                              type="password"
+                              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                              value={password}
+                              onChange={e => _setPassword(e.target.value)}
+                              placeholder="••••••••"
+                              required
+                            />
+                          </div>
+                          <div className="flex items-start space-x-2">
+                            <input
+                              id={`terms-${index}`}
+                              type="checkbox"
+                              checked={agreedToTerms}
+                              onChange={e => setAgreedToTerms(e.target.checked)}
+                              className="mt-1 h-4 w-4 rounded border-gray-300 focus:ring-blue-500"
+                              required
+                            />
+                            <label htmlFor={`terms-${index}`} className="text-xs text-muted-foreground">
+                              I agree to the <a href="/terms" className="underline">Terms & Conditions</a> and <a href="/privacy" className="underline">Privacy Policy</a>.
+                            </label>
+                          </div>
+                          <Button
+                            type="submit"
+                            variant={plan.name === 'Buffett' || plan.name === 'Munger' ? 'financial-outline' : 'hero'}
+                            className="w-full"
+                            size="lg"
+                            disabled={_isLoading}
+                          >
+                            {_isLoading ? 'Processing…' : `Continue with ${plan.name}`}
+                          </Button>
                         </form>
                       )}
                     </>
@@ -325,7 +405,7 @@ const PricingSection = () => {
 
         <div className="text-center mt-12">
           <p className="text-muted-foreground mb-4">
-            Need a custom solution? We offer enterprise packages with tailored features.
+            Monthly subscriptions can be canceled anytime.
           </p>
         </div>
       </div>

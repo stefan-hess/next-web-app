@@ -19,7 +19,7 @@ const HeroSection = () => {
           <div className="space-y-8">
             <div className="space-y-4">
               <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-foreground leading-tight">
-                See through the Noise, {" "}
+                See Through the Noise, {" "}
                 <span className="relative inline-block">
                   <span className="bg-gradient-primary bg-clip-text text-blue-800">
                     {" "}

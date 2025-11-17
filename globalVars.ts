@@ -21,6 +21,16 @@ export const GLOBAL_VARS = {
   PLAN_MUNGER: "Munger",
   PLAN_BUFFETT: "Buffett",
 
+  // Stripe price-id mapping for plans
+  PRICE_ID_MAP: {
+    Munger: "price_1SUKHjI8pTUJRz6FPUH0K3WB",
+    Buffett: "price_1SUKGzI8pTUJRz6F7Fxr4emS",
+    Graham: "price_graham" // TODO: Replace with real price ID if needed
+  },
+
   // Other global constants can be added here
   STRIPE_API_VERSION: "2025-08-27.basil"
 }
+
+
+

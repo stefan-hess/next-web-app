@@ -129,7 +129,7 @@ export async function POST(req: NextRequest) {
     const userContext = `CONTEXT (JSON):\n${JSON.stringify(context).slice(0, 1000000)}\nEND CONTEXT.\n\nUser question: ${messages[messages.length - 1]?.content ?? ""}`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-4o",
       temperature: 0.2,
       messages: [
         { role: "system", content: system },

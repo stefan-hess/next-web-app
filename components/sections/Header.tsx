@@ -1,13 +1,10 @@
 "use client";
-import { ChartColumn, Menu } from "lucide-react";
-import { useState } from "react";
+import { ChartColumn } from "lucide-react";
 import { Button } from "components/ui/Button/Button_new";
 
 
 
 const Header = () => {
-
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <header className="border-b border-border bg-[#fdf6ee] sticky top-0 z-50 overflow-hidden">
@@ -30,27 +27,10 @@ const Header = () => {
                 Contact Us
               </Button>
             </a>
-            <Button variant="ghost" size="icon" className="md:hidden p-1" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Open navigation menu">
-              <Menu className="h-4 w-4" />
-            </Button>
+            {/* Mobile menu navigation button removed */}
           </div>
         </div>
-        {/* Mobile Nav Drawer */}
-        {mobileMenuOpen && (
-          <div className="md:hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex flex-col">
-            <div className="bg-[#fdf6ee] shadow-lg rounded-b-2xl p-4 pt-6 flex flex-col gap-4 w-full max-w-xs mx-auto mt-0">
-              <a href="/login" className="text-base font-semibold text-financial-primary py-2 px-3 rounded hover:bg-indigo-50 transition" onClick={() => setMobileMenuOpen(false)}>
-                Log In
-              </a>
-              <a href="#contactus" className="text-base font-semibold text-financial-primary py-2 px-3 rounded hover:bg-indigo-50 transition" onClick={() => setMobileMenuOpen(false)}>
-                Contact Us
-              </a>
-              <Button variant="ghost" size="sm" className="mt-2" onClick={() => setMobileMenuOpen(false)}>
-                Close
-              </Button>
-            </div>
-          </div>
-        )}
+        {/* Mobile Nav Drawer removed */}
       </div>
       <style>{`
         .blur-2xl {
