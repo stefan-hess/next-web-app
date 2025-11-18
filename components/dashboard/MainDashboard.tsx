@@ -706,7 +706,13 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
             <div className="flex justify-between items-center mb-2">
               <button
                 className="px-3 py-1 rounded font-semibold border border-blue-300 bg-blue-100 text-blue-700 shadow-sm hover:bg-blue-200 transition-colors text-xs mr-4"
-                onClick={() => downloadCSV(fullQuarterlyData, `${ticker.symbol}_quarterly.csv`)}
+                onClick={() => {
+                  let exportData = fullQuarterlyData;
+                  if (stripePlan === 'Munger' || stripePlan == null) {
+                    exportData = fullQuarterlyData.slice(0, 10);
+                  }
+                  downloadCSV(exportData, `${ticker.symbol}_quarterly.csv`);
+                }}
                 disabled={fullQuarterlyData.length === 0}
               >Export CSV</button>
               <h2 className="text-lg font-semibold text-primary flex-1 text-left">Quarterly Full Extract</h2>
@@ -721,7 +727,7 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
                   </tr>
                 </thead>
                 <tbody>
-                  {fullQuarterlyData.map((row: Record<string, string | number | null>, idx: number) => (
+                  {(stripePlan === 'Munger' || stripePlan == null ? fullQuarterlyData.slice(0, 10) : fullQuarterlyData).map((row: Record<string, string | number | null>, idx: number) => (
                     <tr key={idx} className="border-b last:border-b-0">
                       {Object.keys(row).map((col) => (
                         <td key={col} className="px-2 py-1 whitespace-nowrap">{row[col] ?? "-"}</td>
@@ -736,7 +742,13 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
             <div className="flex justify-between items-center mb-2">
               <button
                 className="px-3 py-1 rounded font-semibold border border-blue-300 bg-blue-100 text-blue-700 shadow-sm hover:bg-blue-200 transition-colors text-xs mr-4"
-                onClick={() => downloadCSV(fullAnnualData, `${ticker.symbol}_annual.csv`)}
+                onClick={() => {
+                  let exportData = fullAnnualData;
+                  if (stripePlan === 'Munger' || stripePlan == null) {
+                    exportData = fullAnnualData.slice(0, 10);
+                  }
+                  downloadCSV(exportData, `${ticker.symbol}_annual.csv`);
+                }}
                 disabled={fullAnnualData.length === 0}
               >Export CSV</button>
               <h2 className="text-lg font-semibold text-primary flex-1 text-left">Annual Full Extract</h2>
@@ -751,7 +763,7 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
                   </tr>
                 </thead>
                 <tbody>
-                  {fullAnnualData.map((row: Record<string, string | number | null>, idx: number) => (
+                  {(stripePlan === 'Munger' || stripePlan == null ? fullAnnualData.slice(0, 10) : fullAnnualData).map((row: Record<string, string | number | null>, idx: number) => (
                     <tr key={idx} className="border-b last:border-b-0">
                       {Object.keys(row).map((col) => (
                         <td key={col} className="px-2 py-1 whitespace-nowrap">{row[col] ?? "-"}</td>

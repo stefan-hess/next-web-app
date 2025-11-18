@@ -57,7 +57,7 @@ const HeroSection = () => {
             </div>
             <div className="relative z-10 h-auto w-full max-w-2xl md:max-w-4xl lg:max-w-7xl xl:max-w-screen-xl mx-auto rounded-xl bg-white shadow-card flex items-center justify-center">
               <Image
-                src="/assets/Dashboard.png"
+                src="/assets/Dashboard_1.png"
                 alt="Financial dashboard showing stock charts and market data"
                 width={1600}
                 height={900}
