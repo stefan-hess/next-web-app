@@ -1,6 +1,26 @@
 "use client"
 
 import Image from "next/image";
+import { BarChart, ShieldCheck, Users } from "lucide-react";
+
+function CredibilityBar() {
+  const items = [
+    { icon: <Users className="h-5 w-5" />, text: "Built for professionals" },
+    { icon: <ShieldCheck className="h-5 w-5" />, text: "Data from SEC & Verified Sources" },
+    { icon: <BarChart className="h-5 w-5" />, text: "Daily updated data" },
+  ];
+
+  return (
+    <div className="flex flex-col md:flex-row gap-6 mt-10 text-gray-600">
+      {items.map((item, idx) => (
+        <div key={idx} className="flex items-center gap-3">
+          {item.icon}
+          <span className="text-sm">{item.text}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 const HeroSection = () => {
   return (
@@ -14,7 +34,7 @@ const HeroSection = () => {
       </div>
 
       <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 lg:py-32">
-  <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-2 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-2 items-center">
           {/* Text Section */}
           <div className="space-y-8">
             <div className="space-y-4">
@@ -28,12 +48,10 @@ const HeroSection = () => {
                   <span className="block h-1 w-3/4 bg-blue-800 rounded-full mt-1 mx-auto"></span>
                 </span>{" "}
               </h1>
-
               <p className="text-base sm:text-lg lg:text-xl text-muted-foreground leading-relaxed">
-                The essential yet affordable suite of fundamental data for NYSE and NASDAQ <br /> listed stocks for professional investors.
+                The essential yet affordable suite of fundamental data for NYSE and NASDAQ <br /> listed stocks.
               </p>
             </div>
-
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="w-full sm:w-auto flex items-center gap-2">
                 <a
@@ -45,7 +63,7 @@ const HeroSection = () => {
                 </a>
               </div>
             </div>
-
+            <CredibilityBar />
             <div className="flex items-center space-x-8 text-sm text-muted-foreground"></div>
           </div>
 
