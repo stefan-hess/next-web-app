@@ -30,7 +30,7 @@ const plans = [
     description: "Best for wealth managers and investment advisors",
     features: [
       "Unlimited coverage of stocks",
-      "10 years of historical Balance Sheet, Income Statement, Cash Flow Statement data",
+      "20 years of historical Balance Sheet, Income Statement, Cash Flow Statement data",
       "Quarterly and Annual official filings of financial reportings data",
       "Historical market cap data",
       "Business developments of the month",
@@ -49,7 +49,7 @@ const plans = [
     description: "Customized solutions for family offices, Hedge Funds, Asset Managers starting at",
     features: [
       "Unlimited stocks coverage",
-      "10 years of historical Balance Sheet, Income Statement, Cash Flow Statement data",
+      "20 years of historical Balance Sheet, Income Statement, Cash Flow Statement data",
       "Quarterly and Annual official filings of financial reportings data",
       "Historical market cap data",
       "Business developments of the month",

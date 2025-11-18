@@ -1,4 +1,5 @@
 import type { NextRequest } from 'next/server';
+import { GLOBAL_VARS } from 'globalVars';
 
 interface FinancialReport {
   [key: string]: string | number | null | undefined;
@@ -10,8 +11,8 @@ interface AlphaVantageResponse {
   [key: string]: unknown;
 }
 
-const fetched_quarters = 12;
-const fetched_years = 10;
+const fetched_quarters = GLOBAL_VARS.FETCHED_FUNDAMENTAL_QUARTERS;
+const fetched_years = GLOBAL_VARS.FETCHED_FUNDAMENTAL_YEARS;
 
 function safeDiv(a: string | number | null | undefined, b: string | number | null | undefined): number | null {
   const x = parseFloat(String(a));

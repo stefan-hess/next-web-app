@@ -28,9 +28,11 @@ export const GLOBAL_VARS = {
     Graham: "price_graham" // TODO: Replace with real price ID if needed
   },
 
+  // fetched fundamental years
+  FETCHED_FUNDAMENTAL_YEARS: 20,
+  FETCHED_FUNDAMENTAL_QUARTERS: 12,
+
   // Other global constants can be added here
   STRIPE_API_VERSION: "2025-08-27.basil"
 }
-
-
 

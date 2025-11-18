@@ -1,5 +1,4 @@
 "use client";
-
 import { Activity, BarChart3, DollarSign, ScrollText } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis } from "recharts";
@@ -9,6 +8,7 @@ import { useDividendData } from "app/lib/useDividendData";
 import { useInsiderTradesData } from "app/lib/useInsiderTradesData";
 import { useLatestNews } from "app/lib/useLatestNews";
 import { useSharesOutstandingData } from "app/lib/useSharesOutstandingData";
+import { GLOBAL_VARS } from "globalVars";
 import type { Ticker } from "./Dashboard";
 import { FinancialCard } from "./FinancialCard";
 
@@ -34,6 +34,39 @@ interface MainDashboardProps {
 
 export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentariesSidebarOpen, setCommentariesSidebarOpen, onProvideAssistantData }: MainDashboardProps) => {
   // Sentiment tab state
+  // Periods toggle state
+  const [periodOptions, setPeriodOptions] = useState<number[]>([5, 10, 15, 20]);
+  const [selectedPeriod, setSelectedPeriod] = useState<number>(10);
+  const [stripePlan, setStripePlan] = useState<string | null>(null);
+
+  // Fetch stripe plan for current user
+  useEffect(() => {
+    async function fetchStripePlan() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || !user.email) return;
+      try {
+        const res = await fetch('/api/get-stripe-plan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: user.email })
+        });
+        const json = await res.json() as { plan?: string };
+        if (json && typeof json === 'object' && 'plan' in json) {
+          setStripePlan(json.plan ?? null);
+          if (json.plan === 'Munger' || json.plan == null) {
+            setPeriodOptions([5, 10]);
+            if (!([5, 10].includes(selectedPeriod))) setSelectedPeriod(5);
+          } else {
+            setPeriodOptions([5, 10, 15, 20]);
+          }
+        }
+      } catch (err) {
+        // fallback: show all options
+        setPeriodOptions([5, 10, 15, 20]);
+      }
+    }
+    fetchStripePlan();
+  }, []);
   interface SentimentFeedItem {
     time_published?: string;
     overall_sentiment_score?: number | string;
@@ -76,7 +109,9 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
   const [mainComments, setMainComments] = useState<Record<string, unknown>[]>([]);
   // Request up to 1000 trades to display more history
   const { data: insiderData, loading: insiderLoading, error: insiderError } = useInsiderTradesData(ticker.symbol, 1000);
-  const [expandedCards, setExpandedCards] = useState<string[]>([]);
+  // Set default expanded state for all financial cards
+  const financialCategoryIds = ["balance-sheet", "income-statement", "cash-flow"];
+  const [expandedCards, setExpandedCards] = useState<string[]>(financialCategoryIds);
   const [period, setPeriod] = useState<'annual' | 'quarterly'>('annual');
   const [view, setView] = useState<'table' | 'chart'>('table');
   const [activeTab, setActiveTab] = useState<'fundamentals' | 'shares' | 'insider' | 'dividends' | 'latest' | 'kpi' | 'reports' | 'commentaries' | 'sentiment'>('fundamentals');
@@ -371,8 +406,8 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
             )}
           </div>
         </div>
-        {/* Toggles for annual/quarterly and table/chart */}
-  <div className="flex gap-4 items-center">
+        {/* Toggles for annual/quarterly, table/chart, and periods */}
+        <div className="flex gap-4 items-center">
           <div className="flex gap-2 items-center">
             <span className="text-sm text-muted-foreground">Data:</span>
             <button
@@ -406,6 +441,20 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
             >
               Chart
             </button>
+          </div>
+          {/* Periods Toggle Buttons */}
+          <div className="flex gap-2 items-center">
+            <span className="text-sm text-muted-foreground">Periods:</span>
+            {periodOptions.map((p) => (
+              <button
+                key={p}
+                className={`px-3 py-1 rounded font-semibold border transition-colors duration-150 ${selectedPeriod === p ? 'bg-blue-100 text-blue-700 border-blue-300 shadow-sm' : 'bg-background text-foreground border-border'}`}
+                onClick={() => setSelectedPeriod(p)}
+                style={{ minWidth: 40 }}
+              >
+                {p}
+              </button>
+            ))}
           </div>
         </div>
       </div>
@@ -647,7 +696,7 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
               </div>
             </>
           ) : (
-            <div className="p-8 text-center text-muted-foreground border rounded-lg">Feature in Beta. No recent developments found for this ticker. Hold this ticker in your portfolio at month end to receive latest news.</div>
+            <div className="p-8 text-center text-muted-foreground border rounded-lg">This is a trailing monthly news feed. Permanently hold this ticker in your portfolio to receive monthly news at beginning each month.</div>
           )}
         </div>
       )}
@@ -983,6 +1032,7 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
                 onClick={() => handleCardClick(category.id)}
                 fullWidth={expandedCards.includes(category.id)}
                 view={view}
+                periods={selectedPeriod}
               />
             ))}
           </div>
@@ -1149,6 +1199,7 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
               onClick={() => handleCardClick("shares-outstanding")}
               fullWidth={expandedCards.includes("shares-outstanding")}
               view={view}
+              periods={selectedPeriod}
             />
 
             {/* Market Cap Card (computed) */}
@@ -1174,6 +1225,7 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
               onClick={() => handleCardClick("market-cap")}
               fullWidth={expandedCards.includes("market-cap")}
               view={view}
+              periods={selectedPeriod}
             />
           </div>
         )

@@ -34,10 +34,11 @@ export interface FinancialCardProps {
   onClick: () => void;
   fullWidth?: boolean;
   view?: 'table' | 'chart';
+  periods?: number;
 }
 
 
-export const FinancialCard: React.FC<FinancialCardProps> = ({ category, isExpanded, onClick, fullWidth, view = 'table' }) => {
+export const FinancialCard: React.FC<FinancialCardProps> = ({ category, isExpanded, onClick, fullWidth, view = 'table', periods }) => {
   const Icon = category.icon;
 
   // Get currency from first period
@@ -81,8 +82,8 @@ export const FinancialCard: React.FC<FinancialCardProps> = ({ category, isExpand
     new Set(category.data.flatMap((period: Record<string, string>) => Object.keys(period)))
   ).filter(key => key !== "reportedCurrency" && key !== "fiscalDateEnding" && key !== "date");
 
-  // Get period labels (dates), slice to 5 if minimized, 10 if expanded, and reverse for oldest left
-  const maxPeriods = isExpanded ? 10 : 3;
+  // Use selected periods from prop, default to 10 if not provided
+  const maxPeriods = periods ?? 10;
   // Use 'date' for shares outstanding, 'fiscalDateEnding' for others
   const periodLabels: string[] = (category.id === "shares-outstanding"
     ? category.data.map((period: Record<string, string>) => period.date || "")
@@ -161,9 +162,28 @@ export const FinancialCard: React.FC<FinancialCardProps> = ({ category, isExpand
             <table className="min-w-full text-xs">
               <thead>
                 <tr>
-                  <th className="text-left font-medium text-muted-foreground">Metric</th>
+                  <th
+                    className="text-left font-medium text-muted-foreground"
+                    style={{ minWidth: 120, maxWidth: 160, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                  >
+                    Metric
+                  </th>
                   {periodLabels.map((label, idx) => (
-                    <th key={label + idx} className="text-right font-medium text-muted-foreground">
+                    <th
+                      key={label + idx}
+                      className="text-right font-medium text-muted-foreground"
+                      style={{
+                        //writingMode: 'vertical-rl',
+                        //transform: 'rotate(-45deg)',
+                        maxWidth: 80,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        padding: '40px 16px',
+                        fontSize: '0.75rem',
+                        verticalAlign: 'bottom',
+                      }}
+                    >
                       {label}
                     </th>
                   ))}
