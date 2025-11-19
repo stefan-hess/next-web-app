@@ -1,6 +1,7 @@
 "use client"
 
 import Image from "next/image";
+import { useEffect, useRef } from "react";
 import { BarChart, ShieldCheck, Users } from "lucide-react";
 
 function CredibilityBar() {
@@ -23,8 +24,29 @@ function CredibilityBar() {
 }
 
 const HeroSection = () => {
+  // Parallax refs
+  const starRef = useRef<HTMLDivElement>(null);
+  const springRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleScroll() {
+      const scrollY = window.scrollY;
+      if (starRef.current) {
+        starRef.current.style.transform = `translateY(${scrollY * 0.2}px)`;
+      }
+      if (springRef.current) {
+        springRef.current.style.transform = `translateY(${scrollY * 0.1}px)`;
+      }
+    }
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
   return (
     <section className="relative overflow-hidden bg-[#fdf6ee]">
+      {/* Parallax images */}
+        <div ref={starRef} className="pointer-events-none absolute top-10 z-0" style={{ left: 'calc(50% - 140px)', width: 280, height: 280 }}>
+          <Image src="/assets/star.png" alt="Star" width={280} height={280} style={{ objectFit: 'contain' }} />
+        </div>
       {/* Animated blue/green blobs */}
       <div className="pointer-events-none absolute top-1/2 left-0 -translate-y-1/2 -translate-x-1/3 w-[320px] h-[320px] z-0">
         <div className="w-full h-full rounded-full bg-gradient-to-br from-blue-400 via-blue-300 to-green-300 opacity-60 blur-3xl animate-[blob1_18s_ease-in-out_infinite]" />

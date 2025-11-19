@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+import Image from "next/image";
 import { BarChart3, Building2, Clock, Shield, TrendingUp, UserCheck } from "lucide-react";
 import { Card, CardContent } from "components/ui/card";
 
@@ -41,8 +43,24 @@ const features = [
 ];
 
 const FeaturesSection = () => {
+  const cylinderRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleScroll() {
+      const scrollY = window.scrollY;
+      if (cylinderRef.current) {
+        cylinderRef.current.style.transform = `translateY(${scrollY * 0.1}px)`;
+      }
+    }
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
   return (
     <section id="features" className="relative py-20 lg:py-32 bg-[#fdf6ee] overflow-hidden">
+      {/* Parallax cylinder image */}
+      <div ref={cylinderRef} className="pointer-events-none absolute top-0 left-10 z-0 opacity-100" style={{ width: 180, height: 180 }}>
+        <Image src="/assets/cylinder.png" alt="Cylinder" width={180} height={180} style={{ objectFit: 'contain' }} />
+      </div>
       {/* Animated blue/green blob on the left side */}
       <div className="pointer-events-none absolute top-1/2 left-0 -translate-y-1/2 -translate-x-1/3 w-[320px] h-[320px] z-0">
         <div className="w-full h-full rounded-full bg-gradient-to-br from-blue-400 via-blue-300 to-green-300 opacity-40 blur-3xl animate-[blob1_18s_ease-in-out_infinite]" />

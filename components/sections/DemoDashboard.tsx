@@ -1,8 +1,20 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import Image from "next/image";
 import { MainDashboard } from "../dashboard/MainDashboard";
 
 const DemoDashboard = () => {
+  useEffect(() => {
+    function handleScroll() {
+      const scrollY = window.scrollY;
+      if (springRef.current) {
+        springRef.current.style.transform = `translateY(${scrollY * 0.1}px)`;
+      }
+    }
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+  const springRef = useRef<HTMLDivElement>(null);
   const [ticker, setTicker] = useState("");
   const [submittedTicker, setSubmittedTicker] = useState<string | null>(null);
   const [locked, setLocked] = useState(false);
@@ -25,6 +37,7 @@ const DemoDashboard = () => {
     if (ticker.trim() && !locked) {
       const upperTicker = ticker.trim().toUpperCase();
       setSubmittedTicker(upperTicker);
+    const springRef = useRef<HTMLDivElement>(null); // Parallax ref for spring image
       setLocked(true);
       if (typeof window !== "undefined") {
         localStorage.setItem("demoTicker", upperTicker);
@@ -69,7 +82,10 @@ const DemoDashboard = () => {
 
   return (
     <section id="productDemo" className="relative py-20 lg:py-32 bg-[#fdf6ee] overflow-hidden">
-  <div className="container mx-auto px-4 lg:px-8 max-w-8xl relative z-10">
+      <div ref={springRef} className="pointer-events-none absolute top-12 right-20 z-50" style={{ width: 320, height: 320 }}>
+        <Image src="/assets/spring.png" alt="Spring" width={320} height={320} style={{ objectFit: 'contain' }} />
+      </div>
+      <div className="container mx-auto px-4 lg:px-8 max-w-8xl relative z-10">
         <div className="text-center space-y-4 mb-12">
           <h2 className="text-3xl lg:text-5xl font-bold text-foreground">Demo Dashboard</h2>
           <p className="w-full text-xl text-muted-foreground max-w-2xl mx-auto">Try the fundamental data platform.</p>
