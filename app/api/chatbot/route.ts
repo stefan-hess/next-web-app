@@ -35,7 +35,7 @@ interface ChatbotContext {
 
 async function buildContext(ticker: string, clientData?: ClientData): Promise<ChatbotContext> {
   if (clientData) {
-    // Use client-provided data for context
+    // Use client-provided data for context (insider removed)
     return {
       ticker,
       reports: {
@@ -44,7 +44,7 @@ async function buildContext(ticker: string, clientData?: ClientData): Promise<Ch
       },
       shares: Array.isArray(clientData.shares) ? clientData.shares : [],
       news: Array.isArray(clientData.news) ? clientData.news : [],
-      insider: Array.isArray(clientData.insider) ? clientData.insider : [],
+      insider: [],
       dividends: Array.isArray(clientData.dividends) ? clientData.dividends : [],
     };
   }
@@ -71,12 +71,6 @@ async function buildContext(ticker: string, clientData?: ClientData): Promise<Ch
     .order("year", { ascending: false })
     .order("month_end", { ascending: false })
     .limit(36);
-  const { data: insider } = await supa
-    .from("insider_trades_cache")
-    .select("*")
-    .eq("ticker", ticker)
-    .order("transaction_date", { ascending: false })
-    .limit(1000);
   const { data: dividends } = await supa
     .from("dividend_history_cache")
     .select("*")
@@ -91,7 +85,7 @@ async function buildContext(ticker: string, clientData?: ClientData): Promise<Ch
     },
     shares: (shares ?? []) as unknown[],
     news: (news ?? []) as unknown[],
-    insider: (insider ?? []) as unknown[],
+  insider: [],
     dividends: (dividends ?? []) as unknown[],
   };
 }
