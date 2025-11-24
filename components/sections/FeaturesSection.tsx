@@ -1,6 +1,6 @@
-import { useEffect, useRef } from "react";
-import Image from "next/image";
 import { BarChart3, Building2, Clock, Shield, TrendingUp, UserCheck } from "lucide-react";
+import Image from "next/image";
+import { useEffect, useRef } from "react";
 import { Card, CardContent } from "components/ui/card";
 
 const features = [

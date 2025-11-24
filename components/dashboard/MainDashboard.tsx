@@ -8,7 +8,6 @@ import { useDividendData } from "app/lib/useDividendData";
 import { useInsiderTradesData } from "app/lib/useInsiderTradesData";
 import { useLatestNews } from "app/lib/useLatestNews";
 import { useSharesOutstandingData } from "app/lib/useSharesOutstandingData";
-import { GLOBAL_VARS } from "globalVars";
 import type { Ticker } from "./Dashboard";
 import { FinancialCard } from "./FinancialCard";
 
@@ -60,7 +59,7 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
             setPeriodOptions([5, 10, 15, 20]);
           }
         }
-      } catch (err) {
+      } catch {
         // fallback: show all options
         setPeriodOptions([5, 10, 15, 20]);
       }

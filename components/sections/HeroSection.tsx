@@ -1,8 +1,8 @@
 "use client"
 
+import { BarChart, ShieldCheck, Users } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef } from "react";
-import { BarChart, ShieldCheck, Users } from "lucide-react";
 
 function CredibilityBar() {
   const items = [

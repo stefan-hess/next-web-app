@@ -1,9 +1,10 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
 import { MainDashboard } from "../dashboard/MainDashboard";
 
 const DemoDashboard = () => {
+  const springRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     function handleScroll() {
       const scrollY = window.scrollY;
@@ -14,7 +15,6 @@ const DemoDashboard = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-  const springRef = useRef<HTMLDivElement>(null);
   const [ticker, setTicker] = useState("");
   const [submittedTicker, setSubmittedTicker] = useState<string | null>(null);
   const [locked, setLocked] = useState(false);
@@ -37,7 +37,6 @@ const DemoDashboard = () => {
     if (ticker.trim() && !locked) {
       const upperTicker = ticker.trim().toUpperCase();
       setSubmittedTicker(upperTicker);
-    const springRef = useRef<HTMLDivElement>(null); // Parallax ref for spring image
       setLocked(true);
       if (typeof window !== "undefined") {
         localStorage.setItem("demoTicker", upperTicker);
