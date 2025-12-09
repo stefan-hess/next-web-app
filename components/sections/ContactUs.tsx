@@ -40,7 +40,7 @@ export default function ContactPage() {
             <span>Contact Us</span>
           </h1>
           <p className="w-full text-xl text-muted-foreground max-w-3xl text-center">
-            Have a question, suggestion, or want to get in touch? Shoot us a message and our team will respond as soon as possible.
+            Have a question, suggestion, or want to get in touch? Send us a message and our team will respond as soon as possible.
           </p>
         </div>
         {message && <div className="mb-4 text-center font-semibold text-green-600">{message}</div>}

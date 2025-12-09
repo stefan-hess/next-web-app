@@ -46,7 +46,7 @@ const HeroSection = () => {
       {/* Parallax images */}
           <div
             ref={starRef}
-            className="pointer-events-none absolute top-10 z-0 w-[180px] h-[180px] opacity-60 sm:w-[220px] sm:h-[220px] md:w-[280px] md:h-[280px] md:opacity-100 left-0 right-0 mx-auto"
+            className="pointer-events-none absolute top-10 z-0 w-[180px] h-[180px] opacity-60 sm:w-[220px] sm:h-[220px] md:w-[280px] md:h-[280px] md:opacity-100 left-1/2 -ml-[60px] sm:-ml-[80px] md:-ml-[110px]"
           >
             <Image src="/assets/star.png" alt="Star" width={280} height={280} style={{ objectFit: 'contain' }} />
           </div>
@@ -74,7 +74,7 @@ const HeroSection = () => {
                 </span>{" "}
               </h1>
               <p className="text-base sm:text-lg lg:text-xl text-muted-foreground leading-relaxed">
-                The essential yet affordable suite of fundamental data for NYSE and NASDAQ <br /> listed stocks.
+                The essential yet affordable suite of fundamental data for NYSE and NASDAQ listed stocks.
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
