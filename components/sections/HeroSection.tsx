@@ -44,9 +44,12 @@ const HeroSection = () => {
   return (
     <section className="relative overflow-hidden bg-[#fdf6ee]">
       {/* Parallax images */}
-        <div ref={starRef} className="pointer-events-none absolute top-10 z-0" style={{ left: 'calc(50% - 140px)', width: 280, height: 280 }}>
-          <Image src="/assets/star.png" alt="Star" width={280} height={280} style={{ objectFit: 'contain' }} />
-        </div>
+          <div
+            ref={starRef}
+            className="pointer-events-none absolute top-10 z-0 w-[180px] h-[180px] opacity-60 sm:w-[220px] sm:h-[220px] md:w-[280px] md:h-[280px] md:opacity-100 left-0 right-0 mx-auto"
+          >
+            <Image src="/assets/star.png" alt="Star" width={280} height={280} style={{ objectFit: 'contain' }} />
+          </div>
       {/* Animated blue/green blobs */}
       <div className="pointer-events-none absolute top-1/2 left-0 -translate-y-1/2 -translate-x-1/3 w-[320px] h-[320px] z-0">
         <div className="w-full h-full rounded-full bg-gradient-to-br from-blue-400 via-blue-300 to-green-300 opacity-60 blur-3xl animate-[blob1_18s_ease-in-out_infinite]" />

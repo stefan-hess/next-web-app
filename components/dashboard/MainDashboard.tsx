@@ -41,7 +41,13 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
   // Fetch stripe plan for current user
   useEffect(() => {
     async function fetchStripePlan() {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error) {
+        if (error.message.includes("Refresh Token Not Found") || error.message.includes("Invalid Refresh Token")) {
+          await supabase.auth.signOut();
+        }
+        return;
+      }
       if (!user || !user.email) return;
       try {
         const res = await fetch('/api/get-stripe-plan', {

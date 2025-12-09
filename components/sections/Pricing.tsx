@@ -184,6 +184,8 @@ const PricingSection = () => {
           email,
           firstName,
           lastName,
+          plan: planName,
+          planLabel: (planName === 'Munger' ? 'Basic' : (planName === 'Buffett' ? 'Pro' : planName)),
         })
       });
       const data = await res.json() as { id?: string; error?: string };
@@ -251,7 +253,7 @@ const PricingSection = () => {
                 )}
               
               <CardHeader className="text-center space-y-4 pb-8">
-                <h3 className="text-2xl font-bold text-foreground">{plan.name}</h3>
+                <h3 className="text-2xl font-bold text-foreground">{plan.name === "Munger" ? "Basic" : (plan.name === "Buffett" ? "Pro" : plan.name)}</h3>
                 <p className="text-muted-foreground">{plan.description}</p>
                 <div className="space-y-2">
                   <div className="text-4xl font-bold text-foreground">
@@ -391,7 +393,7 @@ const PricingSection = () => {
                             size="lg"
                             disabled={_isLoading}
                           >
-                            {_isLoading ? 'Processing…' : `Continue with ${plan.name}`}
+                            {_isLoading ? 'Processing…' : `Continue with ${plan.name === 'Munger' ? 'Basic' : (plan.name === 'Buffett' ? 'Pro' : plan.name)}`}
                           </Button>
                         </form>
                       )}

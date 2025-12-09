@@ -24,12 +24,13 @@ const _BASE_URL = rawBase
 
 export async function POST(req: Request) {
   try {
-    const { priceId, email, firstName, lastName, plan } = (await req.json()) as {
+    const { priceId, email, firstName, lastName, plan, planLabel } = (await req.json()) as {
       priceId: string;
       email?: string;
       firstName?: string;
       lastName?: string;
       plan?: string;
+      planLabel?: string;
     };
 
   // Charge immediately: no trial period. If any trial is configured at the Price level,
@@ -46,7 +47,10 @@ export async function POST(req: Request) {
         email: email || "",
         first_name: firstName || "",
         last_name: lastName || "",
+        // Keep canonical plan for backend logic and webhooks
         plan: plan || "",
+        // Add display label for analytics/auditing (e.g., basic/Pro)
+        plan_label: planLabel || (plan === 'Munger' ? 'Basic' : plan === 'Buffett' ? 'Pro' : (plan || '')),
       },
     });
 

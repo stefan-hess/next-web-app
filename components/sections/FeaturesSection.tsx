@@ -58,8 +58,12 @@ const FeaturesSection = () => {
   return (
     <section id="features" className="relative py-20 lg:py-32 bg-[#fdf6ee] overflow-hidden">
       {/* Parallax cylinder image */}
-      <div ref={cylinderRef} className="pointer-events-none absolute top-0 left-10 z-0 opacity-100" style={{ width: 180, height: 180 }}>
-        <Image src="/assets/cylinder.png" alt="Cylinder" width={180} height={180} style={{ objectFit: 'contain' }} />
+      <div
+        ref={cylinderRef}
+        className="pointer-events-none absolute top-0 left-10 z-0 opacity-80 w-32 h-32 sm:w-[180px] sm:h-[180px] sm:opacity-100 hidden xs:block"
+        style={{}}
+      >
+        <Image src="/assets/cylinder.png" alt="Cylinder" width={128} height={128} className="w-full h-full object-contain sm:w-[180px] sm:h-[180px]" />
       </div>
       {/* Animated blue/green blob on the left side */}
       <div className="pointer-events-none absolute top-1/2 left-0 -translate-y-1/2 -translate-x-1/3 w-[320px] h-[320px] z-0">

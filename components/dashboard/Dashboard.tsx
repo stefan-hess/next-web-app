@@ -1,10 +1,7 @@
-
 "use client";
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
-
-
-// ...existing code...
 import { supabase } from "app/lib/supabaseClient";
 import { DashboardHeader } from "components/dashboard/DashboardHeader";
 import { GetStarted } from "components/dashboard/GetStarted";
@@ -30,6 +27,7 @@ export interface Ticker {
 }
 
 export const Dashboard = () => {
+  const router = useRouter();
   const [userEmail, setUserEmail] = useState("");
   const [selectedTickers, setSelectedTickers] = useState<Ticker[]>([]);
   const [activeTicker, setActiveTicker] = useState("");
@@ -55,12 +53,16 @@ export const Dashboard = () => {
       const { data, error } = await supabase.auth.getUser();
       if (error) {
         console.error("Failed to fetch user:", error);
+        if (error.message.includes("Refresh Token Not Found") || error.message.includes("Invalid Refresh Token")) {
+          await supabase.auth.signOut();
+          router.push("/login");
+        }
         return;
       }
       setUserEmail(data.user?.email || "");
     };
     fetchUserEmail();
-  }, []);
+  }, [router]);
 
   // Check Buffett tier only when userEmail changes (i.e., new session)
   useEffect(() => {
