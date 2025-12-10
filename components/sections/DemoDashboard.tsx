@@ -81,13 +81,7 @@ const DemoDashboard = () => {
 
   return (
     <section id="productDemo" className="relative py-20 lg:py-32 bg-[#fdf6ee] overflow-hidden">
-      <div
-        ref={springRef}
-        className="pointer-events-none absolute top-12 right-20 z-50 opacity-80 w-32 h-32 sm:w-[320px] sm:h-[320px] sm:opacity-100"
-        style={{}}
-      >
-        <Image src="/assets/spring.png" alt="Spring" width={128} height={128} className="w-full h-full object-contain sm:w-[320px] sm:h-[320px]" />
-      </div>
+
       <div className="container mx-auto px-4 lg:px-8 max-w-8xl relative z-10">
         <div className="text-center space-y-4 mb-12">
           <h2 className="text-3xl lg:text-5xl font-bold text-foreground">Demo Dashboard</h2>
