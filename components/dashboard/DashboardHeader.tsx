@@ -1,5 +1,5 @@
 
-import { BarChart3, Bell, Bot, MessagesSquare, Settings, User, RefreshCw } from "lucide-react";
+import { BarChart3, Bell, Bot, MessagesSquare, RefreshCw, Settings, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "app/lib/supabaseClient";
 import { Button } from "components/ui/Button/Button_new";
