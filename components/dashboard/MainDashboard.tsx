@@ -128,11 +128,29 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
   const { news, loading: newsLoading, error: newsError } = useLatestNews(ticker.symbol);
   const { data: dividendData, loading: dividendLoading, error: dividendError } = useDividendData(ticker.symbol);
   const { data, loading, error } = useCachedFinancialData(ticker.symbol);
-  const periodData = data?.[ticker.symbol]?.[period] || []; 
+  // Debug: log raw fundamentals data
+  useEffect(() => {
+    if (data) {
+      console.log('[DEBUG] Raw fundamentals data for', ticker.symbol, data);
+    }
+  }, [data, ticker.symbol]);
+  const periodData = data?.[ticker.symbol]?.[period] || [];
   // Full extracts for reports tab
   const fullQuarterlyData = data?.[ticker.symbol]?.quarterly || [];
   const fullAnnualData = data?.[ticker.symbol]?.annual || [];
   const { data: sharesData, loading: sharesLoading, error: sharesError } = useSharesOutstandingData(ticker.symbol);
+  // Debug: log raw shares outstanding data
+  useEffect(() => {
+    if (sharesData) {
+      console.log('[DEBUG] Raw shares outstanding data for', ticker.symbol, sharesData);
+    }
+  }, [sharesData, ticker.symbol]);
+  // Debug: log raw dividend data
+  useEffect(() => {
+    if (dividendData) {
+      console.log('[DEBUG] Raw dividend data for', ticker.symbol, dividendData);
+    }
+  }, [dividendData, ticker.symbol]);
 
   // Provide cached data to parent for assistant (guarded to avoid update loops)
   const onProvideAssistantDataRef = useRef(onProvideAssistantData);

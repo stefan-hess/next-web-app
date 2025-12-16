@@ -186,6 +186,32 @@ export const Dashboard = () => {
     setAssistantOpen((prev) => !prev);
   }
 
+  // Refresh handler for AlphaVantage data
+  const handleRefreshData = async () => {
+    if (!currentTicker) return;
+    // Invalidate all relevant caches
+    const ticker = currentTicker.symbol;
+    // Market cap
+    localStorage.removeItem(`marketcap_${ticker}`);
+    // Fundamentals
+    localStorage.removeItem(`financialData_${ticker}`);
+    // Dividends
+    localStorage.removeItem(`dividendData_${ticker}`);
+    // Insider trades
+    localStorage.removeItem(`insiderData_${ticker}`);
+    // News
+    localStorage.removeItem(`newsData_${ticker}`);
+    // Shares outstanding
+    localStorage.removeItem(`sharesOutstanding_${ticker}`);
+    // Optionally, clear any other custom caches here
+
+    // Reset state to force re-fetch
+    setMarketCap("");
+    setMarketCapCurrency("");
+    setActiveTicker("");
+    setTimeout(() => setActiveTicker(ticker), 0);
+  };
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex flex-col w-full bg-dashboard-bg">
@@ -198,6 +224,7 @@ export const Dashboard = () => {
             selectedTickers={selectedTickers}
             onOpenAssistant={hasBuffettTier ? handleOpenAssistant : undefined}
             showAssistantButton={hasBuffettTier}
+            onRefreshData={handleRefreshData}
           />
         </div>
         <div className="flex flex-1">

@@ -1,5 +1,5 @@
 
-import { BarChart3, Bell, Bot, MessagesSquare, Settings, User } from "lucide-react";
+import { BarChart3, Bell, Bot, MessagesSquare, Settings, User, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "app/lib/supabaseClient";
 import { Button } from "components/ui/Button/Button_new";
@@ -8,17 +8,20 @@ import { Button } from "components/ui/Button/Button_new";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string | undefined;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string | undefined;
 
-export interface DashboardHeaderProps {
+  // ...existing code...
+
+interface DashboardHeaderProps {
   ticker?: { symbol: string; name: string };
   marketCap?: string;
   marketCapCurrency?: string;
   onOpenCommentariesSidebar?: () => void;
   onOpenAssistant?: () => void;
+  onRefreshData?: () => void;
   selectedTickers?: { symbol: string; name: string }[];
   showAssistantButton?: boolean;
 }
 
-export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onOpenCommentariesSidebar, selectedTickers = [], onOpenAssistant, showAssistantButton }) => {
+export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onOpenCommentariesSidebar, selectedTickers = [], onOpenAssistant, showAssistantButton, onRefreshData }) => {
   // Scaling logic
   // ...existing code...
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -126,6 +129,19 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onOpenCommenta
       </div>
 
       <div className="flex items-center gap-3">
+        {/* Minimal Refresh Widget */}
+        {onRefreshData && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9"
+            onClick={onRefreshData}
+            aria-label="Refresh Data"
+            title="Refresh Data"
+          >
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+        )}
         <Button variant="ghost" size="sm" className="gap-2" onClick={onOpenCommentariesSidebar}>
           <MessagesSquare className="h-4 w-4" />
           Discussions

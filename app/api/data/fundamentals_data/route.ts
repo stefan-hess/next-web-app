@@ -122,16 +122,19 @@ async function fetchFundamentals(ticker: string, apiKey: string): Promise<{ annu
 
 export async function GET(req: NextRequest): Promise<Response> {
   const { searchParams } = new URL(req.url);
-  const ticker = searchParams.get('ticker');
+  let ticker = searchParams.get('ticker');
   if (!ticker || typeof ticker !== 'string') {
     return new Response(JSON.stringify({ error: 'Missing or invalid ticker parameter' }), { status: 400 });
   }
+  ticker = ticker.toUpperCase(); // Normalize symbol
   const apiKey = process.env.ALPHA_VANTAGE_API_KEY;
   if (!apiKey) {
     return new Response(JSON.stringify({ error: 'ALPHA_VANTAGE_API_KEY is not set in environment variables.' }), { status: 500 });
   }
   try {
     const fundamentals = await fetchFundamentals(ticker, apiKey);
+    // Debug log: ensure correct symbol in response
+    console.log('[FUNDAMENTALS API] Requested ticker:', ticker, '| Response key:', Object.keys({ [ticker]: fundamentals }));
     return new Response(JSON.stringify({ [ticker]: fundamentals }), { status: 200 });
   } catch (e) {
     return new Response(JSON.stringify({ error: 'Failed to fetch fundamentals data', details: String(e) }), { status: 500 });
