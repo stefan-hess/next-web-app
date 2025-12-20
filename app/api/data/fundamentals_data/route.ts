@@ -14,6 +14,10 @@ interface AlphaVantageResponse {
 const fetched_quarters = GLOBAL_VARS.FETCHED_FUNDAMENTAL_QUARTERS;
 const fetched_years = GLOBAL_VARS.FETCHED_FUNDAMENTAL_YEARS;
 
+// Ensure this route is always dynamic and never cached by Next.js
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 function safeDiv(a: string | number | null | undefined, b: string | number | null | undefined): number | null {
   const x = parseFloat(String(a));
   const y = parseFloat(String(b));
@@ -75,9 +79,36 @@ function computeKPIs(report: FinancialReport): FinancialReport {
 }
 
 async function fetchAlphaVantage(url: string): Promise<AlphaVantageResponse> {
-  const res = await fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' }, cache: 'no-store' });
-  if (!res.ok) throw new Error(`AlphaVantage API error: ${res.status}`);
-  return await res.json() as AlphaVantageResponse;
+  const run = async (): Promise<AlphaVantageResponse> => {
+    const res = await fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' }, cache: 'no-store' });
+    if (!res.ok) throw new Error(`AlphaVantage API error: ${res.status}`);
+    const json = await res.json() as Record<string, unknown>;
+    // Detect throttling or errors returned by Alpha Vantage
+    if (json && typeof json === 'object' && (
+      'Note' in json || 'Information' in json || 'Error Message' in json
+    )) {
+      throw new Error(`AlphaVantage response indicates throttle or error: ${String(json['Note'] || json['Information'] || json['Error Message'])}`);
+    }
+    return json as AlphaVantageResponse;
+  };
+
+  const maxRetries = 2;
+  const baseDelayMs = 500;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await run();
+    } catch (err) {
+      if (attempt === maxRetries) {
+        console.warn('[FUNDAMENTALS API] AlphaVantage fetch failed after retries:', String(err));
+        // Return empty to allow partial data response instead of failing entire request
+        return { annualReports: [], quarterlyReports: [] };
+      }
+      // Exponential backoff
+      const delay = baseDelayMs * Math.pow(2, attempt);
+      await new Promise(r => setTimeout(r, delay));
+    }
+  }
+  return { annualReports: [], quarterlyReports: [] };
 }
 
 async function fetchFundamentals(ticker: string, apiKey: string): Promise<{ annual: FinancialReport[]; quarterly: FinancialReport[] }> {
@@ -99,24 +130,59 @@ async function fetchFundamentals(ticker: string, apiKey: string): Promise<{ annu
   const cfAnnual = cfData.annualReports?.slice(0, fetched_years) ?? [];
   const cfQuarterly = cfData.quarterlyReports?.slice(0, fetched_quarters) ?? [];
 
-  // Merge annual
-  const annual: FinancialReport[] = [];
-  for (let i = 0; i < Math.max(bsAnnual.length, incAnnual.length, cfAnnual.length); i++) {
-    annual.push(computeKPIs({
-      ...(bsAnnual[i] ?? {}),
-      ...(incAnnual[i] ?? {}),
-      ...(cfAnnual[i] ?? {})
+  // Build maps keyed by fiscalDateEnding for robust joining
+  const mapByDate = (rows: FinancialReport[]) => {
+    const m = new Map<string, FinancialReport>();
+    for (const r of rows) {
+      const key = String((r as Record<string, unknown>)['fiscalDateEnding'] ?? '');
+      if (key) m.set(key, r);
+    }
+    return m;
+  };
+
+  const bsAnnualMap = mapByDate(bsAnnual);
+  const incAnnualMap = mapByDate(incAnnual);
+  const cfAnnualMap = mapByDate(cfAnnual);
+  const bsQuarterlyMap = mapByDate(bsQuarterly);
+  const incQuarterlyMap = mapByDate(incQuarterly);
+  const cfQuarterlyMap = mapByDate(cfQuarterly);
+
+  const sortDatesDesc = (dates: string[]) => {
+    return dates.sort((a, b) => {
+      const ad = new Date(a).getTime();
+      const bd = new Date(b).getTime();
+      if (isNaN(ad) || isNaN(bd)) return b.localeCompare(a);
+      return bd - ad;
+    });
+  };
+
+  // Merge annual by date
+  const annualDates = Array.from(new Set<string>([
+    ...Array.from(bsAnnualMap.keys()),
+    ...Array.from(incAnnualMap.keys()),
+    ...Array.from(cfAnnualMap.keys()),
+  ]));
+  const annual: FinancialReport[] = sortDatesDesc(annualDates)
+    .slice(0, fetched_years)
+    .map((d) => computeKPIs({
+      ...(bsAnnualMap.get(d) ?? {}),
+      ...(incAnnualMap.get(d) ?? {}),
+      ...(cfAnnualMap.get(d) ?? {})
     }));
-  }
-  // Merge quarterly
-  const quarterly: FinancialReport[] = [];
-  for (let i = 0; i < Math.max(bsQuarterly.length, incQuarterly.length, cfQuarterly.length); i++) {
-    quarterly.push(computeKPIs({
-      ...(bsQuarterly[i] ?? {}),
-      ...(incQuarterly[i] ?? {}),
-      ...(cfQuarterly[i] ?? {})
+
+  // Merge quarterly by date
+  const quarterlyDates = Array.from(new Set<string>([
+    ...Array.from(bsQuarterlyMap.keys()),
+    ...Array.from(incQuarterlyMap.keys()),
+    ...Array.from(cfQuarterlyMap.keys()),
+  ]));
+  const quarterly: FinancialReport[] = sortDatesDesc(quarterlyDates)
+    .slice(0, fetched_quarters)
+    .map((d) => computeKPIs({
+      ...(bsQuarterlyMap.get(d) ?? {}),
+      ...(incQuarterlyMap.get(d) ?? {}),
+      ...(cfQuarterlyMap.get(d) ?? {})
     }));
-  }
   return { annual, quarterly };
 }
 
@@ -133,9 +199,20 @@ export async function GET(req: NextRequest): Promise<Response> {
   }
   try {
     const fundamentals = await fetchFundamentals(ticker, apiKey);
-    // Debug log: ensure correct symbol in response
-    console.log('[FUNDAMENTALS API] Requested ticker:', ticker, '| Response key:', Object.keys({ [ticker]: fundamentals }));
-    return new Response(JSON.stringify({ [ticker]: fundamentals }), { status: 200 });
+    // Debug log: ensure correct symbol and dataset coverage
+    console.log('[FUNDAMENTALS API] Requested ticker:', ticker,
+      '| annual entries:', fundamentals.annual?.length ?? 0,
+      '| quarterly entries:', fundamentals.quarterly?.length ?? 0);
+    return new Response(
+      JSON.stringify({ [ticker]: fundamentals }),
+      {
+        status: 200,
+        headers: {
+          'Cache-Control': 'no-store, no-cache, max-age=0, must-revalidate',
+          'Content-Type': 'application/json'
+        }
+      }
+    );
   } catch (e) {
     return new Response(JSON.stringify({ error: 'Failed to fetch fundamentals data', details: String(e) }), { status: 500 });
   }
