@@ -5,6 +5,14 @@ import { useEffect, useState } from "react";
 import { supabase } from "app/lib/supabaseClient";
 import { useQuarterlyReportNotifications } from "app/lib/useQuarterlyReportNotifications";
 import { Button } from "components/ui/Button/Button_new";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "components/ui/dialog";
 
 
   // ...existing code...
@@ -25,6 +33,9 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ selectedTicker
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [userEmail, setUserEmail] = useState("");
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const [resetStatus, setResetStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [resetLoading, setResetLoading] = useState(false);
 
   // Quarterly report notifications hook
   const { newReports, loading: reportsLoading, markAsRead } = useQuarterlyReportNotifications(
@@ -42,6 +53,29 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ selectedTicker
     };
     fetchUserEmail();
   }, []);
+  async function handleResetPassword() {
+    if (!userEmail) {
+      setResetStatus({ type: "error", message: "Could not retrieve your email address. Please refresh and try again." });
+      return;
+    }
+    setResetLoading(true);
+    setResetStatus(null);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(userEmail, {
+        redirectTo: window.location.origin + "/reset-password",
+      });
+      if (error) {
+        setResetStatus({ type: "error", message: "Password reset failed. Please contact info@usenektaar.com for assistance." });
+      } else {
+        setResetStatus({ type: "success", message: "Reset email sent. Please check your inbox." });
+      }
+    } catch {
+      setResetStatus({ type: "error", message: "Password reset failed. Please contact info@usenektaar.com for assistance." });
+    } finally {
+      setResetLoading(false);
+    }
+  }
+
   async function handleLogout() {
     try {
       await supabase.auth.signOut();
@@ -161,9 +195,6 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ selectedTicker
             </div>
           )}
         </div>
-        <Button variant="ghost" size="icon" className="h-9 w-9">
-          <Settings className="h-4 w-4" />
-        </Button>
         <div className="relative">
           <Button
             variant="ghost"
@@ -175,7 +206,11 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ selectedTicker
             <User className="h-4 w-4" />
           </Button>
           {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-40 bg-card border border-border rounded shadow-lg z-50" style={{ backgroundColor: '#fff' }}>
+            <div className="absolute right-0 mt-2 w-48 bg-card border border-border rounded shadow-lg z-50" style={{ backgroundColor: '#fff' }}>
+              <button
+                className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted-foreground/10"
+                onClick={() => { setDropdownOpen(false); setResetDialogOpen(true); }}
+              >Reset Password</button>
               <button
                 className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted-foreground/10"
                 onClick={handleLogout}
@@ -185,6 +220,35 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ selectedTicker
         </div>
       </div>
       </header>
+
+      <Dialog open={resetDialogOpen} onOpenChange={(open) => { setResetDialogOpen(open); if (!open) setResetStatus(null); }}>
+        <DialogContent style={{ backgroundColor: '#fff' }}>
+          <DialogHeader>
+            <DialogTitle>Reset Password</DialogTitle>
+            <DialogDescription>
+              A password reset link will be sent to <strong>{userEmail}</strong>. Click confirm to proceed.
+            </DialogDescription>
+          </DialogHeader>
+          {resetStatus && (
+            <p className={`text-sm text-center ${resetStatus.type === "success" ? "text-green-600" : "text-red-600"}`}>
+              {resetStatus.message}
+            </p>
+          )}
+          <DialogFooter>
+            <button
+              className="px-4 py-2 text-sm rounded border border-border hover:bg-muted-foreground/10"
+              onClick={() => { setResetDialogOpen(false); setResetStatus(null); }}
+            >Cancel</button>
+            <button
+              className="px-4 py-2 text-sm rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+              onClick={handleResetPassword}
+              disabled={resetLoading || resetStatus?.type === "success"}
+            >
+              {resetLoading ? "Sending…" : "Send Reset Email"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

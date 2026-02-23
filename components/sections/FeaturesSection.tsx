@@ -16,12 +16,6 @@ const features = [
     description: "Monitor the latest executive transactions to track insiders' conviction of the business.",
     color: "text-financial-accent"
   },
-  {
-    icon: TrendingUp,
-    title: "Community of Shareholders",
-    description: "Engage in ticker specific discussions with others and collectively assess the strategic and financial performance of the company or even participate in shareholder activism.",
-    color: "text-financial-success"
-  },
     {
     icon: Building2,
     title: "Business Developments",

@@ -98,7 +98,7 @@ export default function SignupPage() {
           className="w-full mt-2 p-2 bg-gray-50 text-gray-700 rounded border border-gray-400 hover:bg-gray-100 transition"
           onClick={() => router.push("/unsubscribe")}
         >
-          Unsubscribe
+          Manage Subscription
         </button>
 
         {message && (
