@@ -1,5 +1,5 @@
 "use client";
-import { ChartColumn } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
@@ -59,8 +59,14 @@ const Header = () => {
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center space-x-2 group focus:outline-none">
-          <ChartColumn className="h-8 w-8 text-financial-primary group-hover:scale-110 transition-transform" />
-          <span className="text-xl font-bold text-foreground group-hover:text-financial-primary transition-colors">StockTickerNews</span>
+          <Image
+            src="/assets/icon/icon_v1.svg"
+            width={36}
+            height={36}
+            className="h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9 text-financial-primary"
+            alt="Nektaar logo"
+          />
+          <span className="text-xl font-bold text-foreground group-hover:text-financial-primary transition-colors">Nektaar</span>
           </Link>
         </div>
       </div>

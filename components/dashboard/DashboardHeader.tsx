@@ -1,5 +1,6 @@
 
-import { BarChart3, Bell, Bot, RefreshCw, Settings, User } from "lucide-react";
+import { Bell, Bot, RefreshCw, Settings, User } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { supabase } from "app/lib/supabaseClient";
 import { useQuarterlyReportNotifications } from "app/lib/useQuarterlyReportNotifications";
@@ -65,10 +66,16 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ selectedTicker
       <header className="sticky top-0 z-30 h-16 bg-[#fdf6ee] border-b border-border flex items-center justify-between px-6 shadow-sm">
       <div className="flex items-center gap-4">
         <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-muted-foreground" />
+            <div className="flex items-center gap-2">
+            <Image
+              src="/assets/icon/icon_v1.svg"
+              width={36}
+              height={36}
+              className="h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9 text-financial-primary"
+              alt="Nektaar logo"
+            />
             <h1 className="text-lg font-medium text-foreground">
-              StockTickerNews
+              Nektaar
             </h1>
           </div>
         </div>

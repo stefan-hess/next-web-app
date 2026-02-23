@@ -1,0 +1,26 @@
+<svg width="220" height="200" viewBox="0 0 220 200" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Wings -->
+  <ellipse cx="80" cy="85" rx="35" ry="45" fill="#DFF3FF"/>
+  <ellipse cx="140" cy="85" rx="35" ry="45" fill="#DFF3FF"/>
+
+  <!-- Body -->
+  <ellipse cx="110" cy="115" rx="45" ry="55" fill="#FFB703"/>
+
+  <!-- Stripes -->
+  <rect x="75" y="100" width="70" height="14" rx="7" fill="#1E293B"/>
+  <rect x="75" y="125" width="70" height="14" rx="7" fill="#1E293B"/>
+
+  <!-- Eyes -->
+  <circle cx="95" cy="110" r="5" fill="#1E293B"/>
+  <circle cx="125" cy="110" r="5" fill="#1E293B"/>
+
+  <!-- Antennae -->
+  <rect x="92" y="45" width="4" height="25" rx="2" fill="#1E293B" transform="rotate(-20 94 58)"/>
+  <rect x="124" y="45" width="4" height="25" rx="2" fill="#1E293B" transform="rotate(20 126 58)"/>
+
+  <!-- Antennae tips -->
+  <circle cx="86" cy="40" r="6" fill="#1E293B"/>
+  <circle cx="134" cy="40" r="6" fill="#1E293B"/>
+
+</svg>
