@@ -185,7 +185,7 @@ const PricingSection = () => {
           firstName,
           lastName,
           plan: planName,
-          planLabel: (planName === 'Munger' ? 'Basic' : (planName === 'Buffett' ? 'Pro' : planName)),
+          planLabel: (planName === 'Munger' ? 'Pro' : (planName === 'Buffett' ? 'Pro' : planName)),
         })
       });
       const data = await res.json() as { id?: string; error?: string };
@@ -260,7 +260,7 @@ const PricingSection = () => {
                     <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: '0.25em' }}>
                       {plan.name === "Munger" && (
                         <>
-                          <div className="text-xs line-through mb-1">$99</div>
+                          <div className="text-xs line-through mb-1">$79</div>
                           $<span className="text-black">{plan.price}</span>
                         </>
                       )}

@@ -5,9 +5,6 @@ import { supabase } from "app/lib/supabaseClient";
 import { useQuarterlyReportNotifications } from "app/lib/useQuarterlyReportNotifications";
 import { Button } from "components/ui/Button/Button_new";
 
-// Public env for client-side fallback fetches (safe: NEXT_PUBLIC_*)
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string | undefined;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string | undefined;
 
   // ...existing code...
 
