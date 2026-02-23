@@ -49,31 +49,6 @@ function normalizeDividend(raw: UnknownObject): DividendEntry | null {
 	};
 }
 
-async function fetchDividendHistory(ticker: string, apiKey: string): Promise<DividendEntry[]> {
-	const url = `https://www.alphavantage.co/query?function=DIVIDEND_HISTORY&symbol=${ticker}&apikey=${apiKey}`;
-	const res = await fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' }, cache: 'no-store' });
-	if (!res.ok) return [];
-	const data = await res.json() as AlphaVantageDividendResponse;
-	// Prefer arrays under likely keys; else first array value
-	let arr: UnknownObject[] = [];
-	for (const key in data) {
-		const v = (data as UnknownObject)[key];
-		if (Array.isArray(v) && /dividend|data|history|records/i.test(key)) {
-			arr = v as UnknownObject[];
-			break;
-		}
-	}
-	if (arr.length === 0) {
-		for (const key in data) {
-			const v = (data as UnknownObject)[key];
-			if (Array.isArray(v)) { arr = v as UnknownObject[]; break; }
-		}
-	}
-	const normalized = arr
-		.map((r) => (r && typeof r === 'object' ? normalizeDividend(r as UnknownObject) : null))
-		.filter((x): x is DividendEntry => !!x);
-	return normalized;
-}
 
 async function fetchMonthlyAdjustedFallback(ticker: string, apiKey: string): Promise<DividendEntry[]> {
 	type MonthlyAdjusted = {
@@ -139,13 +114,9 @@ export async function GET(req: NextRequest): Promise<Response> {
 	}
 
 	try {
-		// First try dedicated dividend history
-		let dividends = await fetchDividendHistory(ticker, apiKey);
-			// Then try Fundamentals DIVIDENDS endpoint (often includes all date columns)
-			if (!dividends.length) {
-				dividends = await fetchFundamentalDividends(ticker, apiKey);
-			}
-			// Fallback to monthly adjusted dividends if previous options returned nothing
+		// Try Fundamentals DIVIDENDS endpoint first
+		let dividends = await fetchFundamentalDividends(ticker, apiKey);
+		// Fallback to monthly adjusted dividends if previous option returned nothing
 		if (!dividends.length) {
 			dividends = await fetchMonthlyAdjustedFallback(ticker, apiKey);
 		}

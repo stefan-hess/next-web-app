@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { ArrowUp } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 // Helper to format assistant replies for better readability
 function formatAssistantReply(content: string): string {
@@ -31,6 +32,12 @@ export default function ChatAssistant({ ticker, clientData }: { ticker: string; 
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to latest message
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [msgs, loading]);
 
   // Restore previous responses for this ticker from sessionStorage on mount or ticker change
   useEffect(() => {
@@ -98,31 +105,54 @@ export default function ChatAssistant({ ticker, clientData }: { ticker: string; 
   };
 
   return (
-    <div className="border rounded-lg bg-[hsl(var(--card)/1)] p-3 space-y-3">
-  <div className="max-h-64 overflow-y-auto space-y-6 text-sm">
+    <div className="flex flex-col h-full min-h-0">
+      <style>{`
+        @keyframes msgIn {
+          from { opacity: 0; transform: translateY(8px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .msg-in { animation: msgIn 0.18s ease-out both; }
+      `}</style>
+
+      {/* Messages — scrollable, fills available height */}
+      <div className="flex-1 min-h-0 overflow-y-auto space-y-4 text-sm pb-2">
+        {msgs.length === 0 && !loading && (
+          <p className="text-xs text-muted-foreground text-center pt-6">
+            Ask me about valuation, trends, red flags…
+          </p>
+        )}
         {msgs.map((m, i) => (
-          <div key={i} className={m.role === "user" ? "text-right" : "text-left"}>
+          <div key={i} className={`msg-in ${m.role === "user" ? "text-right" : "text-left"}`}>
             <span
-              className={`inline-block px-2 py-1 rounded whitespace-pre-line ${m.role === "user" ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800"}`}
+              className={`inline-block px-3 py-2 rounded-2xl text-sm whitespace-pre-line ${m.role === "user" ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-800"}`}
               dangerouslySetInnerHTML={m.role === "assistant" ? { __html: formatAssistantReply(m.content) } : undefined}
             >
               {m.role === "user" ? m.content : undefined}
             </span>
           </div>
         ))}
-        {loading && <div className="text-xs text-muted-foreground">Thinking…</div>}
-        {error && <div className="text-xs text-red-600">{error}</div>}
+        {loading && <div className="text-xs text-muted-foreground pl-1 msg-in">Thinking…</div>}
+        {error && <div className="text-xs text-red-600 pl-1">{error}</div>}
+        <div ref={bottomRef} />
       </div>
-      <div className="flex gap-2">
+
+      {/* Input row pinned to bottom */}
+      <div className="flex-shrink-0 flex items-end gap-2 pt-2 border-t border-border">
         <input
-          className="flex-1 border rounded px-2 py-1 text-sm"
-          placeholder="Ask me about valuation, trends, red flags…"
+          className="flex-1 rounded-xl border border-border bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+          placeholder="Message AI Assistant…"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => (e.key === "Enter" ? send() : undefined)}
+          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
         />
-        <button className="px-3 py-1 border rounded bg-blue-100 text-blue-700" onClick={send} disabled={loading || !ticker}>
-          Send
+        <button
+          onClick={send}
+          disabled={loading || !ticker || !input.trim()}
+          className="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          style={{ backgroundColor: input.trim() ? '#2563eb' : '#d1d5db' }}
+          aria-label="Send"
+        >
+          <ArrowUp className="h-4 w-4 text-white" />
         </button>
       </div>
     </div>

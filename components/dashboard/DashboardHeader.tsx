@@ -1,5 +1,5 @@
 
-import { Bell, Bot, RefreshCw, User } from "lucide-react";
+import { Bell, Bot, MessageSquare, RefreshCw, User } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { supabase } from "app/lib/supabaseClient";
@@ -36,6 +36,10 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ selectedTicker
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [resetStatus, setResetStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [resetLoading, setResetLoading] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [feedbackText, setFeedbackText] = useState("");
+  const [feedbackStatus, setFeedbackStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
 
   // Quarterly report notifications hook
   const { newReports, loading: reportsLoading, markAsRead } = useQuarterlyReportNotifications(
@@ -53,6 +57,27 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ selectedTicker
     };
     fetchUserEmail();
   }, []);
+  async function handleSubmitFeedback() {
+    if (!feedbackText.trim()) return;
+    setFeedbackLoading(true);
+    setFeedbackStatus(null);
+    try {
+      const { error } = await supabase
+        .from("feedback")
+        .insert([{ feedback: feedbackText.trim(), email: userEmail || null }]);
+      if (error) {
+        setFeedbackStatus({ type: "error", message: "Failed to submit feedback. Please try again." });
+      } else {
+        setFeedbackStatus({ type: "success", message: "Thank you for your feedback!" });
+        setFeedbackText("");
+      }
+    } catch {
+      setFeedbackStatus({ type: "error", message: "Failed to submit feedback. Please try again." });
+    } finally {
+      setFeedbackLoading(false);
+    }
+  }
+
   async function handleResetPassword() {
     if (!userEmail) {
       setResetStatus({ type: "error", message: "Could not retrieve your email address. Please refresh and try again." });
@@ -129,6 +154,18 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ selectedTicker
             <RefreshCw className="h-4 w-4" />
           </Button>
         )}
+        {/* Feedback Button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="gap-2"
+          onClick={() => { setFeedbackOpen(true); setFeedbackStatus(null); }}
+          aria-label="Send Feedback"
+          title="Send Feedback"
+        >
+          <MessageSquare className="h-4 w-4" />
+          <span className="hidden md:inline">Feedback</span>
+        </Button>
         {showAssistantButton && (
           <Button
             variant="ghost"
@@ -158,7 +195,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ selectedTicker
             )}
           </Button>
           {notificationOpen && (
-            <div className="absolute right-0 mt-2 w-96 bg-card border border-border rounded shadow-lg z-50 p-4 max-h-[500px] overflow-y-auto" style={{ backgroundColor: '#fff' }}>
+            <div className="absolute right-0 mt-2 w-96 bg-card border border-border rounded shadow-lg z-50 p-4 max-h-[500px] overflow-y-auto" style={{ backgroundColor: '#fdf6ee' }}>
               <h3 className="font-semibold text-sm mb-3">Notifications</h3>
               
               {reportsLoading && (
@@ -206,7 +243,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ selectedTicker
             <User className="h-4 w-4" />
           </Button>
           {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-card border border-border rounded shadow-lg z-50" style={{ backgroundColor: '#fff' }}>
+            <div className="absolute right-0 mt-2 w-48 bg-card border border-border rounded shadow-lg z-50" style={{ backgroundColor: '#fdf6ee' }}>
               <button
                 className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted-foreground/10"
                 onClick={() => { setDropdownOpen(false); setResetDialogOpen(true); }}
@@ -220,6 +257,43 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ selectedTicker
         </div>
       </div>
       </header>
+
+      <Dialog open={feedbackOpen} onOpenChange={(open) => { setFeedbackOpen(open); if (!open) { setFeedbackStatus(null); setFeedbackText(""); } }}>
+        <DialogContent style={{ backgroundColor: '#fff' }}>
+          <DialogHeader>
+            <DialogTitle>Send Feedback</DialogTitle>
+            <DialogDescription>
+              Share your thoughts, suggestions, or issues. We&apos;ll receive it directly.
+            </DialogDescription>
+          </DialogHeader>
+          <textarea
+            className="w-full rounded border border-border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            rows={5}
+            placeholder="Write your feedback here…"
+            value={feedbackText}
+            onChange={(e) => setFeedbackText(e.target.value)}
+            disabled={feedbackLoading || feedbackStatus?.type === "success"}
+          />
+          {feedbackStatus && (
+            <p className={`text-sm text-center ${feedbackStatus.type === "success" ? "text-green-600" : "text-red-600"}`}>
+              {feedbackStatus.message}
+            </p>
+          )}
+          <DialogFooter>
+            <button
+              className="px-4 py-2 text-sm rounded border border-border hover:bg-muted-foreground/10"
+              onClick={() => { setFeedbackOpen(false); setFeedbackStatus(null); setFeedbackText(""); }}
+            >Cancel</button>
+            <button
+              className="px-4 py-2 text-sm rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+              onClick={handleSubmitFeedback}
+              disabled={feedbackLoading || !feedbackText.trim() || feedbackStatus?.type === "success"}
+            >
+              {feedbackLoading ? "Sending…" : "Submit"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={resetDialogOpen} onOpenChange={(open) => { setResetDialogOpen(open); if (!open) setResetStatus(null); }}>
         <DialogContent style={{ backgroundColor: '#fff' }}>

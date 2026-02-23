@@ -208,9 +208,9 @@ export const Dashboard = () => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex flex-col w-full bg-[#fdf6ee]">
-        <div className="w-full sticky top-0 z-40" style={{ backgroundColor: '#fff' }}>
-          <DashboardHeader 
+      <div className="flex flex-col w-full bg-[#fdf6ee]" style={{ height: '100vh', overflow: 'hidden' }}>
+        <div className="flex-shrink-0 w-full z-40" style={{ backgroundColor: '#fff' }}>
+          <DashboardHeader
             ticker={currentTicker}
             marketCap={marketCap}
             marketCapCurrency={marketCapCurrency}
@@ -220,7 +220,7 @@ export const Dashboard = () => {
             onRefreshData={handleRefreshData}
           />
         </div>
-        <div className="flex flex-1">
+        <div className="flex flex-1 min-h-0 overflow-hidden">
           <DashboardSidebar
             tickers={selectedTickers}
             activeTicker={activeTicker}
@@ -229,7 +229,7 @@ export const Dashboard = () => {
             onAddTicker={addTicker}
             email={userEmail}
           />
-          <main className="flex-1 p-6">
+          <main className="flex-1 p-6 min-w-0 overflow-auto">
             {currentTicker ? (
               <MainDashboard
                 ticker={currentTicker}
@@ -240,26 +240,44 @@ export const Dashboard = () => {
             ) : (
               <GetStarted onAddTicker={addTicker} />
             )}
-            {/* Assistant chatbox at bottom */}
-            {assistantOpen && currentTicker && (
-              <div
-                className="fixed bottom-0 right-0 z-50 pb-4 pr-4 pointer-events-auto"
-                style={{ width: '100%', maxWidth: '420px' }}
-              >
-                <div className="max-w-md w-full relative bg-white border border-gray-300 rounded-lg shadow-lg" style={{ backgroundColor: '#fff' }}>
-                  {/* Exit button */}
-                  <button
-                    className="absolute top-2 right-2 z-10 bg-gray-100 hover:bg-gray-200 rounded-full p-2 shadow"
-                    aria-label="Close chatbox"
-                    onClick={() => setAssistantOpen(false)}
-                  >
-                    <span style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>&times;</span>
-                  </button>
-                  <ChatAssistant ticker={currentTicker.symbol} clientData={assistantClientData ?? undefined} />
-                </div>
-              </div>
-            )}
           </main>
+          {/* AI Assistant overlay — fixed on the right, transforms in/out (does not change layout) */}
+          {currentTicker && (
+            <div
+              aria-hidden={!assistantOpen}
+              style={{
+                position: 'fixed',
+                top: 0,
+                right: 0,
+                height: '100vh',
+                width: 400,
+                backgroundColor: '#fdf6ee',
+                boxShadow: '-4px 0 12px rgba(0,0,0,0.06)',
+                transform: assistantOpen ? 'translateX(0)' : 'translateX(100%)',
+                transition: 'transform 300ms ease-in-out',
+                zIndex: 60,
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+              }}
+            >
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border flex-shrink-0">
+                <span className="font-semibold text-sm truncate">
+                  AI Assistant{currentTicker ? ` — ${currentTicker.symbol}` : ""}
+                </span>
+                <button
+                  onClick={() => setAssistantOpen(false)}
+                  className="ml-2 flex-shrink-0 text-xl leading-none opacity-60 hover:opacity-100 transition-opacity"
+                  aria-label="Close assistant"
+                >
+                  &times;
+                </button>
+              </div>
+              <div className="flex-1 min-h-0 p-3 flex flex-col">
+                <ChatAssistant ticker={currentTicker.symbol} clientData={assistantClientData ?? undefined} />
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </SidebarProvider>

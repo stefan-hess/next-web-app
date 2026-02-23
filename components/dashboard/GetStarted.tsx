@@ -43,7 +43,7 @@ export const GetStarted = ({ onAddTicker }: GetStartedProps) => {
           <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-primary flex items-center justify-center mb-6">
             <TrendingUp className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-4xl font-bold text-foreground">Welcome to Stock Ticker News</h1>
+          <h1 className="text-4xl font-bold text-foreground">Welcome to Nektaar</h1>
           <p className="text-xl text-muted-foreground max-w-lg mx-auto">
             Analyze official financial data, track performance, and make informed investment decisions with comprehensive fundamental analysis.
           </p>
