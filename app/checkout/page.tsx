@@ -8,10 +8,10 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
 
 const PRICES = [
   {
-    id: "price_1S58CGI8pTUJRz6FyikGu4R7",
+    id: "price_1T2Z6mI8pTUJRz6FcnbZqphs",
     name: "Munger",
-    amount: 4.99,
-    description: "Follow 10 Stocks",
+    amount: 39.00,
+    description: "Follow 30 Stocks",
     features: [
       "Business developments of the month",
       "Latest SEC filings for quarterly and annual financial data",

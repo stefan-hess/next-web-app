@@ -37,7 +37,6 @@ export const Dashboard = () => {
   }, []);
   const [marketCap, setMarketCap] = useState<string>("");
   const [marketCapCurrency, setMarketCapCurrency] = useState<string>("");
-  const [commentariesSidebarOpen, setCommentariesSidebarOpen] = useState(false);
   const [assistantOpen, setAssistantOpen] = useState(false);
   const [assistantClientData, setAssistantClientData] = useState<ClientData | null>(null);
   const [hasBuffettTier, setHasBuffettTier] = useState(false);
@@ -176,11 +175,6 @@ export const Dashboard = () => {
     (t) => t.symbol === activeTicker
   );
 
-  // Handler to open commentaries sidebar
-  const handleOpenCommentariesSidebar = () => {
-    setCommentariesSidebarOpen(true);
-  } 
-
   // Handler to toggle assistant chatbox
   const handleOpenAssistant = () => {
     setAssistantOpen((prev) => !prev);
@@ -214,13 +208,12 @@ export const Dashboard = () => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex flex-col w-full bg-dashboard-bg">
+      <div className="min-h-screen flex flex-col w-full bg-[#fdf6ee]">
         <div className="w-full sticky top-0 z-40" style={{ backgroundColor: '#fff' }}>
           <DashboardHeader 
             ticker={currentTicker}
             marketCap={marketCap}
             marketCapCurrency={marketCapCurrency}
-            onOpenCommentariesSidebar={handleOpenCommentariesSidebar}
             selectedTickers={selectedTickers}
             onOpenAssistant={hasBuffettTier ? handleOpenAssistant : undefined}
             showAssistantButton={hasBuffettTier}
@@ -242,8 +235,6 @@ export const Dashboard = () => {
                 ticker={currentTicker}
                 marketCap={marketCap}
                 marketCapCurrency={marketCapCurrency}
-                commentariesSidebarOpen={commentariesSidebarOpen}
-                setCommentariesSidebarOpen={setCommentariesSidebarOpen}
                 onProvideAssistantData={setAssistantClientData}
               />
             ) : (

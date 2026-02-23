@@ -60,8 +60,8 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   }, [email]);
   // Determine max tickers by plan
   const getMaxTickers = () => {
-    if (userPlan === GLOBAL_VARS.PLAN_MUNGER) return 10;
-    if (userPlan === GLOBAL_VARS.PLAN_BUFFETT) return 20;
+    if (userPlan === GLOBAL_VARS.PLAN_MUNGER) return 30;
+    if (userPlan === GLOBAL_VARS.PLAN_BUFFETT) return 999;
     // Free or no plan: allow a small number
     return 2;
   };

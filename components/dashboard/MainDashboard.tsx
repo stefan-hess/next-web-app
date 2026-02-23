@@ -26,12 +26,10 @@ interface MainDashboardProps {
   ticker: Ticker;
   marketCap?: string;
   marketCapCurrency?: string;
-  commentariesSidebarOpen?: boolean;
-  setCommentariesSidebarOpen?: (open: boolean) => void;
   onProvideAssistantData?: (clientData: ClientData) => void;
 }
 
-export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentariesSidebarOpen, setCommentariesSidebarOpen, onProvideAssistantData }: MainDashboardProps) => {
+export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, onProvideAssistantData }: MainDashboardProps) => {
   // Sentiment tab state
   // Periods toggle state
   const [periodOptions, setPeriodOptions] = useState<number[]>([5, 10, 15, 20]);
@@ -100,18 +98,6 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
         setSentimentLoading(false);
       });
   }, [ticker.symbol]);
-  // Sidebar state for replying to a main post
-  const [replySidebarOpen, setReplySidebarOpen] = useState(false);
-  type SelectedMainPostType = Record<string, unknown> | null | 'NEW_POST';
-  const [selectedMainPost, setSelectedMainPost] = useState<SelectedMainPostType>(null);
-  // Commentary draft state
-  const [commentTitle, setCommentTitle] = useState('');
-  const [commentContent, setCommentContent] = useState('');
-  const [postingComment, setPostingComment] = useState(false);
-  const [commentError, setCommentError] = useState('');
-  const [commentSuccess, setCommentSuccess] = useState('');
-  const [loadingComments, setLoadingComments] = useState(false);
-  const [mainComments, setMainComments] = useState<Record<string, unknown>[]>([]);
   // Request up to 1000 trades to display more history
   const { data: insiderData, loading: insiderLoading, error: insiderError } = useInsiderTradesData(ticker.symbol, 1000);
   // Set default expanded state for all financial cards
@@ -119,12 +105,7 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
   const [expandedCards, setExpandedCards] = useState<string[]>(financialCategoryIds);
   const [period, setPeriod] = useState<'annual' | 'quarterly'>('annual');
   const [view, setView] = useState<'table' | 'chart'>('table');
-  const [activeTab, setActiveTab] = useState<'fundamentals' | 'shares' | 'insider' | 'dividends' | 'latest' | 'kpi' | 'reports' | 'commentaries' | 'sentiment'>('fundamentals');
-  const [userAlias, setUserAlias] = useState<string | null>(null);
-  const [showAliasPrompt, setShowAliasPrompt] = useState(false);
-  const [aliasInput, setAliasInput] = useState('');
-  const [aliasError, setAliasError] = useState('');
-  const [checkingAlias, setCheckingAlias] = useState(false);
+  const [activeTab, setActiveTab] = useState<'fundamentals' | 'shares' | 'insider' | 'dividends' | 'latest' | 'kpi' | 'reports' | 'sentiment'>('fundamentals');
   const { news, loading: newsLoading, error: newsError } = useLatestNews(ticker.symbol);
   const { data: dividendData, loading: dividendLoading, error: dividendError } = useDividendData(ticker.symbol);
   const { data, loading, error } = useCachedFinancialData(ticker.symbol);
@@ -204,111 +185,6 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
     }
     return Array.from(byYear.values());
   }, [sharesData, period]);
-
-  const fetchMainComments = useCallback(async () => {
-    console.debug('[Commentaries] fetchMainComments:start', { ticker: ticker.symbol });
-    setLoadingComments(true);
-
-    const bypassCache = (process.env.NEXT_PUBLIC_BYPASS_COMMENTS_CACHE === 'true') || (() => {
-      try {
-        return typeof window !== 'undefined' && localStorage.getItem('bypass_comments_cache') === 'true';
-      } catch {
-        return false;
-      }
-    })();
-    console.debug('[Commentaries] bypassCache?', bypassCache);
-
-    // 5-minute cache per ticker in localStorage
-    if (!bypassCache) {
-      try {
-        const cacheKey = `comments_${ticker.symbol}`;
-        const cachedRaw = typeof window !== 'undefined' ? localStorage.getItem(cacheKey) : null;
-        console.debug('[Commentaries] cache lookup', { cacheKey, found: !!cachedRaw });
-        if (cachedRaw) {
-          try {
-            const cached = JSON.parse(cachedRaw) as { ts: number; data: Record<string, unknown>[] };
-            const isFresh = Date.now() - (cached.ts || 0) < 5 * 60 * 1000;
-            console.debug('[Commentaries] cache parsed', { ts: cached.ts, isFresh, size: Array.isArray(cached.data) ? cached.data.length : -1 });
-            if (isFresh && Array.isArray(cached.data)) {
-              console.debug('[Commentaries] serving from cache');
-              setMainComments(cached.data);
-              setLoadingComments(false);
-              return; // serve from cache
-            }
-          } catch {
-            // ignore parse errors and fetch fresh
-            console.debug('[Commentaries] cache parse failed, fetching fresh');
-          }
-        }
-      } catch {
-        // localStorage not available (SSR or blocked), continue to fetch
-        console.debug('[Commentaries] cache unavailable, fetching fresh');
-      }
-    }
-
-    const { data, error } = await supabase
-      .from('ticker_commentaries')
-      .select('*')
-      .eq('related_ticker', ticker.symbol)
-      .eq('original_post', true)
-      .order('created_at', { ascending: false });
-    if (error) {
-      console.debug('[Commentaries] supabase error', error);
-      setMainComments([]);
-      setLoadingComments(false);
-      return;
-    }
-    const rows = data ?? [];
-    console.debug('[Commentaries] supabase rows', { count: rows.length });
-    setMainComments(rows);
-    setLoadingComments(false);
-
-    // write to cache (unless bypassing)
-    if (!bypassCache) {
-      try {
-        const cacheKey = `comments_${ticker.symbol}`;
-        localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), data: rows }));
-        console.debug('[Commentaries] cache written', { cacheKey, count: rows.length });
-      } catch {
-        // ignore quota or availability issues
-        console.debug('[Commentaries] cache write failed');
-      }
-    }
-  }, [ticker.symbol]);
-
-  // Fetch when tab changes or sidebar opens
-  useEffect(() => {
-    if (replySidebarOpen || activeTab === 'commentaries') {
-      console.debug('[Commentaries] effect trigger: replySidebarOpen/tab', { replySidebarOpen, activeTab });
-      fetchMainComments();
-    }
-  }, [replySidebarOpen, activeTab, fetchMainComments]);
-
-  // When the sidebar opens from the header icon, fetch comments without changing tabs
-  useEffect(() => {
-    if (replySidebarOpen) {
-      console.debug('[Commentaries] sidebar opened via header or local control');
-      fetchMainComments();
-    }
-  }, [replySidebarOpen, fetchMainComments]);
-
-  // Sync sidebar open state with parent prop and trigger fetch when opening
-  useEffect(() => {
-    if (typeof commentariesSidebarOpen === 'boolean') {
-      console.debug('[Commentaries] prop change: commentariesSidebarOpen', commentariesSidebarOpen);
-      setReplySidebarOpen(commentariesSidebarOpen);
-      if (commentariesSidebarOpen) {
-        console.debug('[Commentaries] prop opened -> fetching');
-        fetchMainComments();
-      }
-    }
-  }, [commentariesSidebarOpen, fetchMainComments]);
-
-  // When sidebar closes locally, notify parent
-  const handleCloseSidebar = () => {
-    setReplySidebarOpen(false);
-    if (setCommentariesSidebarOpen) setCommentariesSidebarOpen(false);
-  };
 
   // Utility to convert array of objects to CSV string
   function arrayToCSV(data: Record<string, string | number | null>[]): string {
@@ -516,178 +392,8 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
           className={`px-4 py-2 font-semibold text-xs ${activeTab === 'reports' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
           onClick={() => setActiveTab('reports')}
         >Report Filings</button>
-        <button
-          className={`px-4 py-2 font-semibold text-xs ${activeTab === 'commentaries' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
-          onClick={async () => {
-            if (!userAlias) {
-              setCheckingAlias(true);
-              const { data: { user } } = await supabase.auth.getUser();
-              if (user) {
-                const { data, error: _error } = await supabase
-                  .from('news_subscribed_clients')
-                  .select('user_alias')
-                  .eq('client_id', user.id)
-                  .single();
-                if (data && data.user_alias) {
-                  setUserAlias(data.user_alias);
-                  setActiveTab('commentaries');
-                } else {
-                  setShowAliasPrompt(true);
-                }
-              } else {
-                setAliasError('You must be logged in to comment.');
-              }
-              setCheckingAlias(false);
-            } else {
-              setActiveTab('commentaries');
-            }
-          }}
-        >
-          Commentaries
-        </button>
       </div>
 
-      {/* Global Discussions Sidebar Overlay (always available) */}
-      {replySidebarOpen && (
-        <div className="fixed top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl z-50 flex flex-col border-l border-border" style={{ transition: 'transform 0.3s', transform: replySidebarOpen ? 'translateX(0)' : 'translateX(100%)' }}>
-          <div className="flex justify-between items-center p-4 border-b">
-            <div className="font-bold text-lg text-primary">{selectedMainPost === 'NEW_POST' ? 'Create New Post' : 'Comment Thread'}</div>
-            <button className="text-muted-foreground px-2 py-1 rounded hover:bg-blue-100" onClick={handleCloseSidebar}>Close</button>
-          </div>
-          <div className="flex-1 overflow-y-auto p-4">
-            {loadingComments ? (
-              <div className="flex justify-center items-center h-32">
-                <span className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mr-2"></span>
-                <span>Loading discussions…</span>
-              </div>
-            ) : selectedMainPost === 'NEW_POST' ? (
-              <div className="mb-4 border-b pb-4">
-                <div className="flex gap-3 items-center mb-2">
-                  <div className="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center">
-                    <span className="font-bold text-blue-700 text-lg">{userAlias ? userAlias.charAt(0).toUpperCase() : 'U'}</span>
-                  </div>
-                  <div>
-                    <span className="font-semibold text-primary text-lg">Draft Commentary</span>
-                    <span className="block text-xs text-muted-foreground">by {userAlias ?? 'User'} • just now</span>
-                  </div>
-                </div>
-                <h3 className="text-lg font-bold mb-2">What's your take on {ticker.symbol}?</h3>
-                <p className="text-base text-foreground mb-4">Share your thoughts, analysis, or questions about this company. Start the conversation below!</p>
-                <input
-                  type="text"
-                  className="w-full p-2 border rounded mb-2 bg-background text-foreground"
-                  placeholder="Title of your post"
-                  value={commentTitle}
-                  onChange={e => setCommentTitle(e.target.value)}
-                  disabled={!userAlias}
-                />
-                <textarea
-                  className="w-full p-2 border rounded bg-background text-foreground resize-y mb-2"
-                  rows={5}
-                  placeholder={userAlias ? "Write your commentary..." : "Set your alias to comment"}
-                  value={commentContent}
-                  onChange={e => setCommentContent(e.target.value)}
-                  disabled={!userAlias}
-                />
-                <button
-                  className={`px-4 py-2 rounded font-semibold border border-blue-300 bg-blue-100 text-blue-700 shadow-sm ${!userAlias || !commentTitle.trim() || !commentContent.trim() ? 'cursor-not-allowed' : ''}`}
-                  disabled={!userAlias || !commentTitle.trim() || !commentContent.trim() || postingComment}
-                  onClick={async () => {
-                    if (!userAlias || !commentTitle.trim() || !commentContent.trim()) return;
-                    setPostingComment(true);
-                    setCommentError('');
-                    const { error: insertError } = await supabase
-                      .from('ticker_commentaries')
-                      .insert([
-                        {
-                          related_ticker: ticker.symbol,
-                          original_post: true,
-                          post_content: commentContent,
-                          created_by: userAlias,
-                          post_title: commentTitle
-                        }
-                      ]);
-                    if (insertError) {
-                      setCommentError(`Failed to post comment. ${insertError.message || ''}`);
-                      setPostingComment(false);
-                      return;
-                    }
-                    setCommentTitle('');
-                    setCommentContent('');
-                    setPostingComment(false);
-                    setCommentSuccess('Comment posted!');
-                    // Invalidate cache first
-                    try {
-                      const cacheKey = `comments_${ticker.symbol}`;
-                      localStorage.removeItem(cacheKey);
-                      console.debug('[Commentaries] cache invalidated after post', { cacheKey });
-                    } catch {}
-                    // Immediately refetch latest comments and refresh cache
-                    try { 
-                      console.debug('[Commentaries] refetching after post');
-                      await fetchMainComments(); 
-                    } catch {}
-                    setTimeout(() => setCommentSuccess(''), 2000);
-                  }}
-                >Post Commentary</button>
-                {!userAlias && <p className="text-xs text-muted-foreground mt-2">Set your alias to enable commenting.</p>}
-                {commentError && <p className="text-xs text-destructive mt-2">{commentError}</p>}
-                {commentSuccess && <p className="text-xs text-success mt-2">{commentSuccess}</p>}
-              </div>
-            ) : selectedMainPost ? (
-              <div className="mb-4">
-                <div className="flex gap-3 items-center mb-2">
-                  <div className="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center">
-                    <span className="font-bold text-blue-700 text-lg">{
-                      typeof selectedMainPost === 'object' && selectedMainPost &&
-                      'created_by' in selectedMainPost && typeof (selectedMainPost as { created_by?: unknown }).created_by === 'string'
-                        ? ((selectedMainPost as { created_by: string }).created_by.charAt(0).toUpperCase())
-                        : 'U'
-                    }</span>
-                  </div>
-                  <div>
-                    <span className="font-semibold text-primary text-lg">{
-                      typeof selectedMainPost === 'object' && selectedMainPost &&
-                      'post_title' in selectedMainPost && typeof (selectedMainPost as { post_title?: unknown }).post_title === 'string'
-                        ? ((selectedMainPost as { post_title: string }).post_title)
-                        : ''
-                    }</span>
-                    <span className="block text-xs text-muted-foreground">by {
-                      typeof selectedMainPost === 'object' && selectedMainPost &&
-                      'created_by' in selectedMainPost && typeof (selectedMainPost as { created_by?: unknown }).created_by === 'string'
-                        ? ((selectedMainPost as { created_by: string }).created_by)
-                        : 'User'
-                    } • {
-                      typeof selectedMainPost === 'object' && selectedMainPost &&
-                      'created_at' in selectedMainPost && typeof (selectedMainPost as { created_at?: unknown }).created_at === 'string'
-                        ? new Date((selectedMainPost as { created_at: string }).created_at).toLocaleString()
-                        : ''
-                    }</span>
-                  </div>
-                </div>
-                <div className="whitespace-pre-line text-base text-foreground">{
-                  typeof selectedMainPost === 'object' && selectedMainPost &&
-                  'post_content' in selectedMainPost && typeof (selectedMainPost as { post_content?: unknown }).post_content === 'string'
-                    ? ((selectedMainPost as { post_content: string }).post_content)
-                    : ''
-                }</div>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center text-center border rounded-lg bg-card shadow-sm p-6">
-                <div className="w-12 h-12 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xl mb-3">
-                  +
-                </div>
-                <h3 className="text-lg font-semibold mb-1">Be the first to start a discussion</h3>
-                <p className="text-sm text-muted-foreground mb-4">No commentaries for {ticker.symbol} yet. Share your insights to kick things off.</p>
-                <button
-                  className="px-4 py-2 rounded font-semibold border border-blue-300 bg-blue-100 text-blue-700 shadow-sm hover:bg-blue-200 transition-colors"
-                  onClick={() => setSelectedMainPost('NEW_POST' as SelectedMainPostType)}
-                >Create New Post</button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
       {/* AI Assistant drawer removed; handled at top-level Dashboard */}
 
       {/* latest developments */}
@@ -799,77 +505,6 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
           </div>
         </div>
       )}
-{activeTab === 'commentaries' && (
-  <div className="w-full flex flex-col items-center py-8">
-    <button
-      className="mb-6 px-4 py-2 rounded font-semibold border border-blue-300 bg-blue-100 text-blue-700 shadow-sm hover:bg-blue-200 transition-colors"
-      onClick={() => {
-  setSelectedMainPost('NEW_POST' as SelectedMainPostType);
-        setReplySidebarOpen(true);
-      }}
-    >Add New Post</button>
-
-    {/* Comments list */}
-    <div className="w-full max-w-3xl">
-      {loadingComments ? (
-        <div className="flex justify-center items-center h-24 text-muted-foreground">
-          Loading commentaries…
-        </div>
-      ) : mainComments && mainComments.length > 0 ? (
-        <ul className="space-y-3">
-          {mainComments.map((post: Record<string, unknown>, idx: number) => (
-            <li key={
-              typeof post.id === 'string' || typeof post.id === 'number'
-                ? String(post.id)
-                : `${'related_ticker' in post && typeof post.related_ticker === 'string' ? post.related_ticker : 't'}-${'post_title' in post && typeof post.post_title === 'string' ? post.post_title : 'untitled'}-${'created_at' in post && typeof post.created_at === 'string' ? post.created_at : 'ts'}-${idx}`
-            }>
-              <button
-                className="w-full text-left p-4 border rounded-lg bg-card hover:bg-muted/40 transition-colors shadow-sm"
-                onClick={() => {
-                  setSelectedMainPost(post);
-                  setReplySidebarOpen(true);
-                }}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="font-semibold text-primary truncate pr-2">{
-                    'post_title' in post && typeof post.post_title === 'string' ? post.post_title : 'Untitled'
-                  }</div>
-                  <div className="text-xs text-muted-foreground whitespace-nowrap">
-                    {
-                      'created_by' in post && typeof post.created_by === 'string' ? post.created_by : 'User'
-                    } • {
-                      'created_at' in post && typeof post.created_at === 'string' ? new Date(post.created_at).toLocaleString() : ''
-                    }
-                  </div>
-                </div>
-                {'post_content' in post && typeof post.post_content === 'string' && (
-                  <div className="mt-1 text-sm text-foreground line-clamp-2">
-                    {post.post_content}
-                  </div>
-                )}
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <div className="flex flex-col items-center justify-center text-center border rounded-lg bg-card shadow-sm p-6">
-          <div className="w-12 h-12 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xl mb-3">
-            +
-          </div>
-          <h3 className="text-lg font-semibold mb-1">Be the first to start a discussion</h3>
-          <p className="text-sm text-muted-foreground mb-4">No commentaries for {ticker.symbol} yet. Share your insights to kick things off.</p>
-          <button
-            className="px-4 py-2 rounded font-semibold border border-blue-300 bg-blue-100 text-blue-700 shadow-sm hover:bg-blue-200 transition-colors"
-            onClick={() => {
-              setSelectedMainPost('NEW_POST' as SelectedMainPostType);
-              setReplySidebarOpen(true);
-            }}
-          >Create New Post</button>
-        </div>
-      )}
-    </div>
-  </div>
-)}
       {activeTab === 'dividends' && (
         <div className="w-full">
           {dividendLoading ? (
@@ -1317,70 +952,6 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, commentari
           )}
         </div>
       )}
-    {/* Alias Prompt Modal */}
-    {showAliasPrompt && (
-      <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-        <div className="bg-white p-6 rounded-lg shadow-2xl w-full max-w-sm" style={{ backgroundColor: '#fff' }}>
-          <h2 className="text-lg font-bold mb-2">Choose your alias</h2>
-          <p className="text-sm text-muted-foreground mb-4">Enter a unique alias to use for commenting. This will be visible to others.</p>
-          <input
-            type="text"
-            className="w-full p-2 border rounded mb-2"
-            value={aliasInput}
-            onChange={e => { setAliasInput(e.target.value); setAliasError(''); }}
-            placeholder="Your alias"
-            disabled={checkingAlias}
-          />
-          {aliasError && <p className="text-xs text-destructive mb-2">{aliasError}</p>}
-          <div className="flex gap-2 justify-end">
-            <button
-              className="px-4 py-2 rounded font-semibold border border-border bg-background text-foreground"
-              onClick={() => { setShowAliasPrompt(false); setAliasInput(''); setAliasError(''); }}
-              disabled={checkingAlias}
-            >Cancel</button>
-            <button
-              className="px-4 py-2 rounded font-semibold border border-blue-300 bg-blue-100 text-blue-700"
-              disabled={checkingAlias || !aliasInput.trim()}
-              onClick={async () => {
-                setCheckingAlias(true);
-                setAliasError('');
-                const { data: existing, error: _aliasCheckError } = await supabase
-                  .from('news_subscribed_clients')
-                  .select('user_alias')
-                  .eq('user_alias', aliasInput.trim())
-                  .single();
-                if (existing) {
-                  setAliasError('Alias already taken. Please choose another.');
-                  setCheckingAlias(false);
-                  return;
-                }
-                const { data: { user } } = await supabase.auth.getUser();
-                if (!user) {
-                  setAliasError('You must be logged in.');
-                  setCheckingAlias(false);
-                  return;
-                }
-                const { error: updateError } = await supabase
-                  .from('news_subscribed_clients')
-                  .update({ user_alias: aliasInput.trim() })
-                  .eq('client_id', user.id);
-                if (updateError) {
-                  setAliasError(`Failed to set alias. ${updateError.message || 'Try again.'}`);
-                  setCheckingAlias(false);
-                  return;
-                }
-                setUserAlias(aliasInput.trim());
-                setShowAliasPrompt(false);
-                setAliasInput('');
-                setAliasError('');
-                setActiveTab('commentaries');
-                setCheckingAlias(false);
-              }}
-            >Set Alias</button>
-          </div>
-        </div>
-      </div>
-    )}
     </div>
   );
 }

@@ -123,8 +123,6 @@ const DemoDashboard = () => {
                 changePercent: 0,
                 ...dashboardData[submittedTicker]
               }}
-              commentariesSidebarOpen={false}
-              setCommentariesSidebarOpen={() => {}}
               onProvideAssistantData={() => {}}
             />
           )}

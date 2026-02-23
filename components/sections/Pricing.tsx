@@ -8,10 +8,10 @@ import { GLOBAL_VARS } from "globalVars";
 const plans = [
   {
     name: "Munger",
-    price: 49.00,
+    price: 39.00,
     description: "Ideal for individual analysts and sophisticated retail investors",
     features: [
-      "Coverage of 10 stocks",
+      "Coverage of 30 stocks",
       "10 years of historical Balance Sheet, Income Statement, Cash Flow Statement data",
       "Quarterly and Annual official filings of financial reportings data",
       "Historical market cap data",
@@ -20,7 +20,7 @@ const plans = [
       "Insider trading activities",
       "News Sentiment Analysis",
       "Access to community discussions",
-      <span className="font-bold">10 AI queries per day / user</span>,
+      <span className="font-bold">150 AI queries per month</span>,
     ],
     popular: false
   },
@@ -38,14 +38,14 @@ const plans = [
       "Insider trading activities",
       "News Sentiment Analysis",
       "Access to community discussions",
-  <span className="font-bold">100 AI queries per day / user</span>,
+  <span className="font-bold">500 AI queries per month</span>,
   <span className="font-bold">Advanced Support</span>,
     ],
     popular: true
   },
   {
     name: "Graham Tier (Enterprise)",
-    price: 499,
+    price: 299,
     description: "Customized solutions for family offices, Hedge Funds, Asset Managers starting at",
     features: [
       "Unlimited stocks coverage",

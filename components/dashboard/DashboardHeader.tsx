@@ -1,7 +1,8 @@
 
-import { BarChart3, Bell, Bot, MessagesSquare, RefreshCw, Settings, User } from "lucide-react";
+import { BarChart3, Bell, Bot, RefreshCw, Settings, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "app/lib/supabaseClient";
+import { useQuarterlyReportNotifications } from "app/lib/useQuarterlyReportNotifications";
 import { Button } from "components/ui/Button/Button_new";
 
 // Public env for client-side fallback fetches (safe: NEXT_PUBLIC_*)
@@ -14,87 +15,35 @@ interface DashboardHeaderProps {
   ticker?: { symbol: string; name: string };
   marketCap?: string;
   marketCapCurrency?: string;
-  onOpenCommentariesSidebar?: () => void;
   onOpenAssistant?: () => void;
   onRefreshData?: () => void;
   selectedTickers?: { symbol: string; name: string }[];
   showAssistantButton?: boolean;
 }
 
-export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onOpenCommentariesSidebar, selectedTickers = [], onOpenAssistant, showAssistantButton, onRefreshData }) => {
+export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ selectedTickers = [], onOpenAssistant, showAssistantButton, onRefreshData }) => {
   // Scaling logic
   // ...existing code...
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
-  const [latestComments, setLatestComments] = useState<Record<string, { alias: string; timestamp: string } | null>>({});
-  const [loadingNotifications, setLoadingNotifications] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
 
-  // Removed unused setRefreshTick to fix lint warning
+  // Quarterly report notifications hook
+  const { newReports, loading: reportsLoading, markAsRead } = useQuarterlyReportNotifications(
+    userEmail,
+    selectedTickers.map(t => t.symbol)
+  );
 
+  // Fetch user email on mount
   useEffect(() => {
-    async function fetchLatestComments() {
-      if (!selectedTickers.length) return;
-      setLoadingNotifications(true);
-      const results: Record<string, { alias: string; timestamp: string } | null> = {};
-      try {
-        // Fetch each ticker in parallel against PostgREST with explicit apikey param and headers
-        const promises = selectedTickers.map(async (ticker) => {
-          const symbol = (ticker.symbol || '').trim();
-          if (!supabaseUrl || !supabaseAnonKey) {
-            console.debug('[Notifications] Missing Supabase env vars');
-            return { symbol, value: null };
-          }
-          try {
-            const url = new URL(`${supabaseUrl.replace(/\/$/, '')}/rest/v1/ticker_commentaries`);
-            url.searchParams.set('select', 'created_by,created_at');
-            url.searchParams.set('related_ticker', `ilike.${symbol}`);
-            url.searchParams.set('order', 'created_at.desc');
-            url.searchParams.set('limit', '1');
-            // Append apikey query param to satisfy environments that strip headers
-            url.searchParams.set('apikey', supabaseAnonKey);
-            const resp = await fetch(url.toString(), {
-              headers: {
-                apikey: supabaseAnonKey,
-                Authorization: `Bearer ${supabaseAnonKey}`,
-              },
-            });
-            if (!resp.ok) {
-              console.debug('[Notifications] REST fetch failed', { symbol, status: resp.status });
-              return { symbol, value: null };
-            }
-            interface TickerCommentaryRow {
-              created_by?: string;
-              created_at?: string;
-              [key: string]: unknown;
-            }
-            const rows = (await resp.json()) as TickerCommentaryRow[];
-            if (!rows?.length) return { symbol, value: null };
-            const r = rows[0] || {};
-            return {
-              symbol,
-              value: {
-                alias: typeof r.created_by === 'string' ? r.created_by : 'none',
-                timestamp: typeof r.created_at === 'string' ? new Date(r.created_at).toLocaleString() : 'none',
-              },
-            };
-          } catch (e) {
-            console.debug('[Notifications] REST fetch error', { symbol, e });
-            return { symbol, value: null };
-          }
-        });
-        const all = await Promise.all(promises);
-        for (const { symbol, value } of all) {
-          results[symbol] = value;
-        }
-        setLatestComments(results);
-      } finally {
-        setLoadingNotifications(false);
+    const fetchUserEmail = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (!error && data.user?.email) {
+        setUserEmail(data.user.email);
       }
-    }
-    if (notificationOpen) {
-      fetchLatestComments();
-    }
-  }, [selectedTickers, notificationOpen]);
+    };
+    fetchUserEmail();
+  }, []);
   async function handleLogout() {
     try {
       await supabase.auth.signOut();
@@ -116,7 +65,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onOpenCommenta
       <div className="block md:hidden w-full bg-yellow-100 text-yellow-900 text-center py-2 px-4 text-sm font-medium border-b border-yellow-300">
         You are currently using the mobile view, for enhanced experience, please use the desktop version.
       </div>
-      <header className="sticky top-0 z-30 h-16 bg-card border-b border-border flex items-center justify-between px-6 shadow-sm">
+      <header className="sticky top-0 z-30 h-16 bg-[#fdf6ee] border-b border-border flex items-center justify-between px-6 shadow-sm">
       <div className="flex items-center gap-4">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
@@ -142,10 +91,6 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onOpenCommenta
             <RefreshCw className="h-4 w-4" />
           </Button>
         )}
-        <Button variant="ghost" size="sm" className="gap-2" onClick={onOpenCommentariesSidebar}>
-          <MessagesSquare className="h-4 w-4" />
-          Discussions
-        </Button>
         {showAssistantButton && (
           <Button
             variant="ghost"
@@ -161,29 +106,52 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onOpenCommenta
         )}
         <div className="h-4 w-px bg-border mx-2" />
         <div className="relative">
-          <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setNotificationOpen((open) => !open)}>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-9 w-9 relative" 
+            onClick={() => setNotificationOpen((open) => !open)}
+          >
             <Bell className="h-4 w-4" />
+            {newReports.length > 0 && (
+              <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                {newReports.length}
+              </span>
+            )}
           </Button>
           {notificationOpen && (
-            <div className="absolute right-0 mt-2 w-80 bg-card border border-border rounded shadow-lg z-50 p-4" style={{ backgroundColor: '#fff' }}>
-              {loadingNotifications && (
-                <div className="text-xs text-muted-foreground mb-2">Loading latest activity…</div>
+            <div className="absolute right-0 mt-2 w-96 bg-card border border-border rounded shadow-lg z-50 p-4 max-h-[500px] overflow-y-auto" style={{ backgroundColor: '#fff' }}>
+              <h3 className="font-semibold text-sm mb-3">Notifications</h3>
+              
+              {reportsLoading && (
+                <div className="text-xs text-muted-foreground mb-2">Loading quarterly reports…</div>
               )}
-              {selectedTickers.length === 0 ? (
-                <div className="text-muted-foreground">No tickers selected.</div>
-              ) : (
+              
+              {!reportsLoading && newReports.length === 0 && (
+                <div className="text-muted-foreground text-sm py-4 text-center">
+                  No new quarterly reports for your selected tickers.
+                </div>
+              )}
+              
+              {newReports.length > 0 && (
                 <ul className="divide-y divide-border">
-                  {selectedTickers.map((ticker) => {
-                    const comment = latestComments[ticker.symbol];
-                    return (
-                      <li key={ticker.symbol} className="py-2 flex flex-col">
-                        <span className="font-medium">{ticker.symbol} - {ticker.name}</span>
-                        <span className="text-xs text-muted-foreground">
-                          Last comment: {comment ? `${comment.alias} @ ${comment.timestamp}` : 'none'}
-                        </span>
-                      </li>
-                    );
-                  })}
+                  {newReports.map((report) => (
+                    <li key={`${report.ticker}-${report.fiscalDateEnding}`} className="py-3 flex justify-between items-start">
+                      <div className="flex-1">
+                        <span className="font-medium text-sm">{report.ticker}</span>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          New quarterly report for fiscal period ending{' '}
+                          <span className="font-semibold">{report.fiscalDateEnding}</span>
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => markAsRead(report.ticker, report.fiscalDateEnding)}
+                        className="ml-2 text-xs text-blue-600 hover:text-blue-800 underline flex-shrink-0"
+                      >
+                        Dismiss
+                      </button>
+                    </li>
+                  ))}
                 </ul>
               )}
             </div>
