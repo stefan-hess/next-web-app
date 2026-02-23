@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { supabase } from "app/lib/supabaseClient";
 
 type Status = { type: "success" | "error"; message: string } | null;

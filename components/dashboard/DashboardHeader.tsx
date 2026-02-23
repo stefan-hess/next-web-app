@@ -1,5 +1,5 @@
 
-import { Bell, Bot, RefreshCw, Settings, User } from "lucide-react";
+import { Bell, Bot, RefreshCw, User } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { supabase } from "app/lib/supabaseClient";
@@ -8,10 +8,10 @@ import { Button } from "components/ui/Button/Button_new";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "components/ui/dialog";
 
 
