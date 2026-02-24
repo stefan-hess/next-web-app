@@ -168,7 +168,7 @@ export default function TermsPage() {
             
             <li>
               <strong>Contact Us</strong><br />
-              If you have questions about these Terms, please contact us at: info@stock-ticker-news.com
+              If you have questions about these Terms, please contact us at: info@usenektaar.com
             </li>
           </ol>
         </div>

@@ -147,7 +147,7 @@ export default function CheckoutPage() {
                 &times;
               </button>
               <p className="mb-6 text-center text-xl font-semibold text-black">
-                Please contact us at <a href="mailto:info@stock-ticker-news.com" className="text-blue-600 underline">info@stock-ticker-news.com</a>
+                Please contact us at <a href="mailto:info@usenektaar.com" className="text-blue-600 underline">info@usenektaar.com</a>
               </p>
             </div>
           </div>
