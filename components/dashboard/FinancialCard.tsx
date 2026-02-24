@@ -12,8 +12,8 @@ function autoScale(values: string[], currency: string) {
   return { scale: 1, label: currency };
 }
 import { ChevronDown, ChevronRight, SlidersHorizontal } from "lucide-react";
-import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { useEffect, useRef, useState } from "react";
+import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { cn } from "app/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "components/ui/card";
 

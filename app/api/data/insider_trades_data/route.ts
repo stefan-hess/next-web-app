@@ -1,4 +1,5 @@
 import type { NextRequest } from 'next/server';
+import { isValidTicker } from '../../../lib/validateTicker';
 
 interface InsiderTradeEntry {
   transaction_date?: string;
@@ -113,6 +114,9 @@ export async function GET(req: NextRequest): Promise<Response> {
   const tickers = tickersParam.split(',').map(t => t.trim()).filter(Boolean);
   if (!tickers.length) {
     return new Response(JSON.stringify({ error: 'No valid tickers provided' }), { status: 400 });
+  }
+  if (tickers.some(t => !isValidTicker(t))) {
+    return new Response(JSON.stringify({ error: 'One or more invalid ticker values.' }), { status: 400 });
   }
   const apiKey = process.env.ALPHA_VANTAGE_API_KEY;
   if (!apiKey) {

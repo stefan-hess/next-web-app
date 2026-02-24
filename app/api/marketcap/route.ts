@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { isValidTicker } from "../../lib/validateTicker";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -34,7 +35,16 @@ export async function GET(req: NextRequest) {
     return new Response(JSON.stringify({ error: "Missing symbol" }), { status: 400 });
   }
   symbol = symbol.toUpperCase();
-  const apiKey = process.env.ALPHA_VANTAGE_API_KEY || "demo";
+  if (!isValidTicker(symbol)) {
+    return new Response(JSON.stringify({ error: "Invalid ticker format." }), { status: 400 });
+  }
+  const apiKey = process.env.ALPHA_VANTAGE_API_KEY;
+  if (!apiKey) {
+    return new Response(
+      JSON.stringify({ error: "ALPHA_VANTAGE_API_KEY is not configured." }),
+      { status: 500 }
+    );
+  }
   const url = `https://www.alphavantage.co/query?function=OVERVIEW&symbol=${symbol}&apikey=${apiKey}`;
   try {
     const data = await fetchAlphaVantageJson(url);

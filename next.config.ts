@@ -5,6 +5,7 @@ import { env } from "./env.mjs"
 
 const config: NextConfig = {
   reactStrictMode: true,
+  transpilePackages: ["@stripe/stripe-js"],
   logging: {
     fetches: {
       fullUrl: true,

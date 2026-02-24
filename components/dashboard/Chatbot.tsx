@@ -1,5 +1,6 @@
 "use client";
 
+import DOMPurify from "dompurify";
 import { ArrowUp } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -125,7 +126,7 @@ export default function ChatAssistant({ ticker, clientData }: { ticker: string; 
           <div key={i} className={`msg-in ${m.role === "user" ? "text-right" : "text-left"}`}>
             <span
               className={`inline-block px-3 py-2 rounded-2xl text-sm whitespace-pre-line ${m.role === "user" ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-800"}`}
-              dangerouslySetInnerHTML={m.role === "assistant" ? { __html: formatAssistantReply(m.content) } : undefined}
+              dangerouslySetInnerHTML={m.role === "assistant" ? { __html: DOMPurify.sanitize(formatAssistantReply(m.content)) } : undefined}
             >
               {m.role === "user" ? m.content : undefined}
             </span>

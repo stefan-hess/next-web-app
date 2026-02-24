@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { GLOBAL_VARS } from 'globalVars';
+import { isValidTicker } from '../../../lib/validateTicker';
 
 interface FinancialReport {
   [key: string]: string | number | null | undefined;
@@ -193,6 +194,9 @@ export async function GET(req: NextRequest): Promise<Response> {
     return new Response(JSON.stringify({ error: 'Missing or invalid ticker parameter' }), { status: 400 });
   }
   ticker = ticker.toUpperCase(); // Normalize symbol
+  if (!isValidTicker(ticker)) {
+    return new Response(JSON.stringify({ error: 'Invalid ticker format.' }), { status: 400 });
+  }
   const apiKey = process.env.ALPHA_VANTAGE_API_KEY;
   if (!apiKey) {
     return new Response(JSON.stringify({ error: 'ALPHA_VANTAGE_API_KEY is not set in environment variables.' }), { status: 500 });

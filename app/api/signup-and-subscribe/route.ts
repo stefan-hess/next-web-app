@@ -19,26 +19,24 @@ export async function POST(req: Request) {
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
-    // 1. Check if user exists in Supabase Auth
+    // 1. Create user in Supabase Auth (or look up if they already exist)
     let userId: string | undefined;
-    const { data: userList, error: userListError } = await supabase.auth.admin.listUsers();
-    if (userListError) {
-      return NextResponse.json({ error: userListError.message || "Failed to list users." }, { status: 500 });
-    }
-    const existingUser = userList?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase());
-    if (existingUser) {
-      userId = existingUser.id;
-    } else {
-      // Create user in Supabase Auth
-      const { data: signUpData, error: signUpError } = await supabase.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true,
-      });
-      if (signUpError || !signUpData?.user) {
-        return NextResponse.json({ error: signUpError?.message || "Failed to create user." }, { status: 500 });
-      }
+    const { data: signUpData, error: signUpError } = await supabase.auth.admin.createUser({
+      email,
+      password,
+    });
+    if (signUpData?.user) {
       userId = signUpData.user.id;
+    } else if (signUpError?.message?.toLowerCase().includes("already been registered") || signUpError?.message?.toLowerCase().includes("already exists")) {
+      // User already has an account — find them by email
+      const { data: userList } = await supabase.auth.admin.listUsers();
+      const existing = userList?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase());
+      if (!existing) {
+        return NextResponse.json({ error: "User already exists but could not be located." }, { status: 500 });
+      }
+      userId = existing.id;
+    } else {
+      return NextResponse.json({ error: signUpError?.message || "Failed to create user." }, { status: 500 });
     }
     // 2. Upsert subscription info
     const { error: upsertError } = await supabase

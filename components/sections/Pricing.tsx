@@ -1,9 +1,9 @@
 "use client"
+import { loadStripe } from "@stripe/stripe-js";
 import { Check } from "lucide-react";
 import React from "react";
 import { Button } from "components/ui/Button/Button_new";
 import { Card, CardContent, CardHeader } from "components/ui/card";
-import { GLOBAL_VARS } from "globalVars";
 
 const plans = [
   {
@@ -65,54 +65,59 @@ const plans = [
   }
 ];
 
+interface BlobFollowerProps {
+  hoveredCard: number | null;
+  cardRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
+}
+
+const BlobFollower = React.memo(function BlobFollower({ hoveredCard, cardRefs }: BlobFollowerProps) {
+  const [style, setStyle] = React.useState({
+    display: 'none',
+    opacity: 1,
+    left: 0,
+    top: 0,
+    width: 80,
+    height: 80,
+    transition: 'all 0.9s cubic-bezier(.4,2,.6,1), opacity 1s',
+    position: 'absolute' as const,
+    zIndex: 0,
+    pointerEvents: 'none' as const,
+  });
+  const fadeTimeout = React.useRef<NodeJS.Timeout | null>(null);
+  React.useEffect(() => {
+    if (hoveredCard !== null && cardRefs.current[hoveredCard]) {
+      if (fadeTimeout.current) clearTimeout(fadeTimeout.current);
+      const card = cardRefs.current[hoveredCard];
+      const rect = card!.getBoundingClientRect();
+      const parentRect = card!.parentElement!.getBoundingClientRect();
+      setStyle(s => ({
+        ...s,
+        display: 'block',
+        opacity: 0.3,
+        left: rect.left - parentRect.left - 32,
+        top: rect.top - parentRect.top - 32,
+      }));
+    } else {
+      setStyle(s => ({ ...s, opacity: 0 }));
+      fadeTimeout.current = setTimeout(() => {
+        setStyle(s => ({ ...s, display: 'none' }));
+      }, 500);
+    }
+    return () => {
+      if (fadeTimeout.current) clearTimeout(fadeTimeout.current);
+    };
+  }, [hoveredCard, cardRefs]);
+  return (
+    <div style={style}>
+      <div className="w-full h-full rounded-full bg-gradient-to-br from-blue-400 via-blue-300 to-green-300 opacity-80 blur-md animate-[blob1_18s_ease-in-out_infinite] transition-all duration-300" />
+    </div>
+  );
+});
+
 const PricingSection = () => {
   // --- Blob follower logic ---
-  const [hoveredCard, setHoveredCard] = React.useState<number|null>(null);
-  const cardRefs = React.useRef<(HTMLDivElement|null)[]>([]);
-
-  function BlobFollower() {
-    const [style, setStyle] = React.useState({
-      display: 'none',
-      opacity: 1,
-      left: 0,
-      top: 0,
-      width: 80,
-      height: 80,
-      transition: 'all 0.9s cubic-bezier(.4,2,.6,1), opacity 1s',
-      position: 'absolute' as const,
-      zIndex: 0,
-      pointerEvents: 'none' as const,
-    });
-    const fadeTimeout = React.useRef<NodeJS.Timeout|null>(null);
-    React.useEffect(() => {
-      if (hoveredCard !== null && cardRefs.current[hoveredCard]) {
-        if (fadeTimeout.current) clearTimeout(fadeTimeout.current);
-        const card = cardRefs.current[hoveredCard];
-        const rect = card!.getBoundingClientRect();
-        const parentRect = card!.parentElement!.getBoundingClientRect();
-        setStyle(s => ({
-          ...s,
-          display: 'block',
-          opacity: 0.3,
-          left: rect.left - parentRect.left - 32,
-          top: rect.top - parentRect.top - 32,
-        }));
-      } else {
-        setStyle(s => ({ ...s, opacity: 0 }));
-        fadeTimeout.current = setTimeout(() => {
-          setStyle(s => ({ ...s, display: 'none' }));
-        }, 500);
-      }
-      return () => {
-        if (fadeTimeout.current) clearTimeout(fadeTimeout.current);
-      };
-    }, [hoveredCard]);
-    return (
-      <div style={style}>
-        <div className="w-full h-full rounded-full bg-gradient-to-br from-blue-400 via-blue-300 to-green-300 opacity-80 blur-md animate-[blob1_18s_ease-in-out_infinite] transition-all duration-300" />
-      </div>
-    );
-  }
+  const [hoveredCard, setHoveredCard] = React.useState<number | null>(null);
+  const cardRefs = React.useRef<(HTMLDivElement | null)[]>([]);
 
   // Expanded card state
   const [expandedIndex, setExpandedIndex] = React.useState<number|null>(null);
@@ -128,13 +133,6 @@ const PricingSection = () => {
   setExpandedIndex(expandedIndex === idx ? null : idx);
   _setFormError(null);
   setAgreedToTerms(false);
-  };
-
-  // Map plan name to Stripe priceId (centralized in GLOBAL_VARS)
-  const priceIdMap: Record<string, string> = {
-    Munger: GLOBAL_VARS.PRICE_ID_MAP.Munger,
-    Buffett: GLOBAL_VARS.PRICE_ID_MAP.Buffett,
-    Graham: GLOBAL_VARS.PRICE_ID_MAP.Graham
   };
 
   const handleSubmit = async (e: React.FormEvent, planName: string) => {
@@ -169,18 +167,11 @@ const PricingSection = () => {
   _setIsLoading(false);
         return;
       }
-      // 3. Proceed to Stripe checkout
-      const priceId = priceIdMap[planName];
-      if (!priceId) {
-  _setFormError("Invalid plan selected.");
-  _setIsLoading(false);
-        return;
-      }
+      // 3. Proceed to Stripe checkout — price ID is resolved server-side from env vars
       const res = await fetch("/api/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          priceId,
           email,
           firstName,
           lastName,
@@ -195,8 +186,7 @@ const PricingSection = () => {
         return;
       }
       // Load Stripe.js and redirect
-      const stripeJs = await import("@stripe/stripe-js");
-      const stripe = await stripeJs.loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+      const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
       if (!stripe) {
   _setFormError("Stripe.js failed to load.");
   _setIsLoading(false);
@@ -231,16 +221,18 @@ const PricingSection = () => {
 
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto relative" style={{zIndex:1}}>
           {/* Shared moving blob */}
-          <BlobFollower />
+          <BlobFollower hoveredCard={hoveredCard} cardRefs={cardRefs} />
           {plans.map((plan, index) => (
             <Card 
               key={index} 
               onMouseEnter={() => setHoveredCard(index)}
               onMouseLeave={() => setHoveredCard(null)}
               ref={el => { cardRefs.current[index] = el; }}
-              className={`group relative bg-gradient-card border-border transition-all duration-300 hover:shadow-glow hover:-translate-y-2 hover:scale-105 ${
-                plan.popular ? 'shadow-glow scale-105 border-4 border-blue-500' : ''
-              } ${expandedIndex === index ? 'ring-2 ring-blue-500' : ''}`}
+              className={`group relative bg-gradient-card border-border transition-all duration-300 hover:shadow-glow ${
+                expandedIndex !== index ? 'hover:-translate-y-2 hover:scale-105' : ''
+              } ${plan.popular ? 'shadow-glow scale-105 border-4 border-blue-500' : ''} ${
+                expandedIndex === index ? 'ring-2 ring-blue-500' : ''
+              }`}
             >
                 {plan.popular && (
                   <div className="absolute -top-10 left-1/2 transform -translate-x-1/2">

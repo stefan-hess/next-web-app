@@ -1,8 +1,9 @@
 export const runtime = "nodejs";
 
 import { createClient } from "@supabase/supabase-js";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
+import { rateLimit } from "../../lib/rateLimit";
 
 function getSupabaseService() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -91,6 +92,18 @@ async function buildContext(ticker: string, clientData?: ClientData): Promise<Ch
 }
 
 export async function POST(req: NextRequest) {
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    req.headers.get("x-real-ip") ??
+    "anonymous";
+  const { allowed, retryAfterMs } = rateLimit(ip, { limit: 50, windowMs: 60_000 });
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { status: 429, headers: { "Retry-After": String(Math.ceil(retryAfterMs / 1000)) } }
+    );
+  }
+
   try {
     const { messages, ticker, clientData } = (await req.json()) as {
       messages: { role: "user" | "system" | "assistant"; content: string }[];

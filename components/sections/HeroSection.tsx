@@ -74,7 +74,7 @@ const HeroSection = () => {
                 </span>{" "}
               </h1>
               <p className="text-base sm:text-lg lg:text-xl text-muted-foreground leading-relaxed">
-                The essential yet affordable suite of fundamental data for NYSE and NASDAQ listed stocks.
+                The essential yet affordable suite of fundamental data <br /> for 2'300+ listed companies on the NYSE and NASDAQ.
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-4">

@@ -1,8 +1,8 @@
 "use client";
-import Footer from "components/sections/Footer";
-import Header from "components/sections/Header";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Footer from "components/sections/Footer";
+import Header from "components/sections/Header";
 import { supabase } from "../lib/supabaseClient";
 
 export default function SignupPage() {

@@ -26,7 +26,10 @@ function getServiceRoleSupabase() {
 }
 
 export async function POST(req: Request) {
-  const sig = req.headers.get("stripe-signature")!
+  const sig = req.headers.get("stripe-signature");
+  if (!sig) {
+    return NextResponse.json({ error: "Missing stripe-signature header" }, { status: 400 });
+  }
   const body = await req.text();
 
   let event: Stripe.Event;
@@ -35,7 +38,7 @@ export async function POST(req: Request) {
     event = getStripe().webhooks.constructEvent(
       body,
       sig,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      process.env.STRIPE_WEBHOOK_SECRET ?? (() => { throw new Error("Missing STRIPE_WEBHOOK_SECRET") })()
     );
   } catch (err) {
     if (err instanceof Error) {
@@ -82,22 +85,20 @@ export async function POST(req: Request) {
         );
       }
 
-      // Upsert client in Supabase (do not update created_at)
+      // Update the existing row by email — never overwrite client_id which was set at signup
       const supabaseService = getServiceRoleSupabase();
       const { error: upsertError } = await supabaseService
         .from("news_subscribed_clients")
-        .upsert([
-          {
-            email: clientEmail,
-            first_name: firstName,
-            last_name: lastName,
-            stripe_customer_id: stripeCustomerId,
-            stripe_subscription_id: stripeSubscriptionId,
-            stripe_plan: stripePlan,
-            updated_at: updatedAt,
-            subscription_cancelled: subscriptionCancelled,
-          },
-        ], { onConflict: "email" });
+        .update({
+          first_name: firstName,
+          last_name: lastName,
+          stripe_customer_id: stripeCustomerId,
+          stripe_subscription_id: stripeSubscriptionId,
+          stripe_plan: stripePlan,
+          updated_at: updatedAt,
+          subscription_cancelled: subscriptionCancelled,
+        })
+        .eq("email", clientEmail);
 
       if (upsertError) {
         console.error("Supabase upsert failed:", upsertError.message);
@@ -131,9 +132,15 @@ try {
     const stripeSubscriptionId = subscription.id;
     const status = subscription.status; // e.g., 'canceled', 'active', 'incomplete'
 
-    // Decide if the subscription is considered cancelled
+    // Decide if the subscription is considered cancelled.
+    // cancel_at_period_end means the user chose to unsubscribe — Stripe keeps the
+    // status "active" until the period ends, then fires subscription.deleted.
+    // We treat cancel_at_period_end as cancelled so the DB stays consistent with
+    // what the unsubscribe endpoint already wrote.
     const isCancelled =
-      status === "canceled" || status === "incomplete_expired";
+      status === "canceled" ||
+      status === "incomplete_expired" ||
+      subscription.cancel_at_period_end === true;
 
     // Update subscription_cancelled in Supabase
     const supabaseService = getServiceRoleSupabase();

@@ -197,7 +197,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
             <Button
               variant="outline"
               size="sm"
-              className="mt-4 w-full"
+              className="mt-4 w-full flex items-center justify-center"
               disabled={isAtLimit}
               title={isAtLimit ? `You have reached your plan's limit (${maxTickers} stocks)` : undefined}
             >

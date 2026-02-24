@@ -1,6 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
+import { rateLimit } from "../../lib/rateLimit";
 import { supabase } from "../../lib/supabaseClient";
+
 export async function POST(req: NextRequest) {
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    req.headers.get("x-real-ip") ??
+    "anonymous";
+  const { allowed, retryAfterMs } = rateLimit(ip, { limit: 3, windowMs: 60_000 });
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { status: 429, headers: { "Retry-After": String(Math.ceil(retryAfterMs / 1000)) } }
+    );
+  }
+
   try {
     const { email, content } = (await req.json()) as { email: string; content: string };
     if (!email || !content) {

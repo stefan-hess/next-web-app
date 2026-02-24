@@ -1,4 +1,5 @@
 import type { NextRequest } from 'next/server';
+import { isValidTicker } from '../../../lib/validateTicker';
 
 interface SharesOutstandingEntry {
   date?: string;
@@ -135,6 +136,9 @@ export async function GET(req: NextRequest): Promise<Response> {
   const ticker = searchParams.get('ticker');
   if (!ticker || typeof ticker !== 'string') {
     return new Response(JSON.stringify({ error: 'Missing or invalid ticker parameter' }), { status: 400 });
+  }
+  if (!isValidTicker(ticker)) {
+    return new Response(JSON.stringify({ error: 'Invalid ticker format.' }), { status: 400 });
   }
   const apiKey = process.env.ALPHA_VANTAGE_API_KEY;
   if (!apiKey) {

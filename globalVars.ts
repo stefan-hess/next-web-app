@@ -22,10 +22,11 @@ export const GLOBAL_VARS = {
   PLAN_BUFFETT: "Buffett",
 
   // Stripe price-id mapping for plans
+  // TEST mode IDs (used with sk_test_... keys) — replace with live IDs for production
   PRICE_ID_MAP: {
-    Munger: "price_1T2Z6mI8pTUJRz6FcnbZqphs",
-    Buffett: "price_1SUKGzI8pTUJRz6F7Fxr4emS",
-    Graham: "price_graham" // TODO: Replace with real price ID if needed
+    Munger: process.env.STRIPE_PRICE_ID_MUNGER ?? "price_1T2Z6mI8pTUJRz6FcnbZqphs",
+    Buffett: process.env.STRIPE_PRICE_ID_BUFFETT ?? "price_1SUKGzI8pTUJRz6F7Fxr4emS",
+    Graham: process.env.STRIPE_PRICE_ID_GRAHAM ?? "price_graham" // TODO: Replace with real price ID if needed
   },
 
   // fetched fundamental years

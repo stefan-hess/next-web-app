@@ -45,7 +45,7 @@ export const GetStarted = ({ onAddTicker }: GetStartedProps) => {
           </div>
           <h1 className="text-4xl font-bold text-foreground">Welcome to Nektaar</h1>
           <p className="text-xl text-muted-foreground max-w-lg mx-auto">
-            Analyze official financial data, track performance, and make informed investment decisions with comprehensive fundamental analysis.
+            Kick things off by adding your first ticker to the dashboard. Explore trusted financial data and gain smart insights.
           </p>
         </div>
 
@@ -53,7 +53,7 @@ export const GetStarted = ({ onAddTicker }: GetStartedProps) => {
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button size="lg" className="bg-gradient-primary hover:opacity-90 text-white">
+              <Button size="lg" className="bg-transparent hover:-translate-y-0.5 transition-transform duration-300 font-bold" style={{ borderWidth: '2px', borderStyle: 'solid', borderColor: '#bfa76a', color: '#bfa76a' }}>
                 <Plus className="w-5 h-5 mr-2" />
                 Add Your First Ticker
               </Button>
@@ -116,33 +116,6 @@ export const GetStarted = ({ onAddTicker }: GetStartedProps) => {
                 </CardContent>
               </Card>
             ))}
-          </div>
-        </div>
-
-        {/* Features */}
-        <div className="pt-8">
-          <div className="grid md:grid-cols-3 gap-6 text-left">
-            <div className="space-y-2">
-              <div className="w-10 h-10 rounded-lg bg-success-light flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-success" />
-              </div>
-              <h3 className="font-semibold">Trusted Data</h3>
-              <p className="text-sm text-muted-foreground">Access latest official financial information submitted to regulators and current market data.</p>
-            </div>
-            <div className="space-y-2">
-              <div className="w-10 h-10 rounded-lg bg-warning-light flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-warning" />
-              </div>
-              <h3 className="font-semibold">Comprehensive Analysis</h3>
-              <p className="text-sm text-muted-foreground">Deep dive into balance sheets, income statements, and more.</p>
-            </div>
-            <div className="space-y-2">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-primary" />
-              </div>
-              <h3 className="font-semibold">Smart Insights</h3>
-              <p className="text-sm text-muted-foreground">Get intelligent analysis of performance metrics.</p>
-            </div>
           </div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import { isValidTicker } from '../../../lib/validateTicker';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -33,6 +34,9 @@ export async function POST(req: NextRequest) {
     if (!email || !Array.isArray(tickers) || tickers.length === 0) {
       return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
     }
+    if (tickers.some(t => !isValidTicker(t))) {
+      return NextResponse.json({ error: 'One or more invalid ticker values.' }, { status: 400 });
+    }
 
     const newReports: NewReport[] = [];
 
@@ -40,7 +44,7 @@ export async function POST(req: NextRequest) {
     for (const ticker of tickers) {
       try {
         // Fetch from AlphaVantage via your existing API pattern
-        const alphaKey = process.env.ALPHAVANTAGE_API_KEY;
+        const alphaKey = process.env.ALPHA_VANTAGE_API_KEY;
         if (!alphaKey) continue;
 
         const url = `https://www.alphavantage.co/query?function=BALANCE_SHEET&symbol=${ticker}&apikey=${alphaKey}`;

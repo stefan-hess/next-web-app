@@ -24,8 +24,8 @@ const _BASE_URL = rawBase
 
 export async function POST(req: Request) {
   try {
-    const { priceId, email, firstName, lastName, plan, planLabel } = (await req.json()) as {
-      priceId: string;
+    const { priceId: clientPriceId, email, firstName, lastName, plan, planLabel } = (await req.json()) as {
+      priceId?: string;
       email?: string;
       firstName?: string;
       lastName?: string;
@@ -33,8 +33,17 @@ export async function POST(req: Request) {
       planLabel?: string;
     };
 
-  // Charge immediately: no trial period. If any trial is configured at the Price level,
-  // override it by setting trial_end to 'now'.
+    // Resolve price ID server-side from env vars (safe — never exposed to browser)
+    const serverPriceMap: Record<string, string | undefined> = {
+      Munger: process.env.STRIPE_PRICE_ID_MUNGER,
+      Buffett: process.env.STRIPE_PRICE_ID_BUFFETT,
+      Graham: process.env.STRIPE_PRICE_ID_GRAHAM,
+    };
+    const priceId = (plan && serverPriceMap[plan]) || clientPriceId;
+
+    if (!priceId) {
+      return NextResponse.json({ error: `No price ID configured for plan: ${plan}` }, { status: 400 });
+    }
 
   const session = await getStripe().checkout.sessions.create({
       mode: "subscription",

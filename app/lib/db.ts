@@ -8,7 +8,7 @@ function getRuntimeConfig(): sql.config {
     DB_PASSWORD,
     DB_SERVER,
     DB_NAME,
-    DB_TRUST_CERT = "true",
+    DB_TRUST_CERT = "false",
   } = process.env;
 
   if (!DB_USER || !DB_PASSWORD || !DB_SERVER || !DB_NAME) {
