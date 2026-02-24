@@ -48,7 +48,7 @@ const HeroSection = () => {
             ref={starRef}
             className="pointer-events-none absolute top-10 z-0 w-[180px] h-[180px] opacity-60 sm:w-[220px] sm:h-[220px] md:w-[280px] md:h-[280px] md:opacity-100 left-1/2 -ml-[60px] sm:-ml-[80px] md:-ml-[110px]"
           >
-            <Image src="/assets/star.png" alt="Star" width={280} height={280} style={{ objectFit: 'contain' }} />
+            <Image src="/assets/icon/icon_v1.svg" alt="Brand Logo" width={280} height={255} style={{ objectFit: 'contain' }} />
           </div>
       {/* Animated blue/green blobs */}
       <div className="pointer-events-none absolute top-1/2 left-0 -translate-y-1/2 -translate-x-1/3 w-[320px] h-[320px] z-0">
