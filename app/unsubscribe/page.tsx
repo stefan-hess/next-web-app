@@ -1,5 +1,7 @@
 "use client"
 
+import Image from "next/image"
+import Link from "next/link"
 import React, { useState } from "react"
 import Footer from "components/sections/Footer"
 import Header from "components/sections/Header"
@@ -54,12 +56,11 @@ export default function UnsubscribePage() {
           <Image
             src="/assets/icon/icon_v1.svg"
             alt=""
-            aria-hidden="true"
-            className="pointer-events-none absolute -bottom-8 -right-8 h-52 w-52 select-none opacity-10"
-            style={{ transform: "rotate(20deg)" }}
+            aria-hidden={true}
             width={208}
             height={208}
-            priority
+            className="pointer-events-none absolute -bottom-8 -right-8 h-52 w-52 select-none opacity-10"
+            style={{ transform: "rotate(20deg)" }}
           />
 
           {success ? (

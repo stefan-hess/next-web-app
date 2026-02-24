@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Footer from "components/sections/Footer";
 import Header from "components/sections/Header";
 
@@ -11,12 +12,11 @@ export default function PaymentSuccess() {
           <Image
             src="/assets/icon/icon_v1.svg"
             alt=""
-            aria-hidden="true"
-            className="pointer-events-none select-none absolute -bottom-8 -right-8 w-52 h-52 opacity-10"
-            style={{ transform: 'rotate(20deg)' }}
+            aria-hidden={true}
             width={208}
             height={208}
-            priority
+            className="pointer-events-none select-none absolute -bottom-8 -right-8 w-52 h-52 opacity-10"
+            style={{ transform: 'rotate(20deg)' }}
           />
           {/* Checkmark icon */}
           <div className="flex items-center justify-center mx-auto w-16 h-16 rounded-full bg-green-100">
