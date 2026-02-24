@@ -1,4 +1,3 @@
-import { isValidTicker } from '../../../lib/validateTicker';
 // Types for Alpha Vantage News Sentiment response
 interface AlphaVantageTopic {
 	relevance_score: string;
@@ -19,6 +18,7 @@ interface AlphaVantageSentimentResponse {
 	[key: string]: unknown;
 }
 import type { NextRequest } from 'next/server';
+import { isValidTicker } from '../../../lib/validateTicker';
 
 export async function GET(req: NextRequest): Promise<Response> {
 	const { searchParams } = new URL(req.url);

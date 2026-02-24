@@ -1,8 +1,8 @@
 "use client"
 
 import React, { useState } from "react"
-import Header from "components/sections/Header"
 import Footer from "components/sections/Footer"
+import Header from "components/sections/Header"
 
 export default function UnsubscribePage() {
   const [email, setEmail] = useState("")
@@ -51,12 +51,15 @@ export default function UnsubscribePage() {
       <main className="flex flex-1 flex-col items-center justify-center px-4 py-20">
         <div className="relative w-full max-w-md overflow-hidden rounded-2xl border border-border bg-white p-10 text-center shadow-card">
           {/* Decorative bee in background */}
-          <img
+          <Image
             src="/assets/icon/icon_v1.svg"
             alt=""
             aria-hidden="true"
             className="pointer-events-none absolute -bottom-8 -right-8 h-52 w-52 select-none opacity-10"
             style={{ transform: "rotate(20deg)" }}
+            width={208}
+            height={208}
+            priority
           />
 
           {success ? (
@@ -81,13 +84,13 @@ export default function UnsubscribePage() {
                   <p className="text-sm text-muted-foreground">Thank you for your feedback — it helps us improve!</p>
                 )}
               </div>
-              <a
+              <Link
                 href="/"
                 className="inline-block w-full rounded-lg border-2 px-8 py-3 text-base font-bold shadow transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-lg active:scale-95"
                 style={{ borderColor: "#bfa76a", color: "#bfa76a", background: "transparent" }}
               >
                 Back to Home
-              </a>
+              </Link>
             </div>
           ) : (
             <div className="space-y-6">

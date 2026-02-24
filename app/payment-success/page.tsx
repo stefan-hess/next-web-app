@@ -1,5 +1,5 @@
-import Header from "components/sections/Header";
 import Footer from "components/sections/Footer";
+import Header from "components/sections/Header";
 
 export default function PaymentSuccess() {
   return (
@@ -8,12 +8,15 @@ export default function PaymentSuccess() {
       <main className="flex flex-1 flex-col items-center justify-center px-4 py-20">
         <div className="relative rounded-2xl bg-white border border-border shadow-card max-w-md w-full text-center p-10 space-y-6 overflow-hidden">
           {/* Decorative bee in background */}
-          <img
+          <Image
             src="/assets/icon/icon_v1.svg"
             alt=""
             aria-hidden="true"
             className="pointer-events-none select-none absolute -bottom-8 -right-8 w-52 h-52 opacity-10"
             style={{ transform: 'rotate(20deg)' }}
+            width={208}
+            height={208}
+            priority
           />
           {/* Checkmark icon */}
           <div className="flex items-center justify-center mx-auto w-16 h-16 rounded-full bg-green-100">
