@@ -2,7 +2,6 @@
 // import { Metadata } from "next";
 // import AboutUs from "components/sections/AboutUs";
 import ContactUs from "components/sections/ContactUs";
-import DemoDashboard from "components/sections/DemoDashboard";
 import FeaturesSection from "components/sections/FeaturesSection";
 import Footer from "components/sections/Footer";
 import Header from "components/sections/Header";
@@ -18,7 +17,6 @@ export default function Home() {
     <div className="min-h-screen bg-background overflow-x-hidden">
   <Header />
   <Hero />
-    <DemoDashboard />
     <FeaturesSection />
     <Pricing />
     <ContactUs />

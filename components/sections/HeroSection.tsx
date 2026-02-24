@@ -46,9 +46,9 @@ const HeroSection = () => {
       {/* Parallax images */}
           <div
             ref={starRef}
-            className="pointer-events-none absolute top-10 z-0 w-[180px] h-[180px] opacity-60 sm:w-[220px] sm:h-[220px] md:w-[280px] md:h-[280px] md:opacity-100 left-1/2 -ml-[60px] sm:-ml-[80px] md:-ml-[110px]"
+            className="pointer-events-none absolute top-10 z-0 w-[220px] h-[220px] opacity-60 sm:w-[270px] sm:h-[270px] md:w-[340px] md:h-[340px] md:opacity-100 left-1/2 -ml-[160px] sm:-ml-[200px] md:-ml-[200px]"
           >
-            <Image src="/assets/icon/icon_v1.svg" alt="Brand Logo" width={280} height={255} style={{ objectFit: 'contain' }} />
+            <Image src="/assets/icon/icon_v1.svg" alt="Brand Logo" width={340} height={310} style={{ objectFit: 'contain', transform: 'rotate(-18deg)' }} />
           </div>
       {/* Animated blue/green blobs */}
       <div className="pointer-events-none absolute top-1/2 left-0 -translate-y-1/2 -translate-x-1/3 w-[320px] h-[320px] z-0">
@@ -80,7 +80,7 @@ const HeroSection = () => {
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="w-full sm:w-auto flex items-center gap-2">
                 <a
-                  href="#productDemo"
+                  href="/demo"
                   className="transition-transform duration-300 hover:-translate-y-1 hover:scale-102 border-2 font-bold py-3 px-6 sm:px-8 rounded-lg shadow text-base sm:text-lg flex items-center justify-center"
                   style={{ borderColor: '#bfa76a', color: '#bfa76a', background: 'transparent', minHeight: '48px' }}
                 >

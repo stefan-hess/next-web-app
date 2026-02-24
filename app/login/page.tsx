@@ -1,4 +1,6 @@
 "use client";
+import Footer from "components/sections/Footer";
+import Header from "components/sections/Header";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { supabase } from "../lib/supabaseClient";
@@ -50,64 +52,68 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <form
-        onSubmit={e => { e.preventDefault(); handleLogin(); }}
-        className="w-full max-w-sm p-6 bg-white rounded-2xl shadow"
-      >
-        <h1 className="text-2xl font-semibold mb-4 text-center">
-          Log In
-        </h1>
-
-        <label className="block mb-2 text-sm font-medium">Email</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="w-full p-2 border rounded mb-4"
-        />
-
-        <label className="block mb-2 text-sm font-medium">Password</label>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          className="w-full p-2 border rounded mb-4"
-        />
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
+    <div className="min-h-screen bg-[#fdf6ee] overflow-x-hidden flex flex-col">
+      <Header />
+      <main className="flex flex-1 items-center justify-center py-16 px-4">
+        <form
+          onSubmit={e => { e.preventDefault(); handleLogin(); }}
+          className="w-full max-w-sm bg-white rounded-2xl shadow-card border border-gray-200 p-8"
         >
-          {loading ? "Processing…" : "Log In"}
-        </button>
+          <h1 className="text-3xl font-bold text-foreground mb-2 text-center">Log In</h1>
+          <p className="text-sm text-muted-foreground text-center mb-8">Welcome back to Nektaar</p>
 
-        <button
-          type="button"
-          className="w-full mt-3 p-2 bg-blue-50 text-blue-700 rounded border border-blue-500 hover:bg-blue-100 transition"
-          onClick={handleResetPassword}
-        >
-          Reset Password
-        </button>
+          <label className="block mb-1 text-sm font-medium text-foreground">Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full border-2 border-gray-200 rounded-lg py-2.5 px-4 text-sm mb-5 focus:outline-none focus:border-[#bfa76a] transition-colors"
+          />
 
-        <button
-          type="button"
-          className="w-full mt-2 p-2 bg-gray-50 text-gray-700 rounded border border-gray-400 hover:bg-gray-100 transition"
-          onClick={() => router.push("/unsubscribe")}
-        >
-          Manage Subscription
-        </button>
+          <label className="block mb-1 text-sm font-medium text-foreground">Password</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="w-full border-2 border-gray-200 rounded-lg py-2.5 px-4 text-sm mb-6 focus:outline-none focus:border-[#bfa76a] transition-colors"
+          />
 
-        {message && (
-          <p className="mt-4 text-center text-sm text-gray-700">{message}</p>
-        )}
-        {resetSent && (
-          <p className="mt-4 text-center text-sm text-green-600">{resetSent}</p>
-        )}
-      </form>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full border-2 font-bold py-2.5 px-6 rounded-lg shadow text-base transition-transform duration-300 hover:-translate-y-0.5 mb-3"
+            style={{ borderColor: '#bfa76a', color: '#bfa76a', background: 'transparent' }}
+          >
+            {loading ? "Processing…" : "Log In"}
+          </button>
+
+          <button
+            type="button"
+            className="w-full py-2.5 px-6 rounded-lg border-2 border-gray-300 text-sm font-medium text-gray-600 bg-transparent hover:border-gray-400 transition-colors mb-2"
+            onClick={handleResetPassword}
+          >
+            Reset Password
+          </button>
+
+          <button
+            type="button"
+            className="w-full py-2.5 px-6 rounded-lg border-2 border-gray-300 text-sm font-medium text-gray-600 bg-transparent hover:border-gray-400 transition-colors"
+            onClick={() => router.push("/unsubscribe")}
+          >
+            Manage Subscription
+          </button>
+
+          {message && (
+            <p className="mt-5 text-center text-sm text-gray-700">{message}</p>
+          )}
+          {resetSent && (
+            <p className="mt-5 text-center text-sm text-green-600">{resetSent}</p>
+          )}
+        </form>
+      </main>
+      <Footer />
     </div>
   );
 }
