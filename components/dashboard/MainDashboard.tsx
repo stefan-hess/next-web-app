@@ -11,6 +11,31 @@ import { useSharesOutstandingData } from "app/lib/useSharesOutstandingData";
 import type { Ticker } from "./Dashboard";
 import { FinancialCard } from "./FinancialCard";
 
+// All available fields per financial statement category
+const BALANCE_SHEET_FIELDS = [
+  'totalAssets', 'totalCurrentAssets', 'cashAndCashEquivalentsAtCarryingValue',
+  'cashAndShortTermInvestments', 'inventory', 'currentNetReceivables',
+  'totalNonCurrentAssets', 'propertyPlantEquipment', 'goodwill',
+  'intangibleAssets', 'longTermInvestments', 'shortTermInvestments',
+  'totalLiabilities', 'totalCurrentLiabilities', 'currentAccountsPayable',
+  'shortTermDebt', 'longTermDebt', 'totalNonCurrentLiabilities',
+  'totalShareholderEquity', 'retainedEarnings', 'commonStock',
+] as const;
+
+const INCOME_STATEMENT_FIELDS = [
+  'totalRevenue', 'grossProfit', 'costOfRevenue', 'operatingIncome',
+  'sellingGeneralAndAdministrative', 'researchAndDevelopment', 'operatingExpenses',
+  'interestExpense', 'depreciation', 'depreciationAndAmortization',
+  'incomeBeforeTax', 'incomeTaxExpense', 'ebit', 'ebitda', 'netIncome',
+] as const;
+
+const CASH_FLOW_FIELDS = [
+  'operatingCashflow', 'capitalExpenditures', 'cashflowFromInvestment',
+  'cashflowFromFinancing', 'depreciationDepletionAndAmortization',
+  'dividendPayout', 'changeInReceivables', 'changeInInventory',
+  'proceedsFromIssuanceOfCommonStock', 'changeInCashAndCashEquivalents',
+] as const;
+
 
 
 interface ClientData {
@@ -103,6 +128,12 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, onProvideA
   // Set default expanded state for all financial cards
   const financialCategoryIds = ["balance-sheet", "income-statement", "cash-flow"];
   const [expandedCards, setExpandedCards] = useState<string[]>(financialCategoryIds);
+  const DEFAULT_SELECTED_FIELDS: Record<string, string[]> = {
+    'balance-sheet': ['totalAssets', 'totalLiabilities', 'totalShareholderEquity'],
+    'income-statement': ['totalRevenue', 'costOfRevenue', 'ebitda', 'netIncome'],
+    'cash-flow': ['operatingCashflow', 'cashflowFromInvestment', 'cashflowFromFinancing'],
+  };
+  const [selectedFields, setSelectedFields] = useState<Record<string, string[]>>(DEFAULT_SELECTED_FIELDS);
   const [period, setPeriod] = useState<'annual' | 'quarterly'>('annual');
   const [view, setView] = useState<'table' | 'chart'>('table');
   const [activeTab, setActiveTab] = useState<'fundamentals' | 'shares' | 'insider' | 'dividends' | 'latest' | 'kpi' | 'reports' | 'sentiment'>('fundamentals');
@@ -210,7 +241,6 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, onProvideA
     URL.revokeObjectURL(url);
   }
 
-  // Use periodData for your cards
   const financialCategories = [
     {
       id: "balance-sheet",
@@ -220,9 +250,7 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, onProvideA
       data: periodData.map((p: Record<string, string>) => ({
         reportedCurrency: p.reportedCurrency ?? "",
         fiscalDateEnding: p.fiscalDateEnding ?? "",
-        totalAssets: p.totalAssets ?? "",
-        totalLiabilities: p.totalLiabilities ?? "",
-        shareholderEquity: p.totalShareholderEquity ?? "",
+        ...Object.fromEntries(BALANCE_SHEET_FIELDS.map(f => [f, p[f] ?? ""])),
       })),
     },
     {
@@ -233,10 +261,7 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, onProvideA
       data: periodData.map((p: Record<string, string>) => ({
         reportedCurrency: p.reportedCurrency ?? "",
         fiscalDateEnding: p.fiscalDateEnding ?? "",
-        totalRevenue: p.totalRevenue ?? "",
-        costOfRevenue: p.costOfRevenue ?? "",
-        ebitda: p.ebitda ?? "",
-        netIncome: p.netIncome ?? "",
+        ...Object.fromEntries(INCOME_STATEMENT_FIELDS.map(f => [f, p[f] ?? ""])),
       })),
     },
     {
@@ -247,9 +272,7 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, onProvideA
       data: periodData.map((p: Record<string, string>) => ({
         reportedCurrency: p.reportedCurrency ?? "",
         fiscalDateEnding: p.fiscalDateEnding ?? "",
-        operatingCashflow: p.operatingCashflow ?? "",
-        cashflowFromInvestment: p.cashflowFromInvestment ?? "",
-        cashflowFromFinancing: p.cashflowFromFinancing ?? "",
+        ...Object.fromEntries(CASH_FLOW_FIELDS.map(f => [f, p[f] ?? ""])),
       })),
     },
   ];
@@ -703,6 +726,16 @@ export const MainDashboard = ({ ticker, marketCap, marketCapCurrency, onProvideA
                 fullWidth={expandedCards.includes(category.id)}
                 view={view}
                 periods={selectedPeriod}
+                availableKeys={
+                  category.id === 'balance-sheet' ? [...BALANCE_SHEET_FIELDS] :
+                  category.id === 'income-statement' ? [...INCOME_STATEMENT_FIELDS] :
+                  [...CASH_FLOW_FIELDS]
+                }
+                selectedKeys={selectedFields[category.id]}
+                onSelectedKeysChange={(keys) =>
+                  setSelectedFields((prev) => ({ ...prev, [category.id]: keys }))
+                }
+                defaultKeys={DEFAULT_SELECTED_FIELDS[category.id]}
               />
             ))}
           </div>

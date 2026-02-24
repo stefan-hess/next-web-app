@@ -261,9 +261,9 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ selectedTicker
       <Dialog open={feedbackOpen} onOpenChange={(open) => { setFeedbackOpen(open); if (!open) { setFeedbackStatus(null); setFeedbackText(""); } }}>
         <DialogContent style={{ backgroundColor: '#fff' }}>
           <DialogHeader>
-            <DialogTitle>Send Feedback</DialogTitle>
+            <DialogTitle>Give Us Feedback</DialogTitle>
             <DialogDescription>
-              Share your thoughts, suggestions, or issues. We&apos;ll receive it directly.
+              We value your opinion! Share with us what features you would like, suggestions, or issues. We continuously work to improve our service.
             </DialogDescription>
           </DialogHeader>
           <textarea

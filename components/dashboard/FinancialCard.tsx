@@ -11,11 +11,11 @@ function autoScale(values: string[], currency: string) {
   if (m >= 1e3)  return { scale: 1e3, label: `Thousands ${currency}` };
   return { scale: 1, label: currency };
 }
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, SlidersHorizontal } from "lucide-react";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "app/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "components/ui/card";
-// Removed unused useState import
 
 
 export interface FinancialCategory {
@@ -35,10 +35,40 @@ export interface FinancialCardProps {
   fullWidth?: boolean;
   view?: 'table' | 'chart';
   periods?: number;
+  availableKeys?: string[];
+  selectedKeys?: string[];
+  onSelectedKeysChange?: (keys: string[]) => void;
+  defaultKeys?: string[];
 }
 
 
-export const FinancialCard: React.FC<FinancialCardProps> = ({ category, isExpanded, onClick, fullWidth, view = 'table', periods }) => {
+export const FinancialCard: React.FC<FinancialCardProps> = ({
+  category,
+  isExpanded,
+  onClick,
+  fullWidth,
+  view = 'table',
+  periods,
+  availableKeys: availableKeysProp,
+  selectedKeys: selectedKeysProp,
+  onSelectedKeysChange,
+  defaultKeys,
+}) => {
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const pickerRef = useRef<HTMLDivElement>(null);
+
+  // Close picker when clicking outside
+  useEffect(() => {
+    if (!pickerOpen) return;
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
+        setPickerOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, [pickerOpen]);
+
   const Icon = category.icon;
 
   // Get currency from first period
@@ -77,10 +107,16 @@ export const FinancialCard: React.FC<FinancialCardProps> = ({ category, isExpand
     return defaultFormatLabel(key);
   };
 
-  // Collect all keys from all periods
-  const allKeys: string[] = Array.from(
+  // All keys present in the data (used for leading-metric scale detection)
+  const allDataKeys: string[] = Array.from(
     new Set(category.data.flatMap((period: Record<string, string>) => Object.keys(period)))
   ).filter(key => key !== "reportedCurrency" && key !== "fiscalDateEnding" && key !== "date");
+  // Keys to render in table/chart (filtered by user selection when provided)
+  const allKeys: string[] = selectedKeysProp
+    ? allDataKeys.filter(k => selectedKeysProp.includes(k))
+    : allDataKeys;
+  // Keys available in the column picker
+  const pickerKeys: string[] = availableKeysProp ?? allDataKeys;
 
   // Use selected periods from prop, default to 10 if not provided
   const maxPeriods = periods ?? 10;
@@ -96,14 +132,14 @@ export const FinancialCard: React.FC<FinancialCardProps> = ({ category, isExpand
   const leadingMetricMap: Record<string, string> = {
     'balance-sheet': 'totalAssets',
     'income-statement': 'totalRevenue',
-    'cashflow': 'operatingCashflow',
+    'cash-flow': 'operatingCashflow',
     // fallback: first key
   };
   // Try to find a leading metric for this card
-  let leadingMetric = allKeys[0];
+  let leadingMetric = allDataKeys[0];
   if (category.id in leadingMetricMap) {
     const candidate = leadingMetricMap[category.id];
-    if (candidate && typeof candidate === 'string' && allKeys.includes(candidate)) {
+    if (candidate && typeof candidate === 'string' && allDataKeys.includes(candidate)) {
       leadingMetric = candidate;
     }
   }
@@ -135,12 +171,72 @@ export const FinancialCard: React.FC<FinancialCardProps> = ({ category, isExpand
             </div>
             <span className="text-lg font-semibold">{category.title}</span>
           </div>
-          <div className="transition-transform duration-200 ml-2">
-            {isExpanded ? (
-              <ChevronDown className="w-5 h-5 text-muted-foreground" />
-            ) : (
-              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+          <div className="flex items-center gap-1">
+            {/* Column picker button — only shown when parent provides a change handler */}
+            {onSelectedKeysChange && (
+              <div className="relative" ref={pickerRef}>
+                <button
+                  title="Select data points"
+                  className="p-1 rounded hover:bg-muted transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setPickerOpen((o) => !o);
+                  }}
+                >
+                  <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
+                </button>
+                {pickerOpen && (
+                  <div
+                    className="absolute right-0 top-8 z-50 w-60 bg-[#fdf6ee] border rounded-lg shadow-lg p-3 max-h-72 overflow-y-auto"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="flex items-center justify-between mb-2 pb-1 border-b">
+                      <span className="text-xs font-semibold text-muted-foreground">Select data points</span>
+                      {defaultKeys && onSelectedKeysChange && (
+                        <button
+                          className="text-xs px-2 py-0.5 rounded border border-border bg-background hover:bg-muted text-muted-foreground font-medium transition-colors"
+                          onClick={() => onSelectedKeysChange(defaultKeys)}
+                        >
+                          Default
+                        </button>
+                      )}
+                    </div>
+                    {pickerKeys.map((key) => {
+                      const isChecked = selectedKeysProp
+                        ? selectedKeysProp.includes(key)
+                        : true;
+                      return (
+                        <label
+                          key={key}
+                          className="flex items-center gap-2 py-1 cursor-pointer text-sm hover:text-foreground text-muted-foreground"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            className="accent-primary"
+                            onChange={(e) => {
+                              if (!selectedKeysProp) return;
+                              const next = e.target.checked
+                                ? [...selectedKeysProp, key]
+                                : selectedKeysProp.filter((k) => k !== key);
+                              onSelectedKeysChange(next);
+                            }}
+                          />
+                          <span className="text-xs leading-tight">{resolveLabel(key)}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             )}
+            <div className="transition-transform duration-200 ml-1">
+              {isExpanded ? (
+                <ChevronDown className="w-5 h-5 text-muted-foreground" />
+              ) : (
+                <ChevronRight className="w-5 h-5 text-muted-foreground" />
+              )}
+            </div>
           </div>
         </CardTitle>
         {/* Scale label as sub-header */}
