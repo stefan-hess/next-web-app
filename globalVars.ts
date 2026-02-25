@@ -19,7 +19,7 @@ export const GLOBAL_VARS = {
   // Plan names
   PLAN_FREE: "free",
   PLAN_MUNGER: "Munger",
-  PLAN_BUFFETT: "Buffett",
+  PLAN_BUFFETT: "Buffett", 
 
   // Stripe price-id mapping for plans
   // TEST mode IDs (used with sk_test_... keys) — replace with live IDs for production
