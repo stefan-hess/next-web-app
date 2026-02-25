@@ -1,4 +1,4 @@
-import { ChartColumn } from "lucide-react";
+
 
 const Footer = () => {
   return (

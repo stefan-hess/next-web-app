@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { GLOBAL_VARS } from 'globalVars';
-import { isValidTicker } from '../../../lib/validateTicker';
 import { rateLimit } from '../../../lib/rateLimit';
+import { isValidTicker } from '../../../lib/validateTicker';
 
 interface FinancialReport {
   [key: string]: string | number | null | undefined;

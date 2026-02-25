@@ -21,13 +21,6 @@ export default function Home() {
     <Pricing />
     <ContactUs />
     <Footer />
-    <a
-      href="/feedback"
-      className="fixed bottom-6 right-6 z-50 px-6 py-3 bg-[#fdf6ee] text-black font-normal rounded-full shadow-lg border border-black hover:bg-[#8993cb] transition-all duration-200"
-      style={{ boxShadow: '0 4px 24px 0 rgba(0,0,0,0.12)' }}
-    >
-      Give Us Feedback
-    </a>
     </div>
   )
 }

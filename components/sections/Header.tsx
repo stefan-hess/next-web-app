@@ -2,6 +2,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "components/ui/Button/Button_new";
+import RequestDemoModal from "components/sections/RequestDemoModal";
 
 
 
@@ -24,13 +25,11 @@ const Header = () => {
           {/* Desktop Nav removed */}
           {/* Mobile Nav Button */}
           <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4">
-            <a
-              href="/demo"
-              className="transition-transform duration-300 hover:-translate-y-0.5 border-2 font-bold py-1.5 px-4 rounded-lg shadow text-sm flex items-center justify-center"
-              style={{ borderColor: '#bfa76a', color: '#bfa76a', background: 'transparent' }}
-            >
-              Demo
-            </a>
+            <RequestDemoModal
+              buttonLabel="Demo"
+              buttonClassName="transition-transform duration-300 hover:-translate-y-0.5 border-2 font-bold py-1.5 px-4 rounded-lg shadow text-sm flex items-center justify-center"
+              buttonStyle={{ borderColor: '#bfa76a', color: '#bfa76a', background: 'transparent' }}
+            />
             <a href="#contactus">
               <Button variant="financial" size="sm">
                 Contact Us

@@ -3,6 +3,7 @@
 import { BarChart, ShieldCheck, Users } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef } from "react";
+import RequestDemoModal from "components/sections/RequestDemoModal";
 
 function CredibilityBar() {
   const items = [
@@ -79,13 +80,11 @@ const HeroSection = () => {
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="w-full sm:w-auto flex items-center gap-2">
-                <a
-                  href="/demo"
-                  className="transition-transform duration-300 hover:-translate-y-1 hover:scale-102 border-2 font-bold py-3 px-6 sm:px-8 rounded-lg shadow text-base sm:text-lg flex items-center justify-center"
-                  style={{ borderColor: '#bfa76a', color: '#bfa76a', background: 'transparent', minHeight: '48px' }}
-                >
-                  Go to Demo
-                </a>
+                <RequestDemoModal
+                  buttonLabel="Request Demo"
+                  buttonClassName="transition-transform duration-300 hover:-translate-y-1 hover:scale-102 border-2 font-bold py-3 px-6 sm:px-8 rounded-lg shadow text-base sm:text-lg flex items-center justify-center"
+                  buttonStyle={{ borderColor: '#bfa76a', color: '#bfa76a', background: 'transparent', minHeight: '48px' }}
+                />
               </div>
             </div>
             <CredibilityBar />
