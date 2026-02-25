@@ -49,16 +49,20 @@ export const Dashboard = () => {
   // Fetch logged-in user's email once
   useEffect(() => {
     const fetchUserEmail = async () => {
-      const { data, error } = await supabase.auth.getUser();
+      const { data, error } = await supabase.auth.getSession();
       if (error) {
-        console.error("Failed to fetch user:", error);
+        console.error("Failed to fetch session:", error);
         if (error.message.includes("Refresh Token Not Found") || error.message.includes("Invalid Refresh Token")) {
           await supabase.auth.signOut();
           router.push("/login");
         }
         return;
       }
-      setUserEmail(data.user?.email || "");
+      if (!data.session) {
+        router.push("/login");
+        return;
+      }
+      setUserEmail(data.session.user?.email || "");
     };
     fetchUserEmail();
   }, [router]);

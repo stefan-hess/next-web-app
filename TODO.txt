@@ -1,0 +1,47 @@
+Placeholder Stripe price ID — "price_graham": "price_graham" in globalVars.ts:28
+ Button.tsx:36 type mismatch — React.ButtonHTMLAttributes<HTMLAnchorElement>
+Code Duplication
+ Stripe client initialization duplicated → extract to app/lib/stripe.ts
+ Supabase admin client creation repeated across 5 routes → getSupabaseAdmin()
+ Retry logic with exponential backoff duplicated across 4 routes → fetchWithRetry()
+ Scroll/parallax listeners repeated in 3 landing page components → useParallax() hook
+ autoScale() / market cap scaling duplicated across 3 files
+ Form validate → fetch → setError pattern in 5+ components → useFormSubmit() hook
+Architecture & Organization
+ No route grouping for auth and legal pages
+ Two Button components (Button.tsx and Button_new.tsx)
+ Two Tooltip implementations (Radix + custom CVA)
+ MainDashboard.tsx is ~990 lines — split into sub-components
+ Hooks mixed into app/lib/ alongside server utilities
+ Inconsistent import paths (relative vs absolute)
+ Dead code — search_tickers/route.ts, commented imports in app/page.tsx, unused _autoScale
+ lp-items.tsx at project root — belongs in components/
+Environment & Configuration
+ env.mjs only validates ANALYZE — all critical env vars unvalidated at build time
+ Stripe API version inconsistency — create-checkout-session uses account default, not pinned version
+ Hardcoded Stripe price IDs in app/checkout/page.tsx
+ No .env.example file
+TypeScript Weaknesses
+ ClientData interface uses unknown[] throughout chatbot/route.ts
+ useInsiderTradesData.ts uses Record<string, string>[] instead of typed interface
+ useCachedFinancialData.ts uses Record<string, string>[] for financial data
+ Unverified type assertions (e.g. event.data.object as Stripe.Checkout.Session)
+Performance
+ No server-side caching for Alpha Vantage data
+ Scroll listeners fire every frame in 3 landing page components
+ Array index as React key for news items in MainDashboard.tsx
+ financialCategories array recreated on every render
+ Missing AbortController on most fetch calls
+Magic Numbers & Hardcoded Values
+ Password minimum length 8 hardcoded in reset-password/page.tsx
+ Cache TTL 3600_000 hardcoded in useCachedFinancialData.ts
+ Date window 14 * 24 * 3600 * 1000 hardcoded in shares_outstanding_data
+ Period options [5, 10, 15, 20] hardcoded inline in MainDashboard.tsx
+ Color palette as raw hex strings in FinancialCard.tsx
+ Hardcoded inline styles in Header.tsx, Pricing.tsx, MainDashboard.tsx
+Missing Infrastructure
+ No React error boundaries
+ No centralized error logging
+ No request/response logging middleware
+ No tests for API routes, hooks, or business logic
+ No database migration tooling

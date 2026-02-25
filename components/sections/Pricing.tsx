@@ -19,7 +19,6 @@ const plans = [
       "Dividend history",
       "Insider trading activities",
       "News Sentiment Analysis",
-      "Access to community discussions",
       <span className="font-bold">150 AI queries per month</span>,
     ],
     popular: false
@@ -30,14 +29,13 @@ const plans = [
     description: "Best for wealth managers and investment advisors",
     features: [
       "Unlimited coverage of stocks",
-      "20 years of historical Balance Sheet, Income Statement, Cash Flow Statement data",
+      <span><span className="font-bold">20 years</span> of historical Balance Sheet, Income Statement, Cash Flow Statement data</span>,
       "Quarterly and Annual official filings of financial reportings data",
       "Historical market cap data",
       "Business developments of the month",
       "Dividend history",
       "Insider trading activities",
       "News Sentiment Analysis",
-      "Access to community discussions",
   <span className="font-bold">500 AI queries per month</span>,
   <span className="font-bold">Advanced Support</span>,
     ],
@@ -49,14 +47,13 @@ const plans = [
     description: "Customized solutions for family offices, Hedge Funds, Asset Managers starting at",
     features: [
       "Unlimited stocks coverage",
-      "20 years of historical Balance Sheet, Income Statement, Cash Flow Statement data",
+      <span><span className="font-bold">20 years</span> of historical Balance Sheet, Income Statement, Cash Flow Statement data</span>,
       "Quarterly and Annual official filings of financial reportings data",
       "Historical market cap data",
       "Business developments of the month",
       "Dividend history",
       "Insider trading activities",
       "News Sentiment Analysis",
-      "Access to community discussions",
   <span className="font-bold">Unlimited AI queries</span>,
   <span className="font-bold">Custom dashboards and KPI</span>,
   <span className="font-bold">Priority Support</span>
@@ -212,7 +209,7 @@ const PricingSection = () => {
       <div className="container mx-auto px-4 lg:px-8 relative z-10">
   <div className="text-center space-y-4 mb-24">
           <div className="inline-block bg-green-100 text-green-800 px-4 py-2 rounded-full font-semibold text-base mb-2 shadow">
-            🎉 Limited Offer: <span className="font-bold">50% OFF</span> on all plans!
+            Limited Offer: <span className="font-bold">50% OFF</span> on all plans!
           </div>
           <h2 className="text-3xl lg:text-5xl font-bold text-foreground">
             Choose Your Plan

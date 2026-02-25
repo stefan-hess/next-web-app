@@ -10,6 +10,13 @@ const PUBLIC_API_PREFIXES = [
   "/api/search_tickers",
   "/api/health",
   "/api/contact",
+  "/api/data/fundamentals_data",
+  "/api/data/insider_trades_data",
+  "/api/data/dividend_data",
+  "/api/data/sentiment_data",
+  "/api/data/shares_outstanding_data",
+  "/api/data/check-quarterly-reports",
+  "/api/get-stripe-plan",
 ];
 
 export async function middleware(req: NextRequest) {

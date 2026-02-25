@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { GLOBAL_VARS } from 'globalVars';
 import { isValidTicker } from '../../../lib/validateTicker';
+import { rateLimit } from '../../../lib/rateLimit';
 
 interface FinancialReport {
   [key: string]: string | number | null | undefined;
@@ -188,6 +189,21 @@ async function fetchFundamentals(ticker: string, apiKey: string): Promise<{ annu
 }
 
 export async function GET(req: NextRequest): Promise<Response> {
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
+  const { allowed, retryAfterMs } = rateLimit(ip, { limit: 10, windowMs: 60_000 });
+  if (!allowed) {
+    return new Response(
+      JSON.stringify({ error: 'Too many requests. Please try again later.' }),
+      {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'Retry-After': String(Math.ceil(retryAfterMs / 1000)),
+        },
+      }
+    );
+  }
+
   const { searchParams } = new URL(req.url);
   let ticker = searchParams.get('ticker');
   if (!ticker || typeof ticker !== 'string') {

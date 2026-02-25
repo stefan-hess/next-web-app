@@ -66,11 +66,11 @@ const HeroSection = () => {
               <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-foreground leading-tight">
                 See Through the Noise, {" "}
                 <span className="relative inline-block">
-                  <span className="bg-gradient-primary bg-clip-text text-blue-800">
+                  <span className="bg-gradient-primary bg-clip-text" style={{ color: '#bfa76a' }}>
                     {" "}
                     Find Value.
                   </span>
-                  <span className="block h-1 w-3/4 bg-blue-800 rounded-full mt-1 mx-auto"></span>
+                  <span className="block h-1 w-3/4 rounded-full mt-1 mx-auto" style={{ backgroundColor: '#bfa76a' }}></span>
                 </span>{" "}
               </h1>
               <p className="text-base sm:text-lg lg:text-xl text-muted-foreground leading-relaxed">

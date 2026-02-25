@@ -7,8 +7,7 @@ const Footer = () => {
         <div className="grid md:grid-cols-4 gap-8">
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <ChartColumn className="h-6 w-6 text-financial-primary" />
-              <span className="text-lg font-bold text-foreground">StockTickerNews</span>
+              <span className="text-lg font-bold text-foreground">Nektaar</span>
             </div>
             <p className="text-muted-foreground text-sm leading-relaxed bg-[#fdf6ee]" >
               Empowering the intelligent investor
